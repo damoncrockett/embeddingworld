@@ -2,10 +2,10 @@ import { forceSimulation, forceManyBody, forceX, forceY, forceCollide } from 'd3
 import { transition } from 'd3-transition';
 import { select } from 'd3-selection';
 
-export const plotSummaryCoords = (summaries, summaryCoords, svg, excludeRectRange = null) => {
+export const plotsampleCoords = (samples, sampleCoords, svg, excludeRectRange = null) => {
     
-    // Create a force simulation to prevent overlapping summaries
-    const simulation = forceSimulation(summaryCoords)
+    // Create a force simulation to prevent overlapping samples
+    const simulation = forceSimulation(sampleCoords)
         .force("charge", forceManyBody().strength(-10))
         .force("x", forceX(d => d.x).strength(0.5))
         .force("y", forceY(d => d.y).strength(0.5))
@@ -19,11 +19,11 @@ export const plotSummaryCoords = (summaries, summaryCoords, svg, excludeRectRang
     const duration = 750;
 
     // Update pattern: Bind data to groups, handling entering (new) and updating (existing) elements
-    let summariesGroup = svg.selectAll('g')
-        .data(summaryCoords, (_, i) => i); // Assuming each data point has an identifier 'id'
+    let samplesGroup = svg.selectAll('g')
+        .data(sampleCoords, (_, i) => i); // Assuming each data point has an identifier 'id'
 
     // Enter new elements
-    const enterGroup = summariesGroup.enter()
+    const enterGroup = samplesGroup.enter()
         .append('g')
         .attr('transform', d => `translate(${d.left},${d.top})`); // Initial position
 
@@ -44,16 +44,16 @@ export const plotSummaryCoords = (summaries, summaryCoords, svg, excludeRectRang
         .attr('y', 20)
         .attr('dominant-baseline', 'middle')
         .attr('class', (_, i) => excludeRectRange && (i >= excludeRectRange.start && i <= excludeRectRange.end) ? 'text-excluded' : 'text-included') // Apply class based on condition
-        .text((_, i) => summaries[i]);
+        .text((_, i) => samples[i]);
 
     // Merge entering elements with updating ones to apply transitions
-    summariesGroup = enterGroup.merge(summariesGroup);
+    samplesGroup = enterGroup.merge(samplesGroup);
 
     // Apply transitions to all groups (both new and updating)
-    summariesGroup.transition().duration(duration)
+    samplesGroup.transition().duration(duration)
         .attr('transform', d => `translate(${d.left},${d.top})`);
 
-    summariesGroup.select('text')
+    samplesGroup.select('text')
         .each(function(d, i) {
             if (!excludeRectRange || (i < excludeRectRange.start || i > excludeRectRange.end)) {
                 const textWidth = this.getComputedTextLength();

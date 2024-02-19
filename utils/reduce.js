@@ -2,7 +2,14 @@ import { getEmbeddings } from './embed';
 import { PCA } from 'ml-pca';
 import { toScreenCoordinates } from './coords';
 
-export async function reduceEmbeddings(sampleList, width, height, embedderRef, setEmbeddings, embeddings = null, fittedModel = null) {
+export async function reduceEmbeddings(
+    sampleList, 
+    width, 
+    height, 
+    embedderRef, 
+    setEmbeddings, 
+    embeddings = null, 
+    fittedModel = null) {
 
     let newEmbeddings = await getEmbeddings(sampleList, embedderRef);
 
