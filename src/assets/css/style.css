@@ -1,0 +1,64 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#root { /* Assuming you're mounting your React app inside a div with id="root" */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+* {
+    font-family: "Roboto Condensed", sans-serif;
+    font-weight: 300;
+    font-size: 20px;
+}
+
+input {
+    width: 40%;
+    padding: 10px;
+    margin: 20px;
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+button {
+    font-weight: 400;
+    padding: 10px;
+    margin: 20px;
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: 20px;
+    background-color: dodgerblue;
+    color: white;
+}
+
+button.locked {
+    background-color: coral;
+}
+
+button.unlocked {
+    background-color: white;
+    color: black;
+}
+
+button:hover {
+    border-color: white;
+}
+
+svg .text-included {
+    fill: black; /* Default text color */
+}
+
+svg .text-excluded {
+    fill: gainsboro; /* Different text color for excluded items */
+}
+
+svg .rect-included {
+    fill: white;
+    stroke: black;
+    stroke-width: 1px;
+}
+
