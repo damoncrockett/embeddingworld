@@ -1,4 +1,22 @@
-export const chooseThreeMostImportantWords = (text) => {
+import actions from '../src/assets/json/actions.json';
+import emotions from '../src/assets/json/emotions.json';
+import phrases from '../src/assets/json/phrases.json';
+import questions from '../src/assets/json/questions.json';
+import things from '../src/assets/json/things.json';
+import timespace from '../src/assets/json/timespace.json';
+import wikicats from '../src/assets/json/wikicats.json';
+
+const basemaps = {
+    "actions": actions,
+    "emotions": emotions,
+    "phrases": phrases,
+    "questions": questions,
+    "things": things,
+    "timespace": timespace,
+    "wikicats": wikicats
+}
+
+const chooseThreeMostImportantWords = (text) => {
     const words = text.toLowerCase().split(/\s+/);
     const wordCounts = new Map();
     for (const word of words) {
@@ -11,7 +29,7 @@ export const chooseThreeMostImportantWords = (text) => {
     return topThree.join(' '); 
 }
 
-export const stopWords = new Set([
+const stopWords = new Set([
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours",
     "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers",
     "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves",
@@ -25,3 +43,5 @@ export const stopWords = new Set([
     "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
     "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
 ]);
+
+export { basemaps, chooseThreeMostImportantWords };

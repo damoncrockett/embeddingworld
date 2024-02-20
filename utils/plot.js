@@ -2,7 +2,7 @@ import { forceSimulation, forceManyBody, forceX, forceY, forceCollide } from 'd3
 import { transition } from 'd3-transition';
 import { select } from 'd3-selection';
 
-export const plotsampleCoords = (samples, sampleCoords, svg, excludeRectRange = null) => {
+export const plotCoords = (samples, sampleCoords, svg, excludeRectRange = null) => {
     
     // Create a force simulation to prevent overlapping samples
     const simulation = forceSimulation(sampleCoords)

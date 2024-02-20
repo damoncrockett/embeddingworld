@@ -1,6 +1,29 @@
 html, body {
     height: 100%;
     margin: 0;
+    background-color: #222;
+}
+
+#title {
+    color: white;
+    text-align: left;
+    padding: 20px 20px 0 20px;
+    font-size: 40px;
+    font-weight: 400;
+    font-family: "Micro 5";
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    background-color: transparent;
+}
+
+#title:hover {
+    color: coral;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
 #root { /* Assuming you're mounting your React app inside a div with id="root" */
@@ -15,8 +38,8 @@ html, body {
     font-size: 20px;
 }
 
-input {
-    width: 40%;
+textarea {
+    width: 50%;
     padding: 10px;
     margin: 20px;
     border: 2px solid black;
@@ -61,4 +84,98 @@ svg .rect-included {
     stroke: black;
     stroke-width: 1px;
 }
+
+#mapLevel {
+    
+}
+
+#label-mapLevel-map {
+    /* top-left | top-right | bottom-right | bottom-left */
+    border-radius: 10px 0 0 10px;
+}
+
+#label-mapLevel-basemap {
+    /* top-left | top-right | bottom-right | bottom-left */
+    border-radius: 0 10px 10px 0;
+}
+
+.radio-switch input[type="radio"] {
+    display: none; /* Hide the default radio button */
+    }
+
+.radio-switch label {
+    font-weight: 400;
+    background-color: transparent; /* Background color of the switch */
+    color: white; /* Text color */
+    padding: 20px 20px;
+    border: 2px solid black; /* Border color */
+    cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition for background color */
+  }
+  
+  /* This rule will apply the new background color to the label after a checked input */
+.radio-switch input[type="radio"]:checked + label {
+    background-color: coral; /* Background color of the selected switch */
+    /* You can also set other styles to make the selected state stand out more, 
+       such as changing the text color, border, etc. */
+  }
+
+select {
+    font-weight: 400; /* Consistent with button */
+    padding: 10px; /* Consistent with button and input */
+    margin: 20px; /* Consistent with button and input */
+    border: 2px solid black; /* Consistent with button and input */
+    border-radius: 10px; /* Consistent with button and input */
+    font-size: 20px; /* Consistent with button and input */
+    background-color: white; /* Similar to unlocked button, but can be adjusted */
+    color: black; /* Text color consistent with overall design */
+    cursor: pointer; /* Cursor changes to pointer to indicate it's clickable */
+    width: 20%; /* Adjust this based on your layout needs, could be a percentage or fixed width */
+    -webkit-appearance: none; /* Removes default styling provided by the browser */
+    -moz-appearance: none; /* Removes default styling provided by the browser */
+    appearance: none; /* Removes default styling provided by the browser */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><path fill="%23000" d="M2048 640v128h-2048v-128h2048zm0 640v128h-2048v-128h2048z"/></svg>'); /* Custom arrow icon */
+    background-repeat: no-repeat;
+    background-position: right 10px center; /* Position the arrow icon */
+    background-size: 12px; /* Size of the arrow icon */
+}
+
+select:hover {
+    border-color: white; /* Hover effect similar to button */
+    background-color: dodgerblue; /* Optional: Change background on hover to match button hover effect */
+    color: white; /* Optional: Change text color on hover */
+}
+
+.basemap-toggle-label {
+    display: flex; /* Aligns children (checkbox and text) inline */
+    align-items: center; /* Centers items vertically */
+    margin: 5px; /* Adjusted margin for compact spacing */
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 400;
+    color: grey;
+    padding: 5px; /* Slight padding around the text for aesthetics */
+    transition: background-color 0.3s;
+}
+
+.basemap-toggle-checkbox {
+    margin-right: 10px; /* Ensures space between checkbox and label text */
+}
+
+.basemap-toggle-container {
+    background-color: transparent; /* Background color of the container */
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    display: flex; /* Using flexbox to manage children */
+    flex-direction: column; /* Stack children vertically */
+    align-items: flex-start; /* Align items to the start of the flex container */
+    position: absolute; 
+    left: -10px; 
+    top: 50%; 
+    transform: translateY(-50%);
+}
+
+
+
 
