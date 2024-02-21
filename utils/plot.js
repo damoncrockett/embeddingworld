@@ -17,24 +17,21 @@ export const plotCoords = (svg, combinedData) => {
         .stop();
     
     // Run the simulation
-    for (let i = 0; i < 10; i++) simulation.tick();
+    for (let i = 0; i < 120; i++) simulation.tick();
 
-    // Transition duration in milliseconds
-    const duration = 750;
+    const duration = 750; // Transition duration in milliseconds
 
-    // Update pattern: Bind data to groups, handling entering (new) and updating (existing) elements
     let samplesGroup = svg.selectAll('g')
         .data(combinedData, (_, i) => i);
 
-    // Enter new elements
+    // Handle entering elements
     const enterGroup = samplesGroup.enter()
         .append('g')
-        .attr('transform', d => `translate(${d.x},${d.y})`); // Initial position
-
-    // Append rects conditionally
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+    
     enterGroup.filter(d => d.lvl === 'm')
         .append('rect')
-        .attr('class', 'rect-included') // Add class for styling
+        .attr('class', 'rect-included')
         .attr('width', 100)
         .attr('height', 40)
         .attr('rx', 20)
@@ -42,26 +39,28 @@ export const plotCoords = (svg, combinedData) => {
 
     const padding = 10;
 
-    // Append text elements
     enterGroup.append('text')
         .attr('x', padding)
         .attr('y', 20)
         .attr('dominant-baseline', 'middle')
         .text(d => d.smp);
 
-    // Merge entering elements with updating ones to apply transitions
-    samplesGroup = enterGroup.merge(samplesGroup);
+    samplesGroup.exit()
+        .transition().duration(duration)
+        .style('opacity', 0) // Transition the opacity to 0 before removing
+        .remove();
 
-    // Apply transitions to all groups (both new and updating)
-    samplesGroup.transition().duration(duration)
+    // Handle updating elements
+    samplesGroup = enterGroup.merge(samplesGroup)
+        .transition().duration(duration)
         .attr('transform', d => `translate(${d.x},${d.y})`);
-
+    
     samplesGroup.select('text')
-        .each(function(d, i) {
+        .each(function(d) {
             if (d.lvl === 'm') {
                 const textWidth = this.getComputedTextLength();
                 const rectWidth = textWidth + 2 * padding;
-                select(this.previousSibling) // Assuming the rectangle is immediately before the text in the DOM
+                select(this.previousSibling)
                     .transition().duration(duration)
                     .attr('width', rectWidth);
             }

@@ -13,6 +13,7 @@ export default function App() {
     const [mapList, setMapList] = useState([]); // Stores inputs for maps
     const [basemapLocked, setBasemapLocked] = useState(false); // Tracks whether the basemap is locked
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
+    const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
 
     const inputRef = useRef(null);
@@ -99,21 +100,21 @@ export default function App() {
     
 
     useEffect(() => {
-        if ( mapList.length === 0 ) return;
     
         const svgWidth = svgRef.current.clientWidth;
         const svgHeight = svgRef.current.clientHeight;
         const svg = select(svgRef.current);   
-        const screenCoords = reduceEmbeddings(mapList, svgWidth, svgHeight, basemapLocked);
+        const screenCoords = reduceEmbeddings(mapList, svgWidth, svgHeight, basemapLocked, reducer);
 
         const combinedData = mapList.map((item, index) => ({
             ...item,
-            ...screenCoords[index], // Merge screenCoords info into mapList items
+            ...screenCoords[index],
         }));
         
         plotCoords(svg, combinedData);
+        console.log('plotting');
     
-    } , [mapList, basemapLocked]);
+    } , [mapList, basemapLocked, reducer]);
     
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -125,6 +126,7 @@ export default function App() {
                     <button onClick={handleAdd} style={{ marginRight: '10px' }}>ADD</button>
                     <Radio
                         choice={mapLevel}
+                        choices={['map', 'basemap']}
                         onSwitch={(mapLevel) => setMapLevel(mapLevel)}
                         id='mapLevel'
                     />
@@ -137,6 +139,12 @@ export default function App() {
                         </option>
                     ))}
                 </select>
+                <Radio
+                    choice={reducer}
+                    choices={['pca', 'umap']}
+                    onSwitch={(reducer) => setReducer(reducer)}
+                    id='reducer'
+                />
             </div>
             <svg ref={svgRef} style={{ flexGrow: 1 }} width="100%" height="100%"></svg>
         </div>

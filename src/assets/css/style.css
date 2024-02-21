@@ -35,25 +35,25 @@ a {
 * {
     font-family: "Roboto Condensed", sans-serif;
     font-weight: 300;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 textarea {
     width: 50%;
     padding: 10px;
-    margin: 20px;
+    margin: 10px;
     border: 2px solid black;
     border-radius: 10px;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 button {
     font-weight: 400;
     padding: 10px;
-    margin: 20px;
+    margin: 10px;
     border: 2px solid black;
     border-radius: 10px;
-    font-size: 20px;
+    font-size: 16px;
     background-color: dodgerblue;
     color: white;
 }
@@ -85,16 +85,22 @@ svg .rect-included {
     stroke-width: 1px;
 }
 
-#mapLevel {
-    
-}
-
 #label-mapLevel-map {
     /* top-left | top-right | bottom-right | bottom-left */
     border-radius: 10px 0 0 10px;
 }
 
 #label-mapLevel-basemap {
+    /* top-left | top-right | bottom-right | bottom-left */
+    border-radius: 0 10px 10px 0;
+}
+
+#label-reducer-pca {
+    /* top-left | top-right | bottom-right | bottom-left */
+    border-radius: 10px 0 0 10px;
+}
+
+#label-reducer-umap {
     /* top-left | top-right | bottom-right | bottom-left */
     border-radius: 0 10px 10px 0;
 }
@@ -123,10 +129,10 @@ svg .rect-included {
 select {
     font-weight: 400; /* Consistent with button */
     padding: 10px; /* Consistent with button and input */
-    margin: 20px; /* Consistent with button and input */
+    margin: 10px; /* Consistent with button and input */
     border: 2px solid black; /* Consistent with button and input */
     border-radius: 10px; /* Consistent with button and input */
-    font-size: 20px; /* Consistent with button and input */
+    font-size: 16px; /* Consistent with button and input */
     background-color: white; /* Similar to unlocked button, but can be adjusted */
     color: black; /* Text color consistent with overall design */
     cursor: pointer; /* Cursor changes to pointer to indicate it's clickable */

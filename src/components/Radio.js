@@ -1,34 +1,34 @@
 import React from 'react';
 
-export default function Radio({ choice, onSwitch, id }) {
-    const mapId = `${id}-map`;
-    const baseId = `${id}-basemap`;
+export default function Radio({ choice, choices, onSwitch, id }) {
+    const choice0id = `${id}-${choices[0]}`;
+    const choice1id = `${id}-${choices[1]}`;
 
     // Assigning unique IDs for labels as well, to target with CSS
-    const labelMapId = `label-${mapId}`;
-    const labelBaseId = `label-${baseId}`;
+    const labelChoice0id = `label-${choice0id}`;
+    const labelChoice1id = `label-${choice1id}`;
 
     return (
       <div className="radio-switch" id={id} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <input
           type="radio"
-          id={mapId}
-          value="map"
-          checked={choice === 'map'}
-          onChange={() => onSwitch('map')}
+          id={choice0id}
+          value={choices[0]}
+          checked={choice === choices[0]}
+          onChange={() => onSwitch(choices[0])}
           style={{ display: 'none' }}
         />
-        <label htmlFor={mapId} id={labelMapId} style={{ padding: '10px' }}>MAP</label>
+        <label htmlFor={choice0id} id={labelChoice0id} style={{ padding: '10px' }}>{choices[0].toUpperCase()}</label>
 
         <input
           type="radio"
-          id={baseId}
-          value="basemap"
-          checked={choice === 'basemap'}
-          onChange={() => onSwitch('basemap')}
+          id={choice1id}
+          value={choices[1]}
+          checked={choice === choices[1]}
+          onChange={() => onSwitch(choices[1])}
           style={{ display: 'none' }}
         />
-        <label htmlFor={baseId} id={labelBaseId} style={{ padding: '10px' }}>BASE</label>
+        <label htmlFor={choice1id} id={labelChoice1id} style={{ padding: '10px' }}>{choices[1].toUpperCase()}</label>
       </div>
     );
 }

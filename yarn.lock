@@ -3101,6 +3101,7 @@ __metadata:
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     style-loader: "npm:^3.3.4"
+    umap-js: "npm:^1.3.3"
     webpack: "npm:^5.90.3"
     webpack-cli: "npm:^5.1.4"
     webpack-dev-server: "npm:^5.0.2"
@@ -3993,6 +3994,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-any-array@npm:^0.1.0":
+  version: 0.1.1
+  resolution: "is-any-array@npm:0.1.1"
+  checksum: 10c0/82b9a594fd430d0ca69b6e61af533cceb7037fe68dad287ecded9ea5f8ada0fa973648dfc13776722124fdd31e2b7589303b076f3da4fae346e2db78e874357d
+  languageName: node
+  linkType: hard
+
 "is-any-array@npm:^2.0.0, is-any-array@npm:^2.0.1":
   version: 2.0.1
   resolution: "is-any-array@npm:2.0.1"
@@ -4600,7 +4608,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ml-matrix@npm:^6.8.0":
+"ml-levenberg-marquardt@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "ml-levenberg-marquardt@npm:2.1.1"
+  dependencies:
+    is-any-array: "npm:^0.1.0"
+    ml-matrix: "npm:^6.4.1"
+  checksum: 10c0/752f0665a39647ac77309cd03d6fdcb2464340f23750e58a895e9d90c93b03a61f69a0609bccc0b8373a304fe62c6d60e55573d0823339e676acf9b47afdca24
+  languageName: node
+  linkType: hard
+
+"ml-matrix@npm:^6.4.1, ml-matrix@npm:^6.8.0":
   version: 6.11.0
   resolution: "ml-matrix@npm:6.11.0"
   dependencies:
@@ -6200,6 +6218,15 @@ __metadata:
     media-typer: "npm:0.3.0"
     mime-types: "npm:~2.1.24"
   checksum: 10c0/a23daeb538591b7efbd61ecf06b6feb2501b683ffdc9a19c74ef5baba362b4347e42f1b4ed81f5882a8c96a3bfff7f93ce3ffaf0cbbc879b532b04c97a55db9d
+  languageName: node
+  linkType: hard
+
+"umap-js@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "umap-js@npm:1.3.3"
+  dependencies:
+    ml-levenberg-marquardt: "npm:^2.0.0"
+  checksum: 10c0/6682f606aa285931a5e5e62a3e0b33e0c1ce191017a89921defb259ea29764eb5aea100e5ae3913d2460ec8534da1e46d68b0474f53e604d6850269fa2708465
   languageName: node
   linkType: hard
 
