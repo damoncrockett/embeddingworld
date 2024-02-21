@@ -2,17 +2,21 @@ import { forceSimulation, forceManyBody, forceX, forceY, forceCollide } from 'd3
 import { transition } from 'd3-transition';
 import { select } from 'd3-selection';
 
-export const plotCoords = (samples, sampleCoords, svg, excludeRectRange = null) => {
+export const plotCoords = (svg, combinedData) => {
     
-    // Create a force simulation to prevent overlapping samples
-    const simulation = forceSimulation(sampleCoords)
+    combinedData.forEach(item => {
+        item.x = item.left; // Initialize x with left
+        item.y = item.top;  // Initialize y with top
+    });
+    
+    const simulation = forceSimulation(combinedData)
         .force("charge", forceManyBody().strength(-10))
         .force("x", forceX(d => d.x).strength(0.5))
         .force("y", forceY(d => d.y).strength(0.5))
         .force("collide", forceCollide().radius(20).strength(0.5))
         .stop();
-
-    // Manually run the simulation for a set number of ticks
+    
+    // Run the simulation
     for (let i = 0; i < 10; i++) simulation.tick();
 
     // Transition duration in milliseconds
@@ -20,15 +24,15 @@ export const plotCoords = (samples, sampleCoords, svg, excludeRectRange = null) 
 
     // Update pattern: Bind data to groups, handling entering (new) and updating (existing) elements
     let samplesGroup = svg.selectAll('g')
-        .data(sampleCoords, (_, i) => i); // Assuming each data point has an identifier 'id'
+        .data(combinedData, (_, i) => i);
 
     // Enter new elements
     const enterGroup = samplesGroup.enter()
         .append('g')
-        .attr('transform', d => `translate(${d.left},${d.top})`); // Initial position
+        .attr('transform', d => `translate(${d.x},${d.y})`); // Initial position
 
     // Append rects conditionally
-    enterGroup.filter((_, i) => !excludeRectRange || (i < excludeRectRange.start || i > excludeRectRange.end))
+    enterGroup.filter(d => d.lvl === 'm')
         .append('rect')
         .attr('class', 'rect-included') // Add class for styling
         .attr('width', 100)
@@ -43,19 +47,18 @@ export const plotCoords = (samples, sampleCoords, svg, excludeRectRange = null) 
         .attr('x', padding)
         .attr('y', 20)
         .attr('dominant-baseline', 'middle')
-        .attr('class', (_, i) => excludeRectRange && (i >= excludeRectRange.start && i <= excludeRectRange.end) ? 'text-excluded' : 'text-included') // Apply class based on condition
-        .text((_, i) => samples[i]);
+        .text(d => d.smp);
 
     // Merge entering elements with updating ones to apply transitions
     samplesGroup = enterGroup.merge(samplesGroup);
 
     // Apply transitions to all groups (both new and updating)
     samplesGroup.transition().duration(duration)
-        .attr('transform', d => `translate(${d.left},${d.top})`);
+        .attr('transform', d => `translate(${d.x},${d.y})`);
 
     samplesGroup.select('text')
         .each(function(d, i) {
-            if (!excludeRectRange || (i < excludeRectRange.start || i > excludeRectRange.end)) {
+            if (d.lvl === 'm') {
                 const textWidth = this.getComputedTextLength();
                 const rectWidth = textWidth + 2 * padding;
                 select(this.previousSibling) // Assuming the rectangle is immediately before the text in the DOM

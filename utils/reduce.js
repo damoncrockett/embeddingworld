@@ -1,26 +1,13 @@
-import { getEmbeddings } from './embed';
 import { PCA } from 'ml-pca';
 import { toScreenCoordinates } from './coords';
 
-export async function reduceEmbeddings(
-    sampleList, 
-    width, 
-    height, 
-    embedderRef, 
-    setEmbeddings, 
-    embeddings = null, 
-    fittedModel = null) {
+export function reduceEmbeddings(mapList, width, height, basemapLocked) {
 
-    let newEmbeddings = await getEmbeddings(sampleList, embedderRef);
-
-    const mergedEmbeddings = embeddings ? [...embeddings, ...newEmbeddings] : newEmbeddings;
-    setEmbeddings(mergedEmbeddings);
-
-    const twoDimArrays = mergedEmbeddings.map(d => Array.from(d));
-
-    const model = fittedModel ? fittedModel : new PCA(twoDimArrays);
-    const coords = model.predict(twoDimArrays)["data"].map(d => Array.from(d.slice(0, 2)));
+    const toFit = basemapLocked ? mapList.filter(d => d.lvl === 'b') : mapList;
+    const twoDimArrays = toFit.map(d => Array.from(d.vec));
+    const model = new PCA(twoDimArrays);
+    const coords = model.predict(mapList.map(d => d.vec))["data"].map(d => Array.from(d.slice(0, 2)));
     const screenCoords = toScreenCoordinates(coords, width, height, 100);
 
-    return { model, screenCoords };
+    return screenCoords;
 }

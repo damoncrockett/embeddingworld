@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-// import { select } from 'd3-selection';
-// import { plotCoords } from '../../utils/plot';
+import { select } from 'd3-selection';
+import { plotCoords } from '../../utils/plot';
 import { embeddingModels, initializeEmbedder, getEmbeddings } from '../../utils/embed';
-// import { reduceEmbeddings } from '../../utils/reduce';
+import { reduceEmbeddings } from '../../utils/reduce';
 import { basemaps } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
@@ -11,11 +11,9 @@ export default function App() {
 
     const [mapLevel, setMapLevel] = useState('map'); // Tracks the current mode (map or basemap)
     const [mapList, setMapList] = useState([]); // Stores inputs for maps
-    const [basemapList, setBasemapList] = useState([]); // Stores inputs for basemaps
     const [basemapLocked, setBasemapLocked] = useState(false); // Tracks whether the basemap is locked
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
-    const [basemapCoords, setBasemapCoords] = useState([]);
 
     const inputRef = useRef(null);
     const svgRef = useRef();
@@ -23,48 +21,43 @@ export default function App() {
 
     const handleBasemapToggle = async (name, isChecked) => {
         // Extract the current list first to avoid directly using async operations inside setBasemapList
-        let currentList = [...basemapList];
+        let currentList = [...mapList];
         const itemsToAddOrRemove = basemaps[name]; // Assuming this is an array of strings
     
         if (isChecked) {
             // Identify new items not already in the list
-            const newItems = itemsToAddOrRemove.filter(item => !currentList.some(e => e.sample === item));
+            const newItems = itemsToAddOrRemove.filter(item => !currentList.some(e => e.smp === item));
             if (newItems.length > 0) {
                 const newEmbeddings = await getEmbeddings(newItems, embedderRef);
                 const newItemsWithEmbeddings = newItems.map((item, index) => ({
-                    sample: item,
-                    embedding: newEmbeddings[index],
+                    smp: item,
+                    vec: newEmbeddings[index],
+                    lvl: 'b'
                 }));
                 // Update the list with new items
-                setBasemapList(currentList.concat(newItemsWithEmbeddings));
+                setMapList(currentList.concat(newItemsWithEmbeddings));
             }
         } else {
             // For unchecked, filter out the items related to this basemap
-            const filteredList = currentList.filter(item => !itemsToAddOrRemove.includes(item.sample));
-            setBasemapList(filteredList);
+            const filteredList = currentList.filter(item => !itemsToAddOrRemove.includes(item.smp));
+            setMapList(filteredList);
         }
     };
         
     const handleAdd = async () => {
         const inputValues = inputRef.current.value.split('\n')
             .map(item => item.trim())
-            .filter(item => item && !mapList.some(e => e.sample === item) && !basemapList.some(e => e.sample === item)); // Unique, non-empty items not already in lists
-    
+            .filter(item => item && !mapList.some(e => e.smp === item)); // Avoid duplicates
         if (inputValues.length > 0) {
             // Fetch embeddings for the new input values
             const newEmbeddings = await getEmbeddings(inputValues, embedderRef);
             // Create new items with their embeddings
             const newItemsWithEmbeddings = inputValues.map((item, index) => ({
-                sample: item,
-                embedding: newEmbeddings[index],
+                smp: item,
+                vec: newEmbeddings[index],
+                lvl: mapLevel === 'map' ? 'm' : 'b'
             }));
-    
-            // Decide which list to update based on the current map level
-            if (mapLevel === 'map') {
-                setMapList(prevList => [...prevList, ...newItemsWithEmbeddings]);
-            } else if (mapLevel === 'basemap') {
-                setBasemapList(prevList => [...prevList, ...newItemsWithEmbeddings]);
-            }
+            setMapList(prevList => [...prevList, ...newItemsWithEmbeddings]);
         }
     
         inputRef.current.value = ''; // Clear the input field
@@ -89,30 +82,39 @@ export default function App() {
     }, [embeddingModel]);
 
     useEffect(() => {
-        const reFetchAllEmbeddings = async () => {
-            // Helper function to extract samples, fetch new embeddings, and update items with new embeddings
-            async function fetchEmbeddingsForItems(items) {
-                const samples = items.map(item => item.sample);
-                const newEmbeddings = await getEmbeddings(samples, embedderRef);
-                // Now we correctly associate each new embedding with its corresponding item
-                return samples.map((sample, index) => ({
-                    sample: sample,
-                    embedding: newEmbeddings[index],
-                }));
-            }
+        const recomputeEmbeddings = async () => {
+            const samples = mapList.map(item => item.smp);
+            const newEmbeddings = await getEmbeddings(samples, embedderRef);
     
-            // Re-fetch embeddings for all items in mapList and basemapList
-            const mapItems = await fetchEmbeddingsForItems(mapList);
-            const basemapItems = await fetchEmbeddingsForItems(basemapList);
+            const updatedMapList = mapList.map((item, index) => ({
+                ...item,
+                vec: newEmbeddings[index],
+            }));
     
-            setMapList(mapItems); // Corrected to reflect the change in variable names
-            setBasemapList(basemapItems); // Corrected to reflect the change in variable names
+            setMapList(updatedMapList);
         };
     
-        reFetchAllEmbeddings();
-    }, [embedderChangeCounter]); // Depend on embedderChangeCounter to trigger re-fetching
+        recomputeEmbeddings();
+    }, [embedderChangeCounter]);
     
 
+    useEffect(() => {
+        if ( mapList.length === 0 ) return;
+    
+        const svgWidth = svgRef.current.clientWidth;
+        const svgHeight = svgRef.current.clientHeight;
+        const svg = select(svgRef.current);   
+        const screenCoords = reduceEmbeddings(mapList, svgWidth, svgHeight, basemapLocked);
+
+        const combinedData = mapList.map((item, index) => ({
+            ...item,
+            ...screenCoords[index], // Merge screenCoords info into mapList items
+        }));
+        
+        plotCoords(svg, combinedData);
+    
+    } , [mapList, basemapLocked]);
+    
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
