@@ -67,6 +67,7 @@ export default function App() {
     
     function handleKeyDown(event) {
         if (event.key === 'Enter') {
+            event.preventDefault(); // prevents newline
             handleAdd(); 
         }
     }
