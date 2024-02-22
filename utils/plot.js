@@ -5,8 +5,8 @@ import { select } from 'd3-selection';
 export const plotCoords = (svg, combinedData) => {
     
     combinedData.forEach(item => {
-        item.x = item.left; // Initialize x with left
-        item.y = item.top;  // Initialize y with top
+        item.x = item.left; 
+        item.y = item.top;  
     });
     
     const simulation = forceSimulation(combinedData)
@@ -16,15 +16,13 @@ export const plotCoords = (svg, combinedData) => {
         .force("collide", forceCollide().radius(20).strength(0.5))
         .stop();
     
-    // Run the simulation
     for (let i = 0; i < 120; i++) simulation.tick();
 
-    const duration = 750; // Transition duration in milliseconds
+    const duration = 750; 
 
     let samplesGroup = svg.selectAll('g')
         .data(combinedData, (_, i) => i);
 
-    // Handle entering elements
     const enterGroup = samplesGroup.enter()
         .append('g')
         .attr('transform', d => `translate(${d.x},${d.y})`);
@@ -47,10 +45,9 @@ export const plotCoords = (svg, combinedData) => {
 
     samplesGroup.exit()
         .transition().duration(duration)
-        .style('opacity', 0) // Transition the opacity to 0 before removing
+        .style('opacity', 0)
         .remove();
 
-    // Handle updating elements
     samplesGroup = enterGroup.merge(samplesGroup)
         .transition().duration(duration)
         .attr('transform', d => `translate(${d.x},${d.y})`);

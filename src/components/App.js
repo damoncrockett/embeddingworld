@@ -9,9 +9,9 @@ import BasemapToggles from './BasemapToggles';
 
 export default function App() {
 
-    const [mapLevel, setMapLevel] = useState('map'); // Tracks the current mode (map or basemap)
-    const [mapList, setMapList] = useState([]); // Stores inputs for maps
-    const [basemapLocked, setBasemapLocked] = useState(false); // Tracks whether the basemap is locked
+    const [mapLevel, setMapLevel] = useState('map'); 
+    const [mapList, setMapList] = useState([]); 
+    const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
@@ -21,12 +21,10 @@ export default function App() {
     const embedderRef = useRef(null);
 
     const handleBasemapToggle = async (name, isChecked) => {
-        // Extract the current list first to avoid directly using async operations inside setBasemapList
         let currentList = [...mapList];
-        const itemsToAddOrRemove = basemaps[name]; // Assuming this is an array of strings
+        const itemsToAddOrRemove = basemaps[name]; 
     
         if (isChecked) {
-            // Identify new items not already in the list
             const newItems = itemsToAddOrRemove.filter(item => !currentList.some(e => e.smp === item));
             if (newItems.length > 0) {
                 const newEmbeddings = await getEmbeddings(newItems, embedderRef);
@@ -35,11 +33,9 @@ export default function App() {
                     vec: newEmbeddings[index],
                     lvl: 'b'
                 }));
-                // Update the list with new items
                 setMapList(currentList.concat(newItemsWithEmbeddings));
             }
         } else {
-            // For unchecked, filter out the items related to this basemap
             const filteredList = currentList.filter(item => !itemsToAddOrRemove.includes(item.smp));
             setMapList(filteredList);
         }
@@ -48,11 +44,9 @@ export default function App() {
     const handleAdd = async () => {
         const inputValues = inputRef.current.value.split('\n')
             .map(item => item.trim())
-            .filter(item => item && !mapList.some(e => e.smp === item)); // Avoid duplicates
+            .filter(item => item && !mapList.some(e => e.smp === item)); 
         if (inputValues.length > 0) {
-            // Fetch embeddings for the new input values
             const newEmbeddings = await getEmbeddings(inputValues, embedderRef);
-            // Create new items with their embeddings
             const newItemsWithEmbeddings = inputValues.map((item, index) => ({
                 smp: item,
                 vec: newEmbeddings[index],
@@ -61,21 +55,13 @@ export default function App() {
             setMapList(prevList => [...prevList, ...newItemsWithEmbeddings]);
         }
     
-        inputRef.current.value = ''; // Clear the input field
+        inputRef.current.value = ''; 
     };
     
     function handleKeyDown(event) {
         if (event.key === 'Enter') {
-            handleAdd(); // Call the function to handle submission
+            handleAdd(); 
         }
-    }
-
-    const handleLockBasemap = () => {
-        setBasemapLocked(!basemapLocked);
-    }
-
-    function handleModelChange(event) {
-        setEmbeddingModel(event.target.value);
     }
 
     useEffect(() => {
@@ -112,7 +98,6 @@ export default function App() {
         }));
         
         plotCoords(svg, combinedData);
-        console.log('plotting');
     
     } , [mapList, basemapLocked, reducer]);
     
@@ -122,7 +107,7 @@ export default function App() {
             <div><a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world.</a></div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <textarea ref={inputRef} onKeyDown={handleKeyDown} style={{ marginRight: '10px' }} />
-                <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}> {/* Adjust this div to align items */}
+                <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
                     <button onClick={handleAdd} style={{ marginRight: '10px' }}>ADD</button>
                     <Radio
                         choice={mapLevel}
@@ -131,8 +116,8 @@ export default function App() {
                         id='mapLevel'
                     />
                 </div>
-                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleLockBasemap} style={{ marginRight: '10px' }}>LOCK</button>
-                <select onChange={handleModelChange} value={embeddingModel} style={{ marginRight: '10px' }}>
+                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={() => setBasemapLocked(!basemapLocked)} style={{ marginRight: '10px' }}>LOCK</button>
+                <select onChange={e => setEmbeddingModel(e.target.value)} value={embeddingModel} style={{ marginRight: '10px' }}>
                     {embeddingModels.map(model => (
                         <option key={model} value={model}>
                             {model}

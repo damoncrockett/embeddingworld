@@ -4,7 +4,6 @@ export default function Radio({ choice, choices, onSwitch, id }) {
     const choice0id = `${id}-${choices[0]}`;
     const choice1id = `${id}-${choices[1]}`;
 
-    // Assigning unique IDs for labels as well, to target with CSS
     const labelChoice0id = `label-${choice0id}`;
     const labelChoice1id = `label-${choice1id}`;
 
