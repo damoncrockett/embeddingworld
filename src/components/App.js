@@ -39,6 +39,14 @@ export default function App() {
             setMapList(filteredList);
         }
     };
+
+    const handleBasemapLock = () => {
+        
+        // if there is nothing on the basemap, you can't lock the basemap
+        if (!mapList.some(item => item.lvl === 'b')) return;
+        
+        setBasemapLocked(!basemapLocked);
+    };
         
     const handleAdd = async () => {
         const inputValues = inputRef.current.value.split('\n')
@@ -110,7 +118,7 @@ export default function App() {
                         id='mapLevel'
                     />
                 </div>
-                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={() => setBasemapLocked(!basemapLocked)} style={{ marginRight: '10px' }}>LOCK</button>
+                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock} style={{ marginRight: '10px' }}>LOCK</button>
                 <select onChange={e => setEmbeddingModel(e.target.value)} value={embeddingModel} style={{ marginRight: '10px' }}>
                     {embeddingModels.map(model => (
                         <option key={model} value={model}>
