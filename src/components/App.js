@@ -1,23 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { select } from 'd3-selection';
-import { plotCoords } from '../../utils/plot';
 import { embeddingModels, initializeEmbedder, getEmbeddings } from '../../utils/embed';
 import { reduceEmbeddings } from '../../utils/reduce';
 import { basemaps } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
+import Map from './Map';
 
 export default function App() {
 
     const [mapLevel, setMapLevel] = useState('map'); 
-    const [mapList, setMapList] = useState([]); 
+    const [mapList, setMapList] = useState([]);
+    const [mapData, setMapData] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
 
     const inputRef = useRef(null);
-    const svgRef = useRef();
     const embedderRef = useRef(null);
 
     const handleBasemapToggle = async (name, isChecked) => {
@@ -84,20 +83,15 @@ export default function App() {
         recomputeEmbeddings();
     }, [embedderChangeCounter]);
     
-
-    useEffect(() => {
-    
-        const svgWidth = svgRef.current.clientWidth;
-        const svgHeight = svgRef.current.clientHeight;
-        const svg = select(svgRef.current);   
-        const screenCoords = reduceEmbeddings(mapList, svgWidth, svgHeight, basemapLocked, reducer);
-
-        const combinedData = mapList.map((item, index) => ({
+    useEffect(() => {        
+        const coords = reduceEmbeddings(mapList, basemapLocked, reducer);
+        const mapListAndCoords = mapList.map((item, index) => ({
             ...item,
-            ...screenCoords[index],
+            x: coords[index][0],
+            y: coords[index][1]
         }));
         
-        plotCoords(svg, combinedData);
+        setMapData(mapListAndCoords);
     
     } , [mapList, basemapLocked, reducer]);
     
@@ -131,7 +125,7 @@ export default function App() {
                     id='reducer'
                 />
             </div>
-            <svg ref={svgRef} style={{ flexGrow: 1 }} width="100%" height="100%"></svg>
+            <Map mapData={mapData} />
         </div>
     );
     

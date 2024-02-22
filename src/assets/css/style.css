@@ -1,7 +1,7 @@
 html, body {
     height: 100%;
     margin: 0;
-    background-color: #222;
+    background-color: #444;
 }
 
 #title {
@@ -71,18 +71,16 @@ button:hover {
     border-color: white;
 }
 
-svg .text-included {
-    fill: black; /* Default text color */
-}
-
-svg .text-excluded {
-    fill: gainsboro; /* Different text color for excluded items */
-}
-
-svg .rect-included {
+svg .textMap {
     fill: white;
-    stroke: black;
-    stroke-width: 1px;
+    font-weight: 500;
+
+}
+
+svg .textBasemap {
+    fill: grey;
+    font-weight: 100;
+
 }
 
 #label-mapLevel-map {
