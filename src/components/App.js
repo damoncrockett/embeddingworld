@@ -20,7 +20,7 @@ export default function App() {
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
-    const prevMapList = useRef(mapList);
+    const prevSmps = useRef(null);
     const prevEmbeddingModel = useRef(embeddingModel);
     const prevCoords = useRef(null);
     const prevReducer = useRef(reducer);
@@ -142,7 +142,7 @@ export default function App() {
         // If all we've done is switch an item between the map and basemap, we don't recompute coords.
         // This wouldn't matter except that UMAP is non-deterministic and we don't want it to relocate items 
         // if nothing substantive has changed.
-        const skipReduce = isEqual(prevMapList.current.map(d => d.smp), mapList.map(d => d.smp)) && 
+        const skipReduce = isEqual(prevSmps.current, mapList.map(d => d.smp)) && 
                               prevEmbeddingModel.current === embeddingModel &&
                               prevReducer.current === reducer &&
                               reducer === 'umap';
@@ -156,7 +156,7 @@ export default function App() {
             coords = reduceEmbeddings(mapList, basemapLocked, reducer);
         }
 
-        prevMapList.current = mapList;
+        prevSmps.current = mapList.map(d => d.smp);
         prevEmbeddingModel.current = embeddingModel;
         prevCoords.current = coords;
         prevReducer.current = reducer;
