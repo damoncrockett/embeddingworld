@@ -69,6 +69,11 @@ button.unlocked {
 
 button:hover {
     border-color: white;
+    cursor: pointer;
+}
+
+svg {
+    cursor: pointer;
 }
 
 svg .textMap {
@@ -82,6 +87,12 @@ svg .textBasemap {
     font-weight: 100;
 
 }
+
+svg text:hover {
+    fill: coral;
+}
+
+
 
 #label-mapLevel-map {
     /* top-left | top-right | bottom-right | bottom-left */
@@ -175,9 +186,20 @@ select:hover {
     flex-direction: column; /* Stack children vertically */
     align-items: flex-start; /* Align items to the start of the flex container */
     position: absolute; 
-    left: -10px; 
+    left: 10px; 
     top: 50%; 
     transform: translateY(-50%);
+}
+
+#clearButtons {
+    position: absolute;
+    bottom: 30%;
+    left: 10px;
+}
+
+#clearButtons button {
+    font-size: 10px;
+    margin: auto;
 }
 
 

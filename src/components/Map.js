@@ -10,7 +10,7 @@ const svgWidth = window.innerWidth * 0.8;
 
 let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 
-export default function Map({ mapData }) {
+export default function Map({ mapData, setClickChange}) {
     
     const svgRef = useRef(null);
 
@@ -45,6 +45,8 @@ export default function Map({ mapData }) {
 
         if (!mapData) return;
 
+        console.log('new plotting operation', mapData);
+
         xDomain = [min(mapData, d => d.x), max(mapData, d => d.x)];
         yDomain = [min(mapData, d => d.y), max(mapData, d => d.y)];
 
@@ -54,15 +56,37 @@ export default function Map({ mapData }) {
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
-        // key in callback can be any unique identifier; important for exit selection
+        // compund callback key because we will sometimes change d.lvl and nothing else
         mapTexts = mapPointsContainer.selectAll('text')
-            .data(mapData, d => d.smp);
+            .data(mapData, d => d.smp + "-" + d.lvl);
+
+        let clickTimer = null;
+
+        const handleClick = (event, d) => {
+            if (clickTimer === null) {
+                clickTimer = setTimeout(() => {
+                    
+                    setClickChange({changeType: 'switch', smp: d.smp})
+                    
+                    clickTimer = null;
+                }, 300);
+            }
+        };
+
+        const handleDoubleClick = (event, d) => {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            
+            setClickChange({changeType: 'remove', smp: d.smp})
+        };
 
         const enterText = mapTexts.enter().append('text')
             .attr('class', d => d.lvl === 'm' ? 'textMap' : 'textBasemap')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
-            .text(d => d.smp);
+            .text(d => d.smp)
+            .on('click', handleClick)
+            .on('dblclick', handleDoubleClick);
 
         const duration = 750; 
 
