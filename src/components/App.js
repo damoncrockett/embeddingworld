@@ -114,6 +114,17 @@ export default function App() {
         }
     }
 
+    const handleReducer = (reducer) => {
+
+        if ( reducer === 'umap' && mapList.length < 15 ) {
+            alert('In this world, UMAP requires at least 15 samples.');
+            return;
+        }
+
+        setReducer(reducer);
+        console.log('reducer', reducer);
+    }
+
     useEffect(() => {
         initializeEmbedder(
             embeddingModel, 
@@ -138,17 +149,6 @@ export default function App() {
     
         recomputeEmbeddings();
     }, [embedderChangeCounter]);
-
-    const handleReducer = (reducer) => {
-
-        if ( reducer === 'umap' && mapList.length < 15 ) {
-            alert('In this world, UMAP requires at least 15 samples.');
-            return;
-        }
-
-        setReducer(reducer);
-        console.log('reducer', reducer);
-    }
     
     useEffect(() => {
 
