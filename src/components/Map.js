@@ -24,7 +24,7 @@ export default function Map({ mapData, setClickChange}) {
                 console.log('single click');
                 
                 clickTimer = null;
-            }, 300);
+            }, 250);
         }
     };
 
@@ -40,7 +40,7 @@ export default function Map({ mapData, setClickChange}) {
         setTimeout(() => {
             setClickChange({changeType: 'remove', smp: d.smp})
             console.log('double click');
-        }, 750); // Adjust the delay as needed
+        }, 250); // Adjust the delay as needed
     };
 
     const handleZoom = (event) => {
