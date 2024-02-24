@@ -13,6 +13,35 @@ let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 export default function Map({ mapData, setClickChange}) {
     
     const svgRef = useRef(null);
+    
+    let clickTimer = null;
+
+    const handleClick = (event, d) => {
+        if (clickTimer === null) {
+            clickTimer = setTimeout(() => {
+                
+                setClickChange({changeType: 'switch', smp: d.smp})
+                console.log('single click');
+                
+                clickTimer = null;
+            }, 300);
+        }
+    };
+
+    const handleDoubleClick = (event, d) => {
+        // prevent zoom on double click
+        event.preventDefault();
+        event.stopPropagation();
+
+        clearTimeout(clickTimer); // Cancel the pending single click action
+        clickTimer = null;
+    
+        // Set a timeout to delay the action after double click
+        setTimeout(() => {
+            setClickChange({changeType: 'remove', smp: d.smp})
+            console.log('double click');
+        }, 750); // Adjust the delay as needed
+    };
 
     const handleZoom = (event) => {
         const { transform } = event;
@@ -37,7 +66,8 @@ export default function Map({ mapData, setClickChange}) {
         svg.call(zoom()
             .extent([[0, 0], [svgWidth, svgHeight]])
             .scaleExtent([0.25, 5])
-            .on('zoom', handleZoom));
+            .on('zoom', handleZoom))
+            .on('dblclick.zoom', null); // Disable double-click zoom
 
     }, []);
 
@@ -59,26 +89,6 @@ export default function Map({ mapData, setClickChange}) {
         // compund callback key because we will sometimes change d.lvl and nothing else
         mapTexts = mapPointsContainer.selectAll('text')
             .data(mapData, d => d.smp + "-" + d.lvl);
-
-        let clickTimer = null;
-
-        const handleClick = (event, d) => {
-            if (clickTimer === null) {
-                clickTimer = setTimeout(() => {
-                    
-                    setClickChange({changeType: 'switch', smp: d.smp})
-                    
-                    clickTimer = null;
-                }, 300);
-            }
-        };
-
-        const handleDoubleClick = (event, d) => {
-            clearTimeout(clickTimer);
-            clickTimer = null;
-            
-            setClickChange({changeType: 'remove', smp: d.smp})
-        };
 
         const enterText = mapTexts.enter().append('text')
             .attr('class', d => d.lvl === 'm' ? 'textMap' : 'textBasemap')
