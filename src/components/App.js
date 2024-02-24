@@ -6,9 +6,11 @@ import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import isEqual from 'lodash/isEqual';
+import Loading from './Loading';
 
 export default function App() {
 
+    const [loading, setLoading] = useState(true);
     const [mapLevel, setMapLevel] = useState('map'); 
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
@@ -48,12 +50,26 @@ export default function App() {
         }
     };
 
+    const clearAlert = "Clearing the basemap leaves less than 15 map items, and in this world, UMAP requires at least 15 samples.";
+
     const handleClearMap = () => {
+
+        if ( reducer === 'umap' && mapList.filter(d => d.lvl === 'b').length < 15 ) {
+            alert(clearAlert);
+            return;
+        }
+
         setMapList(prevList => prevList.filter(item => item.lvl === 'b'));
         console.log('clear map', mapList.filter(item => item.lvl === 'b'));
     }
 
     const handleClearBasemap = () => {
+
+        if ( reducer === 'umap' && mapList.filter(d => d.lvl === 'm').length < 15 ) {
+            alert(clearAlert);
+            return;
+        }
+
         setMapList(prevList => prevList.filter(item => item.lvl === 'm'));
         console.log('clear basemap', mapList.filter(item => item.lvl === 'm'));
 
@@ -99,7 +115,11 @@ export default function App() {
     }
 
     useEffect(() => {
-        initializeEmbedder(embeddingModel, embedderRef, setEmbedderChangeCounter);
+        initializeEmbedder(
+            embeddingModel, 
+            embedderRef, 
+            setEmbedderChangeCounter,
+            setLoading);
     }, [embeddingModel]);
 
     useEffect(() => {
@@ -133,7 +153,7 @@ export default function App() {
     useEffect(() => {
 
         if ( !mapList.some(item => item.lvl === 'b') && basemapLocked ) {
-            console.log('The basemap is locked but there is nothing on it. Unlocking.')
+            alert('You are fitting the basemap, but there is nothing on it. Exiting "FIT BASE" mode.')
             setBasemapLocked(false);
             console.log('basemap unlocked');
             return; // must return bc setBasemapLocked won't fire fast enough to prevent plotting error
@@ -149,12 +169,7 @@ export default function App() {
 
         console.log('skipReduce:', skipReduce);
 
-        let coords;
-        if ( skipReduce ) {
-            coords = prevCoords.current;
-        } else {
-            coords = reduceEmbeddings(mapList, basemapLocked, reducer);
-        }
+        const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer);
 
         prevSmps.current = mapList.map(d => d.smp);
         prevEmbeddingModel.current = embeddingModel;
@@ -189,6 +204,7 @@ export default function App() {
     }, [clickChange]);
     
     return (
+        loading ? <Loading /> :
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
             <div id='clearButtons'>
@@ -207,7 +223,7 @@ export default function App() {
                         id='mapLevel'
                     />
                 </div>
-                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock} style={{ marginRight: '10px' }}>LOCK</button>
+                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock} style={{ marginRight: '10px' }}>FIT BASE</button>
                 <select onChange={e => setEmbeddingModel(e.target.value)} value={embeddingModel} style={{ marginRight: '10px' }}>
                     {embeddingModels.map(model => (
                         <option key={model} value={model}>

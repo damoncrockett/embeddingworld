@@ -8,12 +8,17 @@ const embeddingModels = [
     'Xenova/jina-embeddings-v2-small-en',
 ]
 
-async function initializeEmbedder(embeddingModel, embedderRef, setEmbedderChangeCounter) {
+async function initializeEmbedder(
+    embeddingModel, 
+    embedderRef, 
+    setEmbedderChangeCounter,
+    setLoading) {
     try {
         const newEmbedder = await pipeline('feature-extraction', embeddingModel);
         embedderRef.current = newEmbedder;
         setEmbedderChangeCounter(counter => counter + 1);
         console.log('incremented counter');
+        setLoading(false);
     } catch (error) {
         console.error("Error initializing embedder:", error);
     }

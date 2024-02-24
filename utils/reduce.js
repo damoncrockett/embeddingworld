@@ -10,8 +10,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer) {
     let coords;
     if (reducer === 'pca') {
 
-      const twoDimArrays = toFit.map(d => Array.from(d.vec));
-      const pca = new PCA(twoDimArrays);
+      const pca = new PCA(toFit.map(d => Array.from(d.vec)));
       coords = pca.predict(mapList.map(d => d.vec))["data"].map(d => Array.from(d.slice(0, 2)));
       
     } else if (reducer === 'umap') {

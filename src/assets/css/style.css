@@ -4,6 +4,30 @@ html, body {
     background-color: #444;
 }
 
+h2 {
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 32px;
+    font-weight: 400;
+    font-family: monospace;
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#loadingContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
 #title {
     color: white;
     text-align: left;
@@ -26,7 +50,7 @@ a {
     color: inherit;
 }
 
-#root { /* Assuming you're mounting your React app inside a div with id="root" */
+#root { 
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -39,7 +63,7 @@ a {
 }
 
 textarea {
-    width: 50%;
+    width: 40%;
     padding: 10px;
     margin: 10px;
     border: 2px solid black;
@@ -76,6 +100,10 @@ svg {
     cursor: pointer;
 }
 
+svg:active {
+    cursor: grabbing;
+}
+
 svg .textMap {
     fill: white;
     font-weight: 500;
@@ -91,8 +119,6 @@ svg .textBasemap {
 svg text:hover {
     fill: coral;
 }
-
-
 
 #label-mapLevel-map {
     /* top-left | top-right | bottom-right | bottom-left */
@@ -120,71 +146,68 @@ svg text:hover {
 
 .radio-switch label {
     font-weight: 400;
-    background-color: transparent; /* Background color of the switch */
-    color: white; /* Text color */
+    background-color: transparent; 
+    color: white; 
     padding: 20px 20px;
-    border: 2px solid black; /* Border color */
+    border: 2px solid black; 
     cursor: pointer;
-    transition: background-color 0.3s; /* Smooth transition for background color */
+    transition: background-color 0.3s; 
   }
   
-  /* This rule will apply the new background color to the label after a checked input */
 .radio-switch input[type="radio"]:checked + label {
-    background-color: coral; /* Background color of the selected switch */
-    /* You can also set other styles to make the selected state stand out more, 
-       such as changing the text color, border, etc. */
+    background-color: coral; 
+   
   }
 
 select {
-    font-weight: 400; /* Consistent with button */
-    padding: 10px; /* Consistent with button and input */
-    margin: 10px; /* Consistent with button and input */
-    border: 2px solid black; /* Consistent with button and input */
-    border-radius: 10px; /* Consistent with button and input */
-    font-size: 16px; /* Consistent with button and input */
-    background-color: white; /* Similar to unlocked button, but can be adjusted */
-    color: black; /* Text color consistent with overall design */
-    cursor: pointer; /* Cursor changes to pointer to indicate it's clickable */
-    width: 20%; /* Adjust this based on your layout needs, could be a percentage or fixed width */
-    -webkit-appearance: none; /* Removes default styling provided by the browser */
-    -moz-appearance: none; /* Removes default styling provided by the browser */
-    appearance: none; /* Removes default styling provided by the browser */
-    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><path fill="%23000" d="M2048 640v128h-2048v-128h2048zm0 640v128h-2048v-128h2048z"/></svg>'); /* Custom arrow icon */
+    font-weight: 400;
+    padding: 10px; 
+    margin: 10px; 
+    border: 2px solid black; 
+    border-radius: 10px; 
+    font-size: 16px; 
+    background-color: white; 
+    color: black; 
+    cursor: pointer; 
+    width: 20%; 
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    appearance: none; 
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><path fill="%23000" d="M2048 640v128h-2048v-128h2048zm0 640v128h-2048v-128h2048z"/></svg>');
     background-repeat: no-repeat;
-    background-position: right 10px center; /* Position the arrow icon */
-    background-size: 12px; /* Size of the arrow icon */
+    background-position: right 10px center; 
+    background-size: 12px; 
 }
 
 select:hover {
-    border-color: white; /* Hover effect similar to button */
-    background-color: dodgerblue; /* Optional: Change background on hover to match button hover effect */
-    color: white; /* Optional: Change text color on hover */
+    border-color: white; 
+    background-color: dodgerblue; 
+    color: white; 
 }
 
 .basemap-toggle-label {
-    display: flex; /* Aligns children (checkbox and text) inline */
-    align-items: center; /* Centers items vertically */
-    margin: 5px; /* Adjusted margin for compact spacing */
+    display: flex; 
+    align-items: center; 
+    margin: 2px; 
     cursor: pointer;
     font-size: 16px;
-    font-weight: 400;
-    color: grey;
-    padding: 5px; /* Slight padding around the text for aesthetics */
+    font-weight: 100;
+    color: gainsboro;
+    padding: 2px; 
     transition: background-color 0.3s;
 }
 
 .basemap-toggle-checkbox {
-    margin-right: 10px; /* Ensures space between checkbox and label text */
+    margin-right: 10px; 
 }
 
 .basemap-toggle-container {
-    background-color: transparent; /* Background color of the container */
+    background-color: transparent; 
     padding: 10px;
-    border: 1px solid black;
     border-radius: 10px;
-    display: flex; /* Using flexbox to manage children */
-    flex-direction: column; /* Stack children vertically */
-    align-items: flex-start; /* Align items to the start of the flex container */
+    display: flex; 
+    flex-direction: column;
+    align-items: flex-start; 
     position: absolute; 
     left: 10px; 
     top: 50%; 
@@ -193,13 +216,21 @@ select:hover {
 
 #clearButtons {
     position: absolute;
-    bottom: 30%;
+    bottom: 33%;
     left: 10px;
 }
 
 #clearButtons button {
     font-size: 10px;
-    margin: auto;
+    margin: 2px;
+    padding: 6px;
+    color: black;
+    border: 1px solid black;
+    background-color: white;
+}
+
+#clearButtons button:hover {
+    border-color: white;
 }
 
 
