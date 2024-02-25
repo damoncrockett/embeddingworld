@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { transition } from 'd3-transition';
 import { select } from 'd3-selection';
 import { zoom, zoomTransform } from 'd3-zoom';
@@ -7,6 +7,8 @@ import { min, max } from 'd3-array';
 
 const svgHeight = window.innerHeight * 0.8;
 const svgWidth = window.innerWidth * 0.8;
+
+const padding = { top: 40, right: 40, bottom: 40, left: 40 };
 
 let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 
@@ -62,14 +64,17 @@ export default function Map({ mapData, setClickChange}) {
         if (mapPointsContainer.empty()) {
             mapPointsContainer = svg.append('g').attr('class', 'mapPointsContainer');
         }
-
-        svg.call(zoom()
+    
+        const initialZoom = zoom()
             .extent([[0, 0], [svgWidth, svgHeight]])
             .scaleExtent([0.25, 5])
-            .on('zoom', handleZoom))
-            .on('dblclick.zoom', null); // Disable double-click zoom
+            .on('zoom', handleZoom);
+    
+        svg.call(initialZoom)
+           .on('dblclick.zoom', null); // Disable double-click zoom
 
     }, []);
+    
 
     useEffect(() => {
 
@@ -80,8 +85,13 @@ export default function Map({ mapData, setClickChange}) {
         xDomain = [min(mapData, d => d.x), max(mapData, d => d.x)];
         yDomain = [min(mapData, d => d.y), max(mapData, d => d.y)];
 
-        xScale = scaleLinear().domain(xDomain).range([0, svgWidth]);
-        yScale = scaleLinear().domain(yDomain).range([0, svgHeight]);
+        xScale = scaleLinear()
+            .domain(xDomain)
+            .range([padding.left, svgWidth - padding.right]);
+
+        yScale = scaleLinear()
+            .domain(yDomain)
+            .range([svgHeight - padding.bottom, padding.top]);
 
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);

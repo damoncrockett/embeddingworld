@@ -1,11 +1,19 @@
+import { max } from 'lodash';
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function SpreadMonitor({ radius }) {
+export default function SpreadMonitor({ radius, embeddingModel }) {
   const frameRef = useRef();
   const [displayRadius, setDisplayRadius] = useState(radius);
   const startRadiusRef = useRef(radius);
   const [maxRadius, setMaxRadius] = useState(radius); // Track the maximum radius
   const [color, setColor] = useState('white'); // New state for color
+  const maxRef = useRef();
+
+  useEffect(() => {
+    setMaxRadius(radius);
+    startRadiusRef.current = 0;
+    maxRef.current.innerText = radius.toFixed(3);
+  }, [embeddingModel]);
 
   useEffect(() => {
     // Update the maximum radius if the new radius is greater
@@ -50,7 +58,7 @@ export default function SpreadMonitor({ radius }) {
       {/* Numbers display */}
       <p id='spreadMonitor' style={{ color, margin: 0 }}>
         {displayRadius.toFixed(3)}
-        <span style={{ color: 'grey', marginLeft: '10px' }}>
+        <span ref={maxRef} style={{ color: 'grey', marginLeft: '10px' }}>
           {maxRadius.toFixed(3)}
         </span>
       </p>

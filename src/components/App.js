@@ -10,7 +10,6 @@ import Loading from './Loading';
 import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
 import SpreadMonitor from './SpreadMonitor';
 import Spearman from './Spearman';
-import { map } from 'lodash';
 
 export default function App() {
 
@@ -272,8 +271,8 @@ export default function App() {
                 setClickChange={setClickChange} 
             />
             <div id='meterContainer'>
-                <SpreadMonitor radius={sphereRadius} />
-                <Spearman correlation={spearmanCorrelation} />
+                <SpreadMonitor radius={sphereRadius} embeddingModel={embeddingModel} />
+                <Spearman correlation={spearmanCorrelation} embeddingModel={embeddingModel} />
             </div>
         </div>
     );
