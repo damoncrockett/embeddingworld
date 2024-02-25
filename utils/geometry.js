@@ -1,28 +1,3 @@
-// export function scaleCoords(coords) {
-//     const numPoints = coords.length;
-//     const dim = coords[0].length;
-//     const mins = new Array(dim).fill(Infinity);
-//     const maxs = new Array(dim).fill(-Infinity);
-
-//     // Find min and max for each dimension
-//     for (let i = 0; i < numPoints; i++) {
-//         for (let j = 0; j < dim; j++) {
-//             mins[j] = Math.min(mins[j], coords[i][j]);
-//             maxs[j] = Math.max(maxs[j], coords[i][j]);
-//         }
-//     }
-
-//     // Scale points to the [0, 1] range
-//     const scaledCoords = coords.map(point =>
-//         point.map((value, idx) => {
-//             const range = maxs[idx] - mins[idx];
-//             return range === 0 ? 0 : (value - mins[idx]) / range; // Avoid division by zero
-//         })
-//     );
-
-//     return scaledCoords;
-// }
-
 function distanceSquared(pointA, pointB) {
     let distance = 0;
     for (let i = 0; i < pointA.length; i++) {

@@ -1,18 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function Spearman({ correlation, embeddingModel }) {
+export default function Spearman({ correlation }) {
   const frameRef = useRef();
   const [displayCorr, setDisplayCorr] = useState(correlation);
   const startCorrRef = useRef(correlation);
   const [maxCorr, setMaxCorr] = useState(correlation); // Track the maximum correlation
   const [color, setColor] = useState('white'); // New state for color
-  const maxRef = useRef();
-
-  useEffect(() => {
-    setMaxCorr(correlation);
-    startCorrRef.current = 0;
-    maxRef.current.innerText = correlation.toFixed(3);
-  }, [embeddingModel]);
 
   useEffect(() => {
     // Update the maximum correlation if the new correlation is greater
@@ -57,7 +50,7 @@ export default function Spearman({ correlation, embeddingModel }) {
       {/* Numbers display */}
       <p id='spreadMonitor' style={{ color, margin: 0 }}>
         {displayCorr.toFixed(3)}
-        <span ref={maxRef} style={{ color: 'grey', marginLeft: '10px' }}>
+        <span style={{ color: 'grey', marginLeft: '10px' }}>
           {maxCorr.toFixed(3)}
         </span>
       </p>
