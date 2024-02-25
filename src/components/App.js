@@ -7,6 +7,10 @@ import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
+import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
+import SpreadMonitor from './SpreadMonitor';
+import Spearman from './Spearman';
+import { map } from 'lodash';
 
 export default function App() {
 
@@ -19,6 +23,8 @@ export default function App() {
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
+    const [sphereRadius, setSphereRadius] = useState(0);
+    const [spearmanCorrelation, setSpearmanCorrelation] = useState(0);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
@@ -169,7 +175,30 @@ export default function App() {
 
         console.log('skipReduce:', skipReduce);
 
+        // get radius of bounding sphere
+        if ( mapList.length > 0 ) {
+            const sphere = calculateSphere(mapList.map(d => d.vec));
+            setSphereRadius(sphere.radius);
+        } else {
+            setSphereRadius(0);
+        }
+
         const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer);
+
+        // get Spearman correlation between pairwise distances in original space and in reduced space
+        
+        if ( mapList.length > 1 ) {
+
+            const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec));
+            const reducedRanks = computeAndRankPairwiseDistances(coords);
+            console.log(originalRanks, reducedRanks)
+            const corr = spearmanRankCorrelation(originalRanks, reducedRanks);
+            console.log('spearman correlation', corr);
+            setSpearmanCorrelation(corr);
+
+        } else {
+            setSpearmanCorrelation(0);
+        }
 
         prevSmps.current = mapList.map(d => d.smp);
         prevEmbeddingModel.current = embeddingModel;
@@ -242,6 +271,10 @@ export default function App() {
                 mapData={mapData}
                 setClickChange={setClickChange} 
             />
+            <div id='meterContainer'>
+                <SpreadMonitor radius={sphereRadius} />
+                <Spearman correlation={spearmanCorrelation} />
+            </div>
         </div>
     );
     

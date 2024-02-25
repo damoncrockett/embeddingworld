@@ -8,9 +8,9 @@ h2 {
     color: white;
     text-align: center;
     padding: 20px;
-    font-size: 32px;
+    font-size: 48px;
     font-weight: 400;
-    font-family: monospace;
+    font-family: 'Micro 5';
 }
 
 #loading {
@@ -231,6 +231,24 @@ select:hover {
 
 #clearButtons button:hover {
     border-color: white;
+}
+
+#meterContainer {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Optional, if you want vertical centering */
+  }
+
+#spreadMonitor {
+    font-size: 24px;
+    font-weight: 400;
+    background-color: transparent;
+    color: white;
 }
 
 
