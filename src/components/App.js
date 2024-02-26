@@ -5,6 +5,7 @@ import { basemaps } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import Map from './Map';
+import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
 import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
 import SpreadMonitor from './SpreadMonitor';
@@ -19,12 +20,17 @@ export default function App() {
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
+    const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [sphereRadius, setSphereRadius] = useState(0);
     const [spearmanCorrelation, setSpearmanCorrelation] = useState(0);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
+    const prevSmps = useRef(null);
+    const prevEmbeddingModel = useRef(embeddingModel);
+    const prevCoords = useRef(null);
+    const prevReducer = useRef(reducer);
 
     const handleBasemapToggle = async (name, isChecked) => {
         let currentList = [...mapList];
@@ -49,13 +55,25 @@ export default function App() {
         }
     };
 
+    const clearAlert = "Clearing the basemap leaves less than 15 map items, and in this world, UMAP requires at least 15 samples.";
+
     const handleClearMap = () => {
+
+        if ( reducer === 'umap' && mapList.filter(d => d.lvl === 'b').length < 15 ) {
+            alert(clearAlert);
+            return;
+        }
 
         setMapList(prevList => prevList.filter(item => item.lvl === 'b'));
         console.log('clear map', mapList.filter(item => item.lvl === 'b'));
     }
 
     const handleClearBasemap = () => {
+
+        if ( reducer === 'umap' && mapList.filter(d => d.lvl === 'm').length < 15 ) {
+            alert(clearAlert);
+            return;
+        }
 
         setMapList(prevList => prevList.filter(item => item.lvl === 'm'));
         console.log('clear basemap', mapList.filter(item => item.lvl === 'm'));
@@ -101,6 +119,17 @@ export default function App() {
         }
     }
 
+    const handleReducer = (reducer) => {
+
+        if ( reducer === 'umap' && mapList.length < 15 ) {
+            alert('In this world, UMAP requires at least 15 samples.');
+            return;
+        }
+
+        setReducer(reducer);
+        console.log('reducer', reducer);
+    }
+
     useEffect(() => {
         initializeEmbedder(
             embeddingModel, 
@@ -135,6 +164,16 @@ export default function App() {
             return; // must return bc setBasemapLocked won't fire fast enough to prevent plotting error
         }
 
+        // If all we've done is switch an item between the map and basemap, we don't recompute coords.
+        // This wouldn't matter except that UMAP is non-deterministic and we don't want it to relocate items 
+        // if nothing substantive has changed.
+        const skipReduce = isEqual(prevSmps.current, mapList.map(d => d.smp)) && 
+                              prevEmbeddingModel.current === embeddingModel &&
+                              prevReducer.current === reducer &&
+                              reducer === 'umap';
+
+        console.log('skipReduce:', skipReduce);
+
         // get radius of bounding sphere
         if ( mapList.length > 0 ) {
             const sphere = calculateSphere(mapList.map(d => d.vec));
@@ -143,7 +182,7 @@ export default function App() {
             setSphereRadius(0);
         }
 
-        const coords = reduceEmbeddings(mapList, basemapLocked);
+        const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer);
 
         // get Spearman correlation between pairwise distances in original space and in reduced space
         
@@ -159,7 +198,12 @@ export default function App() {
         } else {
             setSpearmanCorrelation(0);
         }
-         
+
+        prevSmps.current = mapList.map(d => d.smp);
+        prevEmbeddingModel.current = embeddingModel;
+        prevCoords.current = coords;
+        prevReducer.current = reducer;
+                        
         const mapListAndCoords = mapList.map((item, index) => ({
             ...item,
             x: coords[index][0],
@@ -169,7 +213,7 @@ export default function App() {
         setMapData(mapListAndCoords);
         console.log('new mapListAndCoords created', mapListAndCoords);
     
-    } , [mapList, basemapLocked]);
+    } , [mapList, basemapLocked, reducer]);
 
     useEffect(() => {
         if ( clickChange && clickChange.changeType === 'switch' ) {
@@ -215,18 +259,20 @@ export default function App() {
                         </option>
                     ))}
                 </select>
+                <Radio
+                    choice={reducer}
+                    choices={['pca', 'umap']}
+                    onSwitch={handleReducer}
+                    id='reducer'
+                />
             </div>
             <Map 
                 mapData={mapData}
                 setClickChange={setClickChange} 
             />
             <div id='meterContainer'>
-                <SpreadMonitor 
-                    radius={sphereRadius} 
-                />
-                <Spearman 
-                    correlation={spearmanCorrelation}
-                />
+                <SpreadMonitor radius={sphereRadius} embeddingModel={embeddingModel} />
+                <Spearman correlation={spearmanCorrelation} embeddingModel={embeddingModel} />
             </div>
         </div>
     );
