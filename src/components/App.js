@@ -7,11 +7,10 @@ import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
-import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation, scaleCoords } from '../../utils/geometry';
+import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
 import SpreadMonitor from './SpreadMonitor';
 import Spearman from './Spearman';
 import { returnDomain } from '../../utils/data'; 
-import { map } from 'lodash';
 
 export default function App() {
 
@@ -33,6 +32,7 @@ export default function App() {
     const prevEmbeddingModel = useRef(embeddingModel);
     const prevCoords = useRef(null);
     const prevReducer = useRef(reducer);
+    const prevBasemapLocked = useRef(basemapLocked);
 
     const handleFetchWords = () => {
         fetch(returnDomain() + 'mit10000.txt')
@@ -195,7 +195,8 @@ export default function App() {
         const skipReduce = isEqual(prevSmps.current, mapList.map(d => d.smp)) && 
                               prevEmbeddingModel.current === embeddingModel &&
                               prevReducer.current === reducer &&
-                              reducer === 'umap';
+                              reducer === 'umap' &&
+                              prevBasemapLocked.current === basemapLocked;
 
         console.log('skipReduce:', skipReduce);
 
@@ -213,9 +214,9 @@ export default function App() {
         
         if ( mapList.length > 1 ) {
 
-            // console.log('mins and maxes',scaleCoords(mapList.map(d => d.vec)));
-
             const distanceFunctionName = reducer === 'umap' ? 'cosine' : 'euclidean';
+
+            console.log('corr check: ',mapList.map(d => d.vec), coords);
 
             const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
             const reducedRanks = computeAndRankPairwiseDistances(coords, distanceFunctionName);
@@ -231,6 +232,7 @@ export default function App() {
         prevEmbeddingModel.current = embeddingModel;
         prevCoords.current = coords;
         prevReducer.current = reducer;
+        prevBasemapLocked.current = basemapLocked;
                         
         const mapListAndCoords = mapList.map((item, index) => ({
             ...item,
