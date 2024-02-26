@@ -14,7 +14,7 @@ async function initializeEmbedder(
     setEmbedderChangeCounter,
     setLoading) {
     try {
-        const newEmbedder = await pipeline('feature-extraction', embeddingModel);
+        const newEmbedder = await pipeline('feature-extraction', embeddingModel, { quantized: false });
         embedderRef.current = newEmbedder;
         setEmbedderChangeCounter(counter => counter + 1);
         console.log('incremented counter');

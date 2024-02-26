@@ -214,6 +214,15 @@ select:hover {
     transform: translateY(-50%);
 }
 
+#randomWords {
+    position: absolute;
+    top: 8%;
+    left: 2%;
+    color: black;
+    border: 2px solid black;
+    background-color: white;
+}
+
 #clearButtons {
     position: absolute;
     bottom: 33%;

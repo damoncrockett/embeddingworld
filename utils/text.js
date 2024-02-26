@@ -44,4 +44,9 @@ const stopWords = new Set([
     "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
 ]);
 
-export { basemaps, chooseThreeMostImportantWords };
+function sampleRandomWords(wordsArray, sampleSize = 10) {
+    const shuffled = [...wordsArray].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, sampleSize);
+  }
+
+export { basemaps, chooseThreeMostImportantWords, sampleRandomWords };

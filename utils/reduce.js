@@ -12,14 +12,31 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer) {
     let coords;
     if (reducer === 'pca') {
 
-      const pca = new PCA(toFit.map(d => Array.from(d.vec)));
-      coords = pca.predict(mapList.map(d => d.vec))["data"].map(d => Array.from(d.slice(0, 2)));
+      // `Array.from` because `ml-pca` won't accept Float32Arrays for some reason
+      const pca = new PCA(
+        toFit.map(d => Array.from(d.vec)),
+        { center: true, nComponents: 2});
+      coords = pca.predict(mapList.map(d => d.vec))['data'];
 
       } else if (reducer === 'umap') {
 
-      const umap = new UMAP({ nNeighbors: 5});
-      umap.fit(toFit.map(d => d.vec))
-      coords = umap.transform(mapList.map(d => d.vec));
+      const umap = new UMAP(
+        { 
+          nNeighbors: 15, 
+          DistanceFn: 'cosine',
+          minDist: 0.1,
+        });
+
+        if ( basemapLocked ) {
+          
+          umap.fit(toFit.map(d => d.vec));
+          coords = umap.transform(mapList.map(d => d.vec));
+
+        } else {
+          coords = umap.fit(toFit.map(d => d.vec))
+        }
+      
+        
 
       } 
 

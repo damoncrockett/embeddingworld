@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { embeddingModels, initializeEmbedder, getEmbeddings } from '../../utils/embed';
 import { reduceEmbeddings } from '../../utils/reduce';
-import { basemaps } from '../../utils/text';
+import { basemaps, sampleRandomWords } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
-import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
+import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation, scaleCoords } from '../../utils/geometry';
 import SpreadMonitor from './SpreadMonitor';
 import Spearman from './Spearman';
+import { returnDomain } from '../../utils/data'; 
+import { map } from 'lodash';
 
 export default function App() {
 
@@ -32,6 +34,29 @@ export default function App() {
     const prevCoords = useRef(null);
     const prevReducer = useRef(reducer);
 
+    const handleFetchWords = () => {
+        fetch(returnDomain() + 'mit10000.txt')
+          .then(response => response.text())
+          .then(text => {
+            const wordsArray = text.split('\n').map(line => line.trim()).filter(Boolean);
+            const sampled = sampleRandomWords(wordsArray); // Assuming this function is defined
+            
+            if (inputRef.current) {
+              inputRef.current.value = sampled.join('\n'); // Join the sampled words with newlines
+              
+              // Set focus to the textarea
+              inputRef.current.focus();
+              
+              // Optional: Place the cursor at the end of the textarea content
+              const length = inputRef.current.value.length;
+              inputRef.current.setSelectionRange(length, length);
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch the words file:', error);
+          });
+        };
+      
     const handleBasemapToggle = async (name, isChecked) => {
         let currentList = [...mapList];
         const itemsToAddOrRemove = basemaps[name]; 
@@ -142,7 +167,7 @@ export default function App() {
         const recomputeEmbeddings = async () => {
             const samples = mapList.map(item => item.smp);
             const newEmbeddings = await getEmbeddings(samples, embedderRef);
-    
+
             const updatedMapList = mapList.map((item, index) => ({
                 ...item,
                 vec: newEmbeddings[index],
@@ -188,11 +213,14 @@ export default function App() {
         
         if ( mapList.length > 1 ) {
 
-            const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec));
-            const reducedRanks = computeAndRankPairwiseDistances(coords);
-            console.log(originalRanks, reducedRanks)
+            // console.log('mins and maxes',scaleCoords(mapList.map(d => d.vec)));
+
+            const distanceFunctionName = reducer === 'umap' ? 'cosine' : 'euclidean';
+
+            const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
+            const reducedRanks = computeAndRankPairwiseDistances(coords, distanceFunctionName);
             const corr = spearmanRankCorrelation(originalRanks, reducedRanks);
-            console.log('spearman correlation', corr);
+            console.log('spearman correlation', originalRanks, reducedRanks, corr);
             setSpearmanCorrelation(corr);
 
         } else {
@@ -234,6 +262,7 @@ export default function App() {
     return (
         loading ? <Loading /> :
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <button id='randomWords' onClick={handleFetchWords}>RANDOM</button>
             <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
             <div id='clearButtons'>
                 <button onClick={handleClearMap}>CLEAR MAP</button>

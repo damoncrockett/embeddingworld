@@ -1,27 +1,31 @@
-// export function scaleCoords(coords) {
-//     const numPoints = coords.length;
-//     const dim = coords[0].length;
-//     const mins = new Array(dim).fill(Infinity);
-//     const maxs = new Array(dim).fill(-Infinity);
+export function scaleCoords(coords) {
+    const numPoints = coords.length;
+    const dim = coords[0].length;
+    const mins = new Array(dim).fill(Infinity);
+    const maxs = new Array(dim).fill(-Infinity);
 
-//     // Find min and max for each dimension
-//     for (let i = 0; i < numPoints; i++) {
-//         for (let j = 0; j < dim; j++) {
-//             mins[j] = Math.min(mins[j], coords[i][j]);
-//             maxs[j] = Math.max(maxs[j], coords[i][j]);
-//         }
-//     }
+    // Find min and max for each dimension
+    for (let i = 0; i < numPoints; i++) {
+        for (let j = 0; j < dim; j++) {
+            mins[j] = Math.min(mins[j], coords[i][j]);
+            maxs[j] = Math.max(maxs[j], coords[i][j]);
+        }
+    }
 
-//     // Scale points to the [0, 1] range
-//     const scaledCoords = coords.map(point =>
-//         point.map((value, idx) => {
-//             const range = maxs[idx] - mins[idx];
-//             return range === 0 ? 0 : (value - mins[idx]) / range; // Avoid division by zero
-//         })
-//     );
+    // Scale points to the [0, 1] range
+    const scaledCoords = coords.map(point =>
+        point.map((value, idx) => {
+            const range = maxs[idx] - mins[idx];
+            return range === 0 ? 0 : (value - mins[idx]) / range; // Avoid division by zero
+        })
+    );
 
-//     return scaledCoords;
-// }
+    return scaledCoords;
+
+
+    // return ranges
+    // return maxs.map((max, idx) => max - mins[idx]);
+}
 
 function distanceSquared(pointA, pointB) {
     let distance = 0;
@@ -92,6 +96,26 @@ function euclideanDistance(arr1, arr2) {
     return Math.sqrt(arr1.reduce((sum, current, index) => sum + Math.pow(current - arr2[index], 2), 0));
 }
 
+function cosineDistance(arrA, arrB) {
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    
+    for (let i = 0; i < arrA.length; i++) {
+      dotProduct += arrA[i] * arrB[i]; // Sum of product of each corresponding elements
+      normA += arrA[i] * arrA[i]; // Sum of squares of elements in arrA
+      normB += arrB[i] * arrB[i]; // Sum of squares of elements in arrB
+    }
+  
+    normA = Math.sqrt(normA); // Square root of sum of squares of arrA
+    normB = Math.sqrt(normB); // Square root of sum of squares of arrB
+  
+    const cosineSimilarity = dotProduct / (normA * normB);
+    const cosineDistance = 1 - cosineSimilarity; // Convert similarity to distance
+  
+    return cosineDistance;
+  }  
+
 function generatePairwiseComparisons(length) {
     const pairs = [];
     for (let i = 0; i < length - 1; i++) {
@@ -102,11 +126,14 @@ function generatePairwiseComparisons(length) {
     return pairs;
 }
 
-export function computeAndRankPairwiseDistances(arrays) {
+export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
     const pairs = generatePairwiseComparisons(arrays.length);
+
+    const distanceFunction = distanceFunctionName === 'cosine' ? cosineDistance : euclideanDistance;
+
     const distances = pairs.map(pair => ({
         pair,
-        distance: euclideanDistance(arrays[pair[0]], arrays[pair[1]])
+        distance: distanceFunction(arrays[pair[0]], arrays[pair[1]])
     }));
 
     // Sort distances to rank them, maintaining original pair order in the output
