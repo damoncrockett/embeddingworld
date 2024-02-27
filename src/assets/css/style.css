@@ -13,6 +13,18 @@ h2 {
     font-family: 'Micro 5';
 }
 
+#loadingInsetContainer {
+    position: absolute;
+    top: 69px;
+    right: 430px;
+}
+
+#loadingInset {
+    font-family: "Micro 5";
+    font-size: 24px;
+    color: white;
+}
+
 #loading {
     position: absolute;
     top: 50%;

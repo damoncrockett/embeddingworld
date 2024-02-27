@@ -1,4 +1,5 @@
 import { pipeline } from '@xenova/transformers';
+import { set } from 'lodash';
 
 const embeddingModels = [
     'nomic-ai/nomic-embed-text-v1',
@@ -12,13 +13,15 @@ async function initializeEmbedder(
     embeddingModel, 
     embedderRef, 
     setEmbedderChangeCounter,
-    setLoading) {
+    setLoading,
+    setLoadingInset) {
     try {
         const newEmbedder = await pipeline('feature-extraction', embeddingModel);
         embedderRef.current = newEmbedder;
         setEmbedderChangeCounter(counter => counter + 1);
         console.log('incremented counter');
         setLoading(false);
+        setLoadingInset(false);
     } catch (error) {
         console.error("Error initializing embedder:", error);
     }

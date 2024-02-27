@@ -7,6 +7,7 @@ import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
+import LoadingInset from './LoadingInset';
 import { computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data'; 
@@ -14,6 +15,7 @@ import { returnDomain } from '../../utils/data';
 export default function App() {
 
     const [loading, setLoading] = useState(true);
+    const [loadingInset, setLoadingInset] = useState(false);
     const [mapLevel, setMapLevel] = useState('map'); 
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
@@ -153,7 +155,8 @@ export default function App() {
             embeddingModel, 
             embedderRef, 
             setEmbedderChangeCounter,
-            setLoading);
+            setLoading,
+            setLoadingInset);
     }, [embeddingModel]);
 
     useEffect(() => {
@@ -261,7 +264,7 @@ export default function App() {
                     />
                 </div>
                 <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock} style={{ marginRight: '10px' }}>FIT BASE</button>
-                <select onChange={e => setEmbeddingModel(e.target.value)} value={embeddingModel} style={{ marginRight: '10px' }}>
+                <select onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel} style={{ marginRight: '10px' }}>
                     {embeddingModels.map(model => (
                         <option key={model} value={model}>
                             {model}
@@ -275,6 +278,7 @@ export default function App() {
                     id='reducer'
                 />
             </div>
+            {loadingInset && <LoadingInset />}
             <Map 
                 mapData={mapData}
                 setClickChange={setClickChange} 
