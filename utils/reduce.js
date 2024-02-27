@@ -11,8 +11,8 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer) {
     let coords = [];
     if (reducer === 'pca') {
         
-        const pca = new PCA(toFit.map(d => Array.from(d.vec)), { center: true, nComponents: 2 });
-        coords = pca.predict(mapList.map(d => d.vec))['data'];
+        const pca = new PCA(toFit.map(d => Array.from(d.vec)), { center: true });
+        coords = pca.predict(mapList.map(d => d.vec), { nComponents: 2 } )['data'];
 
     } else if (reducer === 'umap') {
         
@@ -22,28 +22,21 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer) {
             minDist: 0.1,
         });
 
-        // Identify indices of points to fit and transform separately
         const fitIndices = toFit.map(d => mapList.indexOf(d));
         const transformIndices = mapList.map((_, index) => index).filter(index => !fitIndices.includes(index));
 
-        // Fit the model on the selected points
-        // Note that `fit` is really `fit_transform`, so we can't run transform on these points, or 
-        // else we are really transforming twice
+        // Note that `fit` is really `fit_transform`, so can't run transform on these pts, or else we are transforming twice
         const fittedCoords = umap.fit(toFit.map(d => d.vec));
 
         if (!basemapLocked) {
-            // If basemap is not locked, fittedCoords are already in the correct order for the fitted points
             coords = fittedCoords;
         } else {
-            // Prepare an array to hold all coordinates in the original order
             coords = new Array(mapList.length);
 
-            // Place fitted coordinates in their original positions
             fitIndices.forEach((index, fitIndex) => {
                 coords[index] = fittedCoords[fitIndex];
             });
 
-            // Transform the remaining points and place them back in their original positions
             if (transformIndices.length > 0) {
                 const transformCoords = umap.transform(transformIndices.map(index => mapList[index].vec));
                 transformIndices.forEach((index, transIndex) => {

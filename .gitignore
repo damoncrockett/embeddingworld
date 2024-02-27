@@ -13,3 +13,5 @@
 .pnp.*
 
 dist
+notebooks
+httpserver.py
