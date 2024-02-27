@@ -244,7 +244,7 @@ select:hover {
 
 #meterContainer {
     position: absolute;
-    bottom: 20px;
+    bottom: 10px;
     left: 0;
     width: 100%;
     background-color: transparent;
@@ -253,12 +253,25 @@ select:hover {
     align-items: center; /* Optional, if you want vertical centering */
   }
 
-#spreadMonitor {
+.meter {
+    margin: 20px;
+}
+
+.meter > p {
     font-size: 24px;
     font-weight: 400;
     background-color: transparent;
     color: white;
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 1s ease-out;
+  }
 
 
 

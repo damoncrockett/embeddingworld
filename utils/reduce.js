@@ -15,9 +15,13 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer) {
         coords = pca.predict(mapList.map(d => d.vec), { nComponents: 2 } )['data'];
 
     } else if (reducer === 'umap') {
+
+        // 15 neigbors if we have at least 45 points, otherwise 5
+        // If we have less than 15 points, we can't run UMAP
+        const nNeighbors = toFit.length >= 45 ? 15 : toFit.length >= 15 ? 5 : 0;
         
         const umap = new UMAP({
-            nNeighbors: 15,
+            nNeighbors: nNeighbors,
             DistanceFn: 'cosine',
             minDist: 0.1,
         });

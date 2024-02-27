@@ -1,90 +1,87 @@
-export function scaleCoords(coords) {
-    const numPoints = coords.length;
-    const dim = coords[0].length;
-    const mins = new Array(dim).fill(Infinity);
-    const maxs = new Array(dim).fill(-Infinity);
+// export function scaleCoords(coords) {
+//     const numPoints = coords.length;
+//     const dim = coords[0].length;
+//     const mins = new Array(dim).fill(Infinity);
+//     const maxs = new Array(dim).fill(-Infinity);
 
-    // Find min and max for each dimension
-    for (let i = 0; i < numPoints; i++) {
-        for (let j = 0; j < dim; j++) {
-            mins[j] = Math.min(mins[j], coords[i][j]);
-            maxs[j] = Math.max(maxs[j], coords[i][j]);
-        }
-    }
+//     // Find min and max for each dimension
+//     for (let i = 0; i < numPoints; i++) {
+//         for (let j = 0; j < dim; j++) {
+//             mins[j] = Math.min(mins[j], coords[i][j]);
+//             maxs[j] = Math.max(maxs[j], coords[i][j]);
+//         }
+//     }
 
-    // Scale points to the [0, 1] range
-    const scaledCoords = coords.map(point =>
-        point.map((value, idx) => {
-            const range = maxs[idx] - mins[idx];
-            return range === 0 ? 0 : (value - mins[idx]) / range; // Avoid division by zero
-        })
-    );
+//     // Scale points to the [0, 1] range
+//     const scaledCoords = coords.map(point =>
+//         point.map((value, idx) => {
+//             const range = maxs[idx] - mins[idx];
+//             return range === 0 ? 0 : (value - mins[idx]) / range; // Avoid division by zero
+//         })
+//     );
 
-    return scaledCoords;
+//     return scaledCoords;
 
+// }
 
-    // return ranges
-    // return maxs.map((max, idx) => max - mins[idx]);
-}
+// function distanceSquared(pointA, pointB) {
+//     let distance = 0;
+//     for (let i = 0; i < pointA.length; i++) {
+//         distance += (pointA[i] - pointB[i]) ** 2;
+//     }
+//     return distance;
+// }
 
-function distanceSquared(pointA, pointB) {
-    let distance = 0;
-    for (let i = 0; i < pointA.length; i++) {
-        distance += (pointA[i] - pointB[i]) ** 2;
-    }
-    return distance;
-}
+// function findFurthestPoint(points, fromPoint) {
+//     let maxDistance = -Infinity;
+//     let furthestPoint = null;
+//     for (let point of points) {
+//         let dist = distanceSquared(point, fromPoint);
+//         if (dist > maxDistance) {
+//             maxDistance = dist;
+//             furthestPoint = point;
+//         }
+//     }
+//     return furthestPoint;
+// }
 
-function findFurthestPoint(points, fromPoint) {
-    let maxDistance = -Infinity;
-    let furthestPoint = null;
-    for (let point of points) {
-        let dist = distanceSquared(point, fromPoint);
-        if (dist > maxDistance) {
-            maxDistance = dist;
-            furthestPoint = point;
-        }
-    }
-    return furthestPoint;
-}
+// function calculateSphere(points) {
+//     if (points.length === 0) return null;
+//     if (points.length === 1) return { center: points[0], radius: 0 };
 
-export function calculateSphere(points) {
-    if (points.length === 0) return null;
-    if (points.length === 1) return { center: points[0], radius: 0 };
+//     // Step 1: Pick an arbitrary point x from P, find furthest point y
+//     let x = points[0];
+//     let y = findFurthestPoint(points, x);
 
-    // Step 1: Pick an arbitrary point x from P, find furthest point y
-    let x = points[0];
-    let y = findFurthestPoint(points, x);
+//     // Step 2: Find furthest point z from y
+//     let z = findFurthestPoint(points, y);
 
-    // Step 2: Find furthest point z from y
-    let z = findFurthestPoint(points, y);
+//     // Step 3: Set up initial ball B with centre as midpoint of y and z, radius as half distance between y and z
+//     let center = y.map((yi, i) => (yi + z[i]) / 2);
+//     let radiusSquared = distanceSquared(y, z) / 4;
+//     let radius = Math.sqrt(radiusSquared);
 
-    // Step 3: Set up initial ball B with centre as midpoint of y and z, radius as half distance between y and z
-    let center = y.map((yi, i) => (yi + z[i]) / 2);
-    let radiusSquared = distanceSquared(y, z) / 4;
-    let radius = Math.sqrt(radiusSquared);
+//     // Step 4: Check if all points are within ball B, if not, adjust the ball
+//     for (let p of points) {
+//         let distSquaredToP = distanceSquared(center, p);
+//         if (distSquaredToP > radiusSquared) {
+//             // Point p is outside the sphere, adjust the sphere to include p
+//             let distToP = Math.sqrt(distSquaredToP);
+//             let newRadius = (radius + distToP) / 2;
+//             let radiusIncrease = newRadius - radius;
+//             radiusSquared = newRadius ** 2;
 
-    // Step 4: Check if all points are within ball B, if not, adjust the ball
-    for (let p of points) {
-        let distSquaredToP = distanceSquared(center, p);
-        if (distSquaredToP > radiusSquared) {
-            // Point p is outside the sphere, adjust the sphere to include p
-            let distToP = Math.sqrt(distSquaredToP);
-            let newRadius = (radius + distToP) / 2;
-            let radiusIncrease = newRadius - radius;
-            radiusSquared = newRadius ** 2;
+//             // Move the center towards p
+//             for (let i = 0; i < center.length; i++) {
+//                 let direction = (p[i] - center[i]) / distToP; // Normalize direction vector
+//                 center[i] += direction * radiusIncrease;
+//             }
+//             radius = newRadius;
+//         }
+//     }
 
-            // Move the center towards p
-            for (let i = 0; i < center.length; i++) {
-                let direction = (p[i] - center[i]) / distToP; // Normalize direction vector
-                center[i] += direction * radiusIncrease;
-            }
-            radius = newRadius;
-        }
-    }
-
-    return { center: center, radius: radius };
-}
+//     return { center: center, radius: radius };
+// }
 
 //
 //
@@ -138,6 +135,7 @@ export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
 
     // Sort distances to rank them, maintaining original pair order in the output
     const sortedDistances = [...distances].sort((a, b) => a.distance - b.distance);
+    const maxDistance = sortedDistances[sortedDistances.length - 1].distance;
     const ranks = new Array(distances.length);
 
     // Assign ranks based on sorted positions
@@ -146,7 +144,7 @@ export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
         ranks[originalIndex] = index + 1;
     });
 
-    return ranks;
+    return [ranks, maxDistance];
 }
 
 //

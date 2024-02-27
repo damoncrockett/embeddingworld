@@ -23,7 +23,6 @@ export default function Map({ mapData, setClickChange}) {
             clickTimer = setTimeout(() => {
                 
                 setClickChange({changeType: 'switch', smp: d.smp})
-                console.log('single click');
                 
                 clickTimer = null;
             }, 250);
@@ -41,7 +40,6 @@ export default function Map({ mapData, setClickChange}) {
         // Set a timeout to delay the action after double click
         setTimeout(() => {
             setClickChange({changeType: 'remove', smp: d.smp})
-            console.log('double click');
         }, 250); // Adjust the delay as needed
     };
 
@@ -79,8 +77,6 @@ export default function Map({ mapData, setClickChange}) {
     useEffect(() => {
 
         if (!mapData) return;
-
-        console.log('new plotting operation', mapData);
 
         xDomain = [min(mapData, d => d.x), max(mapData, d => d.x)];
         yDomain = [min(mapData, d => d.y), max(mapData, d => d.y)];

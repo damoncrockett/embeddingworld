@@ -7,9 +7,8 @@ import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
-import { calculateSphere, computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
-import SpreadMonitor from './SpreadMonitor';
-import Spearman from './Spearman';
+import { computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
+import Meter from './Meter';
 import { returnDomain } from '../../utils/data'; 
 
 export default function App() {
@@ -23,8 +22,9 @@ export default function App() {
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
-    const [sphereRadius, setSphereRadius] = useState(0);
+    const [maxDistance, setMaxDistance] = useState(0);
     const [spearmanCorrelation, setSpearmanCorrelation] = useState(0);
+    const [meterModelSignal, setMeterModelSignal] = useState(0);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
@@ -71,12 +71,10 @@ export default function App() {
                     lvl: 'b'
                 }));
                 setMapList(currentList.concat(newItemsWithEmbeddings));
-                console.log('basemap toggle checked', currentList.concat(newItemsWithEmbeddings));
             }
         } else {
             const filteredList = currentList.filter(item => !itemsToAddOrRemove.includes(item.smp));
             setMapList(filteredList);
-            console.log('basemap toggle unchecked', filteredList);
         }
     };
 
@@ -90,7 +88,6 @@ export default function App() {
         }
 
         setMapList(prevList => prevList.filter(item => item.lvl === 'b'));
-        console.log('clear map', mapList.filter(item => item.lvl === 'b'));
     }
 
     const handleClearBasemap = () => {
@@ -101,7 +98,6 @@ export default function App() {
         }
 
         setMapList(prevList => prevList.filter(item => item.lvl === 'm'));
-        console.log('clear basemap', mapList.filter(item => item.lvl === 'm'));
 
         // uncheck all basemap toggles
         const basemapToggles = document.querySelectorAll('.basemap-toggle-checkbox');
@@ -116,7 +112,6 @@ export default function App() {
         if (!mapList.some(item => item.lvl === 'b')) return;
         
         setBasemapLocked(!basemapLocked);
-        console.log('basemap' + (basemapLocked ? ' unlocked' : ' locked'));
     };
         
     const handleAdd = async () => {
@@ -131,7 +126,6 @@ export default function App() {
                 lvl: mapLevel === 'map' ? 'm' : 'b'
             }));
             setMapList(prevList => [...prevList, ...newItemsWithEmbeddings]);
-            console.log('add', [...mapList, ...newItemsWithEmbeddings]);
         }
     
         inputRef.current.value = ''; 
@@ -152,7 +146,6 @@ export default function App() {
         }
 
         setReducer(reducer);
-        console.log('reducer', reducer);
     }
 
     useEffect(() => {
@@ -174,7 +167,6 @@ export default function App() {
             }));
     
             setMapList(updatedMapList);
-            console.log('recomputed embeddings', updatedMapList);
         };
     
         recomputeEmbeddings();
@@ -185,7 +177,6 @@ export default function App() {
         if ( !mapList.some(item => item.lvl === 'b') && basemapLocked ) {
             alert('You are fitting the basemap, but there is nothing on it. Exiting "FIT BASE" mode.')
             setBasemapLocked(false);
-            console.log('basemap unlocked');
             return; // must return bc setBasemapLocked won't fire fast enough to prevent plotting error
         }
 
@@ -198,16 +189,6 @@ export default function App() {
                               reducer === 'umap' &&
                               prevBasemapLocked.current === basemapLocked;
 
-        console.log('skipReduce:', skipReduce);
-
-        // get radius of bounding sphere
-        if ( mapList.length > 0 ) {
-            const sphere = calculateSphere(mapList.map(d => d.vec));
-            setSphereRadius(sphere.radius);
-        } else {
-            setSphereRadius(0);
-        }
-
         const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer);
 
         // get Spearman correlation between pairwise distances in original space and in reduced space
@@ -215,18 +196,18 @@ export default function App() {
         if ( mapList.length > 1 ) {
 
             const distanceFunctionName = reducer === 'umap' ? 'cosine' : 'euclidean';
-
-            console.log('corr check: ',mapList.map(d => d.vec), coords);
-
             const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
             const reducedRanks = computeAndRankPairwiseDistances(coords, distanceFunctionName);
-            const corr = spearmanRankCorrelation(originalRanks, reducedRanks);
-            console.log('spearman correlation', originalRanks, reducedRanks, corr);
+            const corr = spearmanRankCorrelation(originalRanks[0], reducedRanks[0]);
             setSpearmanCorrelation(corr);
+            setMaxDistance(originalRanks[1]);
 
         } else {
             setSpearmanCorrelation(0);
+            setMaxDistance(0);
         }
+
+        if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
 
         prevSmps.current = mapList.map(d => d.smp);
         prevEmbeddingModel.current = embeddingModel;
@@ -241,7 +222,6 @@ export default function App() {
         }));
         
         setMapData(mapListAndCoords);
-        console.log('new mapListAndCoords created', mapListAndCoords);
     
     } , [mapList, basemapLocked, reducer]);
 
@@ -251,13 +231,11 @@ export default function App() {
             const index = currentList.findIndex(item => item.smp === clickChange.smp);
             currentList[index].lvl = currentList[index].lvl === 'm' ? 'b' : 'm';
             setMapList(currentList);
-            console.log('switched level', currentList);
         } else if ( clickChange && clickChange.changeType === 'remove' ) {
             const currentList = [...mapList];
             const index = currentList.findIndex(item => item.smp === clickChange.smp);
             currentList.splice(index, 1);
             setMapList(currentList);
-            console.log('removed ' + clickChange.smp, currentList);
         }
     }, [clickChange]);
     
@@ -302,8 +280,8 @@ export default function App() {
                 setClickChange={setClickChange} 
             />
             <div id='meterContainer'>
-                <SpreadMonitor radius={sphereRadius} embeddingModel={embeddingModel} />
-                <Spearman correlation={spearmanCorrelation} embeddingModel={embeddingModel} />
+                <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                <Meter key={'corr' + meterModelSignal} initialValue={spearmanCorrelation} labelText="Reduction Corr." className="meter" />
             </div>
         </div>
     );
