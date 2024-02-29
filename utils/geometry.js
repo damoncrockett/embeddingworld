@@ -1,94 +1,3 @@
-// export function scaleCoords(coords) {
-//     const numPoints = coords.length;
-//     const dim = coords[0].length;
-//     const mins = new Array(dim).fill(Infinity);
-//     const maxs = new Array(dim).fill(-Infinity);
-
-//     // Find min and max for each dimension
-//     for (let i = 0; i < numPoints; i++) {
-//         for (let j = 0; j < dim; j++) {
-//             mins[j] = Math.min(mins[j], coords[i][j]);
-//             maxs[j] = Math.max(maxs[j], coords[i][j]);
-//         }
-//     }
-
-//     // Scale points to the [0, 1] range
-//     const scaledCoords = coords.map(point =>
-//         point.map((value, idx) => {
-//             const range = maxs[idx] - mins[idx];
-//             return range === 0 ? 0 : (value - mins[idx]) / range; // Avoid division by zero
-//         })
-//     );
-
-//     return scaledCoords;
-
-// }
-
-// function distanceSquared(pointA, pointB) {
-//     let distance = 0;
-//     for (let i = 0; i < pointA.length; i++) {
-//         distance += (pointA[i] - pointB[i]) ** 2;
-//     }
-//     return distance;
-// }
-
-// function findFurthestPoint(points, fromPoint) {
-//     let maxDistance = -Infinity;
-//     let furthestPoint = null;
-//     for (let point of points) {
-//         let dist = distanceSquared(point, fromPoint);
-//         if (dist > maxDistance) {
-//             maxDistance = dist;
-//             furthestPoint = point;
-//         }
-//     }
-//     return furthestPoint;
-// }
-
-// function calculateSphere(points) {
-//     if (points.length === 0) return null;
-//     if (points.length === 1) return { center: points[0], radius: 0 };
-
-//     // Step 1: Pick an arbitrary point x from P, find furthest point y
-//     let x = points[0];
-//     let y = findFurthestPoint(points, x);
-
-//     // Step 2: Find furthest point z from y
-//     let z = findFurthestPoint(points, y);
-
-//     // Step 3: Set up initial ball B with centre as midpoint of y and z, radius as half distance between y and z
-//     let center = y.map((yi, i) => (yi + z[i]) / 2);
-//     let radiusSquared = distanceSquared(y, z) / 4;
-//     let radius = Math.sqrt(radiusSquared);
-
-//     // Step 4: Check if all points are within ball B, if not, adjust the ball
-//     for (let p of points) {
-//         let distSquaredToP = distanceSquared(center, p);
-//         if (distSquaredToP > radiusSquared) {
-//             // Point p is outside the sphere, adjust the sphere to include p
-//             let distToP = Math.sqrt(distSquaredToP);
-//             let newRadius = (radius + distToP) / 2;
-//             let radiusIncrease = newRadius - radius;
-//             radiusSquared = newRadius ** 2;
-
-//             // Move the center towards p
-//             for (let i = 0; i < center.length; i++) {
-//                 let direction = (p[i] - center[i]) / distToP; // Normalize direction vector
-//                 center[i] += direction * radiusIncrease;
-//             }
-//             radius = newRadius;
-//         }
-//     }
-
-//     return { center: center, radius: radius };
-// }
-
-//
-//
-//
-//
-//
-
 function euclideanDistance(arr1, arr2) {
     return Math.sqrt(arr1.reduce((sum, current, index) => sum + Math.pow(current - arr2[index], 2), 0));
 }
@@ -136,6 +45,7 @@ export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
     // Sort distances to rank them, maintaining original pair order in the output
     const sortedDistances = [...distances].sort((a, b) => a.distance - b.distance);
     const maxDistance = sortedDistances[sortedDistances.length - 1].distance;
+    const maxPair = sortedDistances[sortedDistances.length - 1].pair;
     const ranks = new Array(distances.length);
 
     // Assign ranks based on sorted positions
@@ -144,7 +54,7 @@ export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
         ranks[originalIndex] = index + 1;
     });
 
-    return [ranks, maxDistance];
+    return [ranks, maxDistance, maxPair];
 }
 
 //
@@ -200,3 +110,37 @@ function getRanks(arr) {
   
     return 1 - (6 * sumDSquared) / (n * (Math.pow(n, 2) - 1));
   }
+
+  //
+  //
+  //
+  //
+  //
+
+  export function calculateLineEndpoints(rect1, rect2, rectStrokeWidth = 1) {
+    let lineStart = {}, lineEnd = {};
+    const offset = rectStrokeWidth + 2; // Half the stroke width to offset the line inside the rect
+
+    // Check if there is horizontal space between rects
+    if (rect1.x + rect1.width < rect2.x || rect2.x + rect2.width < rect1.x) {
+        // There's horizontal space between rects
+        if (rect1.x < rect2.x) {
+            lineStart = { x: rect1.x + rect1.width + offset, y: rect1.y + rect1.height / 2 };
+            lineEnd = { x: rect2.x - offset, y: rect2.y + rect2.height / 2 };
+        } else {
+            lineStart = { x: rect2.x + rect2.width + offset, y: rect2.y + rect2.height / 2 };
+            lineEnd = { x: rect1.x - offset, y: rect1.y + rect1.height / 2 };
+        }
+    } else {
+        // No horizontal space, connect the bottom edge of the top rect to the top edge of the bottom rect
+        if (rect1.y < rect2.y) {
+            lineStart = { x: rect1.x + rect1.width / 2, y: rect1.y + rect1.height + offset };
+            lineEnd = { x: rect2.x + rect2.width / 2, y: rect2.y - offset };
+        } else {
+            lineStart = { x: rect2.x + rect2.width / 2, y: rect2.y + rect2.height + offset };
+            lineEnd = { x: rect1.x + rect1.width / 2, y: rect1.y - offset };
+        }
+    }
+
+    return { lineStart, lineEnd };
+}

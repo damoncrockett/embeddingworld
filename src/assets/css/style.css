@@ -266,7 +266,20 @@ select:hover {
   }
 
 .meter {
-    margin: 20px;
+    /* margin 20px left and right; 10px top and bottom */
+    margin: 10px 20px;
+}
+
+#spreadMeter {
+    border: 2px dotted transparent;
+    transition: border-color 0.75s;
+    border-radius: 10px;
+}
+
+#spreadMeter:hover {
+    border: 2px dotted coral;
+    transition: border-color 0.75s;
+    cursor: pointer;
 }
 
 .meter > p {

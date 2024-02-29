@@ -25,8 +25,10 @@ export default function App() {
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [maxDistance, setMaxDistance] = useState(0);
+    const [maxPair, setMaxPair] = useState(null); // [i, j] indices of the pair with max distance
     const [spearmanCorrelation, setSpearmanCorrelation] = useState(0);
     const [meterModelSignal, setMeterModelSignal] = useState(0);
+    const [isMeterHovered, setIsMeterHovered] = useState(false);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
@@ -205,9 +207,14 @@ export default function App() {
             setSpearmanCorrelation(corr);
             setMaxDistance(originalRanks[1]);
 
+            // safer than saving just the indices, because they change a lot
+            const maxPairSamples = [mapList[originalRanks[2][0]].smp, mapList[originalRanks[2][1]].smp];
+            setMaxPair(maxPairSamples);
+
         } else {
             setSpearmanCorrelation(0);
             setMaxDistance(0);
+            setMaxPair(null);
         }
 
         if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
@@ -281,14 +288,20 @@ export default function App() {
             {loadingInset && <LoadingInset />}
             <Map 
                 mapData={mapData}
-                setClickChange={setClickChange} 
+                setClickChange={setClickChange}
+                isMeterHovered={isMeterHovered}
+                maxPair={maxPair} 
             />
             <div id='meterContainer'>
-                <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                <div id='spreadMeter'
+                    onMouseEnter={() => setIsMeterHovered(true)}
+                    onMouseLeave={() => setIsMeterHovered(false)}
+                >
+                    <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                </div>
                 <Meter key={'corr' + meterModelSignal} initialValue={spearmanCorrelation} labelText="Reduction Corr." className="meter" />
             </div>
         </div>
     );
     
 }
-

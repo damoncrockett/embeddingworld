@@ -1,9 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { transition } from 'd3-transition';
 import { select } from 'd3-selection';
 import { zoom, zoomTransform } from 'd3-zoom';
 import { scaleLinear } from 'd3-scale';
 import { min, max } from 'd3-array';
+import { calculateLineEndpoints } from '../../utils/geometry';
 
 const svgHeight = window.innerHeight * 0.8;
 const svgWidth = window.innerWidth * 0.8;
@@ -12,7 +13,9 @@ const padding = { top: 40, right: 40, bottom: 40, left: 40 };
 
 let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 
-export default function Map({ mapData, setClickChange}) {
+const transitionDuration = 750;
+
+export default function Map({ mapData, setClickChange, isMeterHovered, maxPair}) {
     
     const svgRef = useRef(null);
     
@@ -49,7 +52,7 @@ export default function Map({ mapData, setClickChange}) {
         const xScaleZoomed = transform.rescaleX(xScale);
         const yScaleZoomed = transform.rescaleY(yScale);
         
-        select(svgRef.current).selectAll('text')
+        select(svgRef.current).selectAll('text.map')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y));
 
@@ -73,7 +76,6 @@ export default function Map({ mapData, setClickChange}) {
 
     }, []);
     
-
     useEffect(() => {
 
         if (!mapData) return;
@@ -92,32 +94,99 @@ export default function Map({ mapData, setClickChange}) {
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
-        // compund callback key because we will sometimes change d.lvl and nothing else
-        mapTexts = mapPointsContainer.selectAll('text')
-            .data(mapData, d => d.smp + "-" + d.lvl);
+        // Text elements drawing
+        mapTexts = mapPointsContainer.selectAll('text.map')
+            .data(mapData, d => d.smp + "-" + d.lvl)
+            .join(
+                enter => enter.append('text')
+                            .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
+                            .attr('x', d => xScaleZoomed(d.x))
+                            .attr('y', d => yScaleZoomed(d.y))
+                            .text(d => d.smp)
+                            .attr('data-smp', d => d.smp) // use for rect sizing
+                            .on('click', handleClick)
+                            .on('dblclick', handleDoubleClick),
+                update => update.transition().duration(transitionDuration)
+                                .attr('x', d => xScaleZoomed(d.x))
+                                .attr('y', d => yScaleZoomed(d.y)),
+                exit => exit.transition().duration(transitionDuration)
+                            .style('opacity', 0)
+                            .remove()
+            );
 
-        const enterText = mapTexts.enter().append('text')
-            .attr('class', d => d.lvl === 'm' ? 'textMap' : 'textBasemap')
-            .attr('x', d => xScaleZoomed(d.x))
-            .attr('y', d => yScaleZoomed(d.y))
-            .text(d => d.smp)
-            .on('click', handleClick)
-            .on('dblclick', handleDoubleClick);
 
-        const duration = 750; 
+        if (isMeterHovered && maxPair && maxPair.length === 2) {
+            
+            setTimeout(() => { // to ensure text elements are already drawn
+                const rectData = maxPair.map(smp => {
+                    const textElement = mapPointsContainer.select(`text[data-smp="${smp}"]`).node();
+                    if (!textElement) return null;
+                    const bbox = textElement.getBBox();
+                    return { smp, bbox };
+                }).filter(Boolean); // remove null values
 
-        mapTexts.exit()
-            .transition().duration(duration)
-            .style('opacity', 0)
-            .remove();
+                const rectStrokeWidth = 2;
+    
+                // Draw rectangles based on measured text sizes
+                rectData.forEach(({ smp, bbox }) => {
+                    mapPointsContainer.append('rect')
+                        .attr('class', 'maxPairRect')
+                        .attr('x', bbox.x - 5)
+                        .attr('y', bbox.y - 5)
+                        .attr('width', bbox.width + 10)
+                        .attr('height', bbox.height + 10)
+                        .attr('rx', 5)
+                        .attr('fill', 'white')
+                        .attr('stroke', 'coral')
+                        .attr('stroke-width', rectStrokeWidth)
+                        .attr('data-smp', smp)
+                        .style('opacity', 0)
+                        .transition().duration(transitionDuration).style('opacity', 1);
+                });
+    
+                if (rectData.length === 2) {
+                    const { lineStart, lineEnd } = calculateLineEndpoints(rectData[0].bbox, rectData[1].bbox, rectStrokeWidth);
 
-        mapTexts = enterText.merge(mapTexts);
+                    mapPointsContainer.append('line')
+                        .attr('class', 'maxPairLine')
+                        .attr('x1', lineStart.x)
+                        .attr('y1', lineStart.y)
+                        .attr('x2', lineEnd.x)
+                        .attr('y2', lineEnd.y)
+                        .attr('stroke', 'coral')
+                        .attr('stroke-width', 2)
+                        .attr('stroke-dasharray', '5,5')
+                        .style('opacity', 0)
+                        .transition().duration(transitionDuration).style('opacity', 1);
+                }
 
-        mapTexts.transition().duration(duration)
-            .attr('x', d => xScaleZoomed(d.x))
-            .attr('y', d => yScaleZoomed(d.y));
+                maxPair.forEach(smp => {
+                    const originalTextElement = mapPointsContainer.select(`text[data-smp="${smp}"]`);
+                    if (!originalTextElement.empty()) {
+                        const bbox = originalTextElement.node().getBBox();
+                        mapPointsContainer.append('text')
+                            .attr('x', bbox.x + bbox.width / 2) // Centering text in the rectangle
+                            .attr('y', bbox.y + bbox.height / 2)
+                            .attr('class', 'highlighted-text') // Use this class for specific styling
+                            .style('fill', 'black') // Specify the color directly or in CSS
+                            .attr('text-anchor', 'middle') // Center align text
+                            .attr('dy', "0.35em") // Vertically center align text
+                            .text(originalTextElement.text())
+                            .attr('data-smp', smp) // Tagging for easy removal
+                            .style('opacity', 0)
+                            .transition().duration(transitionDuration).style('opacity', 1);
+                    }
+                });
+                
+
+            }, 0); // timeout is 0 but this will still put the code at the end of the event loop
+        } else {
+            mapPointsContainer.selectAll('.maxPairRect').transition().duration(transitionDuration).style('opacity', 0).remove();
+            mapPointsContainer.selectAll('.maxPairLine').transition().duration(transitionDuration).style('opacity', 0).remove();
+            mapPointsContainer.selectAll('.highlighted-text[data-smp]').transition().duration(transitionDuration).style('opacity', 0).remove();
+        }
         
-    }, [mapData]);
+    }, [mapData, isMeterHovered, maxPair]);
 
     return (
         <svg 
@@ -129,3 +198,5 @@ export default function Map({ mapData, setClickChange}) {
         </svg>
     );
 };
+
+
