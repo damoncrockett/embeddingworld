@@ -32,7 +32,12 @@ function generatePairwiseComparisons(length) {
     return pairs;
 }
 
-export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
+export function computePairwiseDistances(arrays, distanceFunctionName) {
+
+    if (arrays.length < 2) {
+        return [0, null];
+    }
+
     const pairs = generatePairwiseComparisons(arrays.length);
 
     const distanceFunction = distanceFunctionName === 'cosine' ? cosineDistance : euclideanDistance;
@@ -42,19 +47,10 @@ export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
         distance: distanceFunction(arrays[pair[0]], arrays[pair[1]])
     }));
 
-    // Sort distances to rank them, maintaining original pair order in the output
-    const sortedDistances = [...distances].sort((a, b) => a.distance - b.distance);
-    const maxDistance = sortedDistances[sortedDistances.length - 1].distance;
-    const maxPair = sortedDistances[sortedDistances.length - 1].pair;
-    const ranks = new Array(distances.length);
-
-    // Assign ranks based on sorted positions
-    sortedDistances.forEach((sortedDistance, index) => {
-        const originalIndex = distances.findIndex(d => d.pair[0] === sortedDistance.pair[0] && d.pair[1] === sortedDistance.pair[1]);
-        ranks[originalIndex] = index + 1;
-    });
-
-    return [ranks, maxDistance, maxPair];
+    const maxDistance = Math.max(...distances.map(d => d.distance));
+    const maxPair = distances.find(d => d.distance === maxDistance).pair;
+    
+    return [maxDistance, maxPair];
 }
 
 //
@@ -62,60 +58,6 @@ export function computeAndRankPairwiseDistances(arrays, distanceFunctionName) {
 //
 //
 //
-
-function getRanks(arr) {
-    // Create an array of [value, originalIndex] pairs
-    const arrWithIndex = arr.map((value, index) => [value, index]);
-    // Sort the array by the values
-    arrWithIndex.sort((a, b) => a[0] - b[0]);
-  
-    // Create a new array for ranks, fill it with zeros initially
-    const ranks = new Array(arr.length).fill(0);
-    let sumRank = 0, count = 1;
-  
-    for (let i = 0; i < arrWithIndex.length; i++) {
-      // Add current index to sumRank and increment count
-      sumRank += i + 1; // +1 because ranks start from 1
-  
-      // Check if we're at the end of the array or if the next value is different
-      if (i === arrWithIndex.length - 1 || arrWithIndex[i][0] !== arrWithIndex[i + 1][0]) {
-        // If at the end or next value is different, assign the average rank to all equal values
-        const avgRank = sumRank / count;
-        for (let j = i - count + 1; j <= i; j++) {
-          ranks[arrWithIndex[j][1]] = avgRank;
-        }
-        // Reset sumRank and count for the next set of values
-        sumRank = 0;
-        count = 1;
-      } else {
-        // If the next value is the same, increment count and continue
-        count++;
-      }
-    }
-  
-    return ranks;
-  }
-  
-  export function spearmanRankCorrelation(arrX, arrY) {
-    if (arrX.length !== arrY.length) {
-      throw new Error("Arrays must be of the same length");
-    }
-  
-    const rankX = getRanks(arrX);
-    const rankY = getRanks(arrY);
-  
-    const dSquared = rankX.map((rx, i) => Math.pow(rx - rankY[i], 2));
-    const sumDSquared = dSquared.reduce((acc, curr) => acc + curr, 0);
-    const n = arrX.length;
-  
-    return 1 - (6 * sumDSquared) / (n * (Math.pow(n, 2) - 1));
-  }
-
-  //
-  //
-  //
-  //
-  //
 
   export function calculateLineEndpoints(rect1, rect2, rectStrokeWidth = 1) {
     let lineStart = {}, lineEnd = {};

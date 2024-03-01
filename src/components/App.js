@@ -8,13 +8,7 @@ import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
 import LoadingInset from './LoadingInset';
-
-import { 
-    computeAndRankPairwiseDistances, 
-    spearmanRankCorrelation,
-    projectPointOntoLine,
- } from '../../utils/geometry';
-
+import { computePairwiseDistances } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data'; 
 
@@ -32,7 +26,6 @@ export default function App() {
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [maxDistance, setMaxDistance] = useState(0);
     const [maxPair, setMaxPair] = useState(null); // [i, j] indices of the pair with max distance
-    const [spearmanCorrelation, setSpearmanCorrelation] = useState(0);
     const [meterModelSignal, setMeterModelSignal] = useState(0);
     const [isMeterHovered, setIsMeterHovered] = useState(false);
 
@@ -195,6 +188,17 @@ export default function App() {
             return; // must return bc setBasemapLocked won't fire fast enough to prevent plotting error
         }
 
+        const distanceFunctionName = reducer === 'pca' ? 'euclidean' : 'cosine';
+        const maxDistanceAndPair = computePairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
+        
+        
+        setMaxDistance(maxDistanceAndPair[0]);
+        // safer than saving just the indices, because they change a lot
+        
+        const maxPairSamples = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].smp, mapList[maxDistanceAndPair[1][1]].smp] : null;
+        setMaxPair(maxPairSamples);
+        
+
         // If all we've done is switch an item between the map and basemap, we don't recompute coords.
         // This wouldn't matter except that UMAP is non-deterministic and we don't want it to relocate items 
         // if nothing substantive has changed.
@@ -204,28 +208,9 @@ export default function App() {
                               reducer === 'umap' &&
                               prevBasemapLocked.current === basemapLocked;
 
-        const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer);
-
-        // get Spearman correlation between pairwise distances in original space and in reduced space
         
-        if ( mapList.length > 1 ) {
-
-            const distanceFunctionName = reducer === 'pca' ? 'euclidean' : 'cosine';
-            const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
-            const reducedRanks = computeAndRankPairwiseDistances(coords, distanceFunctionName);
-            const corr = spearmanRankCorrelation(originalRanks[0], reducedRanks[0]);
-            setSpearmanCorrelation(corr);
-            setMaxDistance(originalRanks[1]);
-
-            // safer than saving just the indices, because they change a lot
-            const maxPairSamples = [mapList[originalRanks[2][0]].smp, mapList[originalRanks[2][1]].smp];
-            setMaxPair(maxPairSamples);
-
-        } else {
-            setSpearmanCorrelation(0);
-            setMaxDistance(0);
-            setMaxPair(null);
-        }
+        const maxPairCoords = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].vec, mapList[maxDistanceAndPair[1][1]].vec] : null;
+        const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords);
 
         if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
 
@@ -311,7 +296,6 @@ export default function App() {
                 >
                     <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                 </div>
-                <Meter key={'corr' + meterModelSignal} initialValue={spearmanCorrelation} labelText="Reduction Corr." className="meter" />
             </div>
         </div>
     );
