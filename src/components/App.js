@@ -5,7 +5,6 @@ import { basemaps, sampleRandomWords } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import Map from './Map';
-import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
 import LoadingInset from './LoadingInset';
 import { computePairwiseDistances } from '../../utils/geometry';
@@ -31,11 +30,7 @@ export default function App() {
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
-    const prevSmps = useRef(null);
     const prevEmbeddingModel = useRef(embeddingModel);
-    const prevCoords = useRef(null);
-    const prevReducer = useRef(reducer);
-    const prevBasemapLocked = useRef(basemapLocked);
 
     const handleFetchWords = () => {
         fetch(returnDomain() + 'mit10000.txt')
@@ -81,28 +76,10 @@ export default function App() {
         }
     };
 
-    const clearAlert = "Clearing the basemap leaves less than 15 map items, and in this world, UMAP requires at least 15 samples.";
-
-    const handleClearMap = () => {
-
-        if ( reducer === 'umap' && mapList.filter(d => d.lvl === 'b').length < 15 ) {
-            alert(clearAlert);
-            return;
-        }
-
-        setMapList(prevList => prevList.filter(item => item.lvl === 'b'));
-    }
-
-    const handleClearBasemap = () => {
-
-        if ( reducer === 'umap' && mapList.filter(d => d.lvl === 'm').length < 15 ) {
-            alert(clearAlert);
-            return;
-        }
+    const handleClearBase = () => {
 
         setMapList(prevList => prevList.filter(item => item.lvl === 'm'));
 
-        // uncheck all basemap toggles
         const basemapToggles = document.querySelectorAll('.basemap-toggle-checkbox');
         basemapToggles.forEach(toggle => {
             toggle.checked = false;
@@ -139,20 +116,6 @@ export default function App() {
             event.preventDefault(); // prevents newline
             handleAdd(); 
         }
-    }
-
-    const handleReducer = (reducer) => {
-
-        if ( reducer === 'umap' && mapList.length < 15 ) {
-            alert('In this world, UMAP requires at least 15 samples.');
-            return;
-        }
-
-        setReducer(reducer);
-    }
-
-    const handleProjectionMode = () => {
-        setReducer(prev => prev === 'proj' ? prevReducer.current : 'proj');
     }
 
     useEffect(() => {
@@ -198,27 +161,13 @@ export default function App() {
         const maxPairSamples = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].smp, mapList[maxDistanceAndPair[1][1]].smp] : null;
         setMaxPair(maxPairSamples);
         
-
-        // If all we've done is switch an item between the map and basemap, we don't recompute coords.
-        // This wouldn't matter except that UMAP is non-deterministic and we don't want it to relocate items 
-        // if nothing substantive has changed.
-        const skipReduce = isEqual(prevSmps.current, mapList.map(d => d.smp)) && 
-                              prevEmbeddingModel.current === embeddingModel &&
-                              prevReducer.current === reducer &&
-                              reducer === 'umap' &&
-                              prevBasemapLocked.current === basemapLocked;
-
         
         const maxPairCoords = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].vec, mapList[maxDistanceAndPair[1][1]].vec] : null;
-        const coords = skipReduce ? prevCoords.current : reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords);
+        const coords = reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords);
 
         if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
 
-        prevSmps.current = mapList.map(d => d.smp);
         prevEmbeddingModel.current = embeddingModel;
-        prevCoords.current = coords;
-        prevReducer.current = reducer;
-        prevBasemapLocked.current = basemapLocked;
                         
         const mapListAndCoords = mapList.map((item, index) => ({
             ...item,
@@ -250,8 +199,8 @@ export default function App() {
             <button id='randomWords' onClick={handleFetchWords}>RANDOM</button>
             <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
             <div id='clearButtons'>
-                <button onClick={handleClearMap}>CLEAR MAP</button>
-                <button onClick={handleClearBasemap}>CLEAR BASE</button>
+                <button onClick={() => setMapList(prevList => prevList.filter(item => item.lvl === 'b'))}>CLEAR MAP</button>
+                <button onClick={handleClearBase}>CLEAR BASE</button>
             </div>
             <div><a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world.</a></div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
@@ -275,8 +224,8 @@ export default function App() {
                 </select>
                 <Radio
                     choice={reducer}
-                    choices={['pca', 'umap']}
-                    onSwitch={handleReducer}
+                    choices={['pca', 'proj']}
+                    onSwitch={reducer => setReducer(reducer)}
                     id='reducer'
                 />
             </div>
@@ -292,7 +241,6 @@ export default function App() {
                 <div id='spreadMeter'
                     onMouseEnter={() => setIsMeterHovered(true)}
                     onMouseLeave={() => setIsMeterHovered(false)}
-                    onClick={handleProjectionMode}
                 >
                     <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                 </div>
