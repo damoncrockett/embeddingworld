@@ -8,7 +8,13 @@ import Map from './Map';
 import isEqual from 'lodash/isEqual';
 import Loading from './Loading';
 import LoadingInset from './LoadingInset';
-import { computeAndRankPairwiseDistances, spearmanRankCorrelation } from '../../utils/geometry';
+
+import { 
+    computeAndRankPairwiseDistances, 
+    spearmanRankCorrelation,
+    projectPointOntoLine,
+ } from '../../utils/geometry';
+
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data'; 
 
@@ -152,6 +158,10 @@ export default function App() {
         setReducer(reducer);
     }
 
+    const handleProjectionMode = () => {
+        setReducer(prev => prev === 'proj' ? prevReducer.current : 'proj');
+    }
+
     useEffect(() => {
         initializeEmbedder(
             embeddingModel, 
@@ -200,7 +210,7 @@ export default function App() {
         
         if ( mapList.length > 1 ) {
 
-            const distanceFunctionName = reducer === 'umap' ? 'cosine' : 'euclidean';
+            const distanceFunctionName = reducer === 'pca' ? 'euclidean' : 'cosine';
             const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
             const reducedRanks = computeAndRankPairwiseDistances(coords, distanceFunctionName);
             const corr = spearmanRankCorrelation(originalRanks[0], reducedRanks[0]);
@@ -265,7 +275,7 @@ export default function App() {
                     <button onClick={handleAdd} style={{ marginRight: '10px' }}>ADD</button>
                     <Radio
                         choice={mapLevel}
-                        choices={['map', 'basemap']}
+                        choices={['map', 'base']}
                         onSwitch={(mapLevel) => setMapLevel(mapLevel)}
                         id='mapLevel'
                     />
@@ -293,9 +303,11 @@ export default function App() {
                 maxPair={maxPair} 
             />
             <div id='meterContainer'>
+                <div id='projectionMode' className={reducer === 'proj' ? 'projectionModeVisible' : 'projectionModeInvisible'} >PROJECTION MODE</div>
                 <div id='spreadMeter'
                     onMouseEnter={() => setIsMeterHovered(true)}
                     onMouseLeave={() => setIsMeterHovered(false)}
+                    onClick={handleProjectionMode}
                 >
                     <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                 </div>

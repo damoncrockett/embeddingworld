@@ -137,7 +137,7 @@ svg text:hover {
     border-radius: 10px 0 0 10px;
 }
 
-#label-mapLevel-basemap {
+#label-mapLevel-base {
     /* top-left | top-right | bottom-right | bottom-left */
     border-radius: 0 10px 10px 0;
 }
@@ -298,6 +298,16 @@ select:hover {
     animation: fadeIn 1s ease-out;
   }
 
+.projectionModeInvisible {
+    color: transparent;
+}
 
+.projectionModeVisible {
+    color: coral;
+}
+
+#projectionMode {
+    margin-right: 20px;
+}
 
 

@@ -1,5 +1,6 @@
 import { PCA } from 'ml-pca';
 import { UMAP } from 'umap-js';
+import { projectPointOntoLine, computeAndRankPairwiseDistances } from './geometry';
 
 export function reduceEmbeddings(mapList, basemapLocked, reducer) {
     if (mapList.length === 0) return [];
@@ -48,7 +49,21 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer) {
                 });
             }
         }
-    }
+    } else if (reducer === 'proj') {
+
+        if (mapList.length === 1) return [[0, 0]];
+
+        const distanceFunctionName = 'cosine';
+        const originalRanks = computeAndRankPairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
+        const maxPairCoords = [mapList[originalRanks[2][0]].vec, mapList[originalRanks[2][1]].vec];
+
+        const projected = mapList.map(d => projectPointOntoLine(d.vec, maxPairCoords[0], maxPairCoords[1]))
+
+        console.log(mapList, projected);
+
+        coords = projected.map(d => [d, 0])
+
+        }
 
     return coords;
 }

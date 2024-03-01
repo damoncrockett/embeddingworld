@@ -143,4 +143,42 @@ function getRanks(arr) {
     }
 
     return { lineStart, lineEnd };
+
+  }
+
+    //
+    //
+    //
+    //
+    //
+
+    // Function to subtract two vectors
+function subtractVectors(v1, v2) {
+  return v1.map((element, i) => element - v2[i]);
 }
+
+// Function to calculate the dot product of two vectors
+function dotProduct(v1, v2) {
+  return v1.reduce((sum, current, i) => sum + current * v2[i], 0);
+}
+
+// Function to calculate the magnitude of a vector
+function magnitude(v) {
+  return Math.sqrt(dotProduct(v, v));
+}
+
+// Function to normalize a vector
+function normalize(v) {
+  const mag = magnitude(v);
+  return v.map(element => element / mag);
+}
+
+// Function to project a point onto the axis defined by two points (v1 and v2)
+export function projectPointOntoLine(point, v1, v2) {
+  const lineDirection = subtractVectors(v2, v1);
+  const normalizedDirection = normalize(lineDirection);
+  const vectorToPoint = subtractVectors(point, v1);
+  return dotProduct(vectorToPoint, normalizedDirection);
+}
+
+
