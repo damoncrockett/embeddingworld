@@ -1,0 +1,45 @@
+{
+  "name": "embeddingworld",
+  "packageManager": "yarn@4.1.0",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "start": "webpack serve --hot --mode development",
+    "deploy": "aws s3 sync /Users/damoncrockett/embeddingworld/dist/ s3://embedding.world/",
+    "sync": "aws s3 sync /Users/damoncrockett/embeddingworld/src/assets/txt/ s3://embedding.world/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "babel-loader": "^9.1.3",
+    "css-loader": "^6.10.0",
+    "html-webpack-plugin": "^5.6.0",
+    "style-loader": "^3.3.4",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.2"
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.15.0",
+    "d3-array": "^3.2.4",
+    "d3-drag": "^3.0.0",
+    "d3-force": "^3.0.0",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-transition": "^3.0.1",
+    "d3-zoom": "^3.0.0",
+    "lodash": "^4.17.21",
+    "ml-pca": "^4.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "umap-js": "^1.3.3"
+  },
+  "proxy": "http://localhost:8888"
+}
