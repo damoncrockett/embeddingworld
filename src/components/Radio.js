@@ -8,26 +8,22 @@ export default function Radio({ choice, choices, onSwitch, id }) {
     const labelChoice1id = `label-${choice1id}`;
 
     return (
-      <div className="radio-switch" id={id} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div className="radio-switch" id={id}>
         <input
           type="radio"
-          id={choice0id}
           value={choices[0]}
           checked={choice === choices[0]}
           onChange={() => onSwitch(choices[0])}
-          style={{ display: 'none' }}
         />
-        <label htmlFor={choice0id} id={labelChoice0id} style={{ padding: '10px' }}>{choices[0].toUpperCase()}</label>
+        <label htmlFor={choice0id} id={labelChoice0id}>{choices[0].toUpperCase()}</label>
 
         <input
           type="radio"
-          id={choice1id}
           value={choices[1]}
           checked={choice === choices[1]}
           onChange={() => onSwitch(choices[1])}
-          style={{ display: 'none' }}
         />
-        <label htmlFor={choice1id} id={labelChoice1id} style={{ padding: '10px' }}>{choices[1].toUpperCase()}</label>
+        <label htmlFor={choice1id} id={labelChoice1id}>{choices[1].toUpperCase()}</label>
       </div>
     );
 }

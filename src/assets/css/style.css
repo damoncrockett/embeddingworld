@@ -1,7 +1,16 @@
+* {
+    font-family: "Roboto Condensed", sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+}
+
 html, body {
-    height: 100%;
-    margin: 0;
-    background-color: #444;
+    background-color: #222;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
 h2 {
@@ -11,76 +20,6 @@ h2 {
     font-size: 48px;
     font-weight: 400;
     font-family: 'Micro 5';
-}
-
-#loadingInsetContainer {
-    position: absolute;
-    top: 69px;
-    right: 430px;
-}
-
-#loadingInset {
-    font-family: "Micro 5";
-    font-size: 24px;
-    color: white;
-}
-
-#loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-#loadingContainer {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-}
-
-#title {
-    color: white;
-    text-align: left;
-    padding: 20px 20px 0 20px;
-    font-size: 40px;
-    font-weight: 400;
-    font-family: "Micro 5";
-    position: fixed;
-    bottom: 20px;
-    left: 0;
-    background-color: transparent;
-}
-
-#title:hover {
-    color: coral;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-#root { 
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-* {
-    font-family: "Roboto Condensed", sans-serif;
-    font-weight: 300;
-    font-size: 16px;
-}
-
-textarea {
-    width: 40%;
-    padding: 10px;
-    margin: 10px;
-    border: 2px solid black;
-    border-radius: 10px;
-    font-size: 16px;
 }
 
 button {
@@ -132,6 +71,86 @@ svg text:hover {
     fill: coral;
 }
 
+/*----------*/
+
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#loadingContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
+/*----------*/
+
+#svg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#map-controls {
+    position: relative;
+    z-index: 2;
+}
+
+#text-input {
+    position: fixed;
+    margin: 0;
+    padding: 0;
+    top: 2vh;
+    left: 2vw;
+}
+
+textarea {
+    width: 28vw;
+    padding: 10px;
+    margin: 10px;
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+#add-button {
+    position: fixed;
+    margin: 0;
+    top: 2vh;
+    left: 32vw;
+}
+
+#mapLevel {
+    position: fixed;
+    margin: 0;
+    top: 2vh;
+    left: 36vw;
+}
+
+.radio-switch input[type="radio"] {
+    display: none;
+}
+
+.radio-switch label {
+    font-weight: 400;
+    background-color: transparent; 
+    color: white; 
+    padding: 20px 20px;
+    border: 2px solid black; 
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+  
+.radio-switch input[type="radio"]:checked + label {
+    background-color: coral;
+}
+
 #label-mapLevel-map {
     /* top-left | top-right | bottom-right | bottom-left */
     border-radius: 10px 0 0 10px;
@@ -152,24 +171,21 @@ svg text:hover {
     border-radius: 0 10px 10px 0;
 }
 
-.radio-switch input[type="radio"] {
-    display: none; /* Hide the default radio button */
-    }
+#base-fitter {
+    position: fixed;
+    margin: 0;
+    top: 2vh;
+    left: 46vw;
+}
 
-.radio-switch label {
-    font-weight: 400;
-    background-color: transparent; 
-    color: white; 
-    padding: 20px 20px;
-    border: 2px solid black; 
-    cursor: pointer;
-    transition: background-color 0.3s; 
-  }
-  
-.radio-switch input[type="radio"]:checked + label {
-    background-color: coral; 
-   
-  }
+#model-menu {
+    position: fixed;
+    margin: 0;
+    top: 2vh;
+    left: 56vw;
+    width: 20vw;
+
+}
 
 select {
     font-weight: 400;
@@ -181,7 +197,6 @@ select {
     background-color: white; 
     color: black; 
     cursor: pointer; 
-    width: 20%; 
     -webkit-appearance: none; 
     -moz-appearance: none; 
     appearance: none; 
@@ -195,6 +210,26 @@ select:hover {
     border-color: white; 
     background-color: dodgerblue; 
     color: white; 
+}
+
+#choose-reducer {
+    position: fixed;
+    margin: 0;
+    top: 2vh;
+    left: 82vw;
+
+}
+
+#loadingInsetContainer {
+    position: fixed;
+    top: 8vh;
+    left: 40vw;
+}
+
+#loadingInset {
+    font-family: "Micro 5";
+    font-size: 24px;
+    color: white;
 }
 
 .basemap-toggle-label {
@@ -217,28 +252,24 @@ select:hover {
     background-color: transparent; 
     padding: 10px;
     border-radius: 10px;
-    display: flex; 
-    flex-direction: column;
-    align-items: flex-start; 
-    position: absolute; 
-    left: 10px; 
-    top: 50%; 
-    transform: translateY(-50%);
+    position: fixed;
+    top: 40vh;
+    left: 1vw;
 }
 
 #randomWords {
-    position: absolute;
-    top: 8%;
-    left: 2%;
+    position: fixed;
+    top: 8vh;
+    left: 2vw;
     color: black;
     border: 2px solid black;
     background-color: white;
 }
 
 #clearButtons {
-    position: absolute;
-    bottom: 33%;
-    left: 10px;
+    position: fixed;
+    bottom: 30vh;
+    left: 1vw;
 }
 
 #clearButtons button {
@@ -255,14 +286,10 @@ select:hover {
 }
 
 #meterContainer {
-    position: absolute;
-    bottom: 10px;
-    left: 0;
-    width: 100%;
+    position: fixed;
+    bottom: 2vh;
+    left: 46vw;
     background-color: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center; /* Optional, if you want vertical centering */
   }
 
 .meter {
@@ -287,6 +314,23 @@ select:hover {
     font-weight: 400;
     background-color: transparent;
     color: white;
+}
+
+#title {
+    color: white;
+    text-align: left;
+    padding: 20px 20px 0 20px;
+    font-size: 40px;
+    font-weight: 400;
+    font-family: "Micro 5";
+    position: fixed;
+    bottom: 2vh;
+    left: 0;
+    background-color: transparent;
+}
+
+#title:hover {
+    color: coral;
 }
 
 @keyframes fadeIn {

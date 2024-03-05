@@ -6,10 +6,10 @@ import { scaleLinear } from 'd3-scale';
 import { min, max } from 'd3-array';
 import { calculateLineEndpoints } from '../../utils/geometry';
 
-const svgHeight = window.innerHeight * 0.8;
-const svgWidth = window.innerWidth * 0.8;
+const svgHeight = window.innerHeight;
+const svgWidth = window.innerWidth;
 
-const padding = { top: 40, right: 40, bottom: 40, left: 40 };
+const padding = { top: 80, right: 80, bottom: 80, left: 80 };
 
 let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 
@@ -189,9 +189,9 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
     }, [mapData, isMeterHovered, maxPair]);
 
     return (
-        <svg 
+        <svg
+            id="svg-canvas"
             ref={svgRef} 
-            style={{ flexGrow: 1, border: "1px solid black", position: "fixed", top: "10%", left: "10%"}} 
             width={svgWidth} 
             height={svgHeight}
         >

@@ -195,27 +195,24 @@ export default function App() {
     
     return (
         loading ? <Loading /> :
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <button id='randomWords' onClick={handleFetchWords}>RANDOM</button>
-            <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
-            <div id='clearButtons'>
-                <button onClick={() => setMapList(prevList => prevList.filter(item => item.lvl === 'b'))}>CLEAR MAP</button>
-                <button onClick={handleClearBase}>CLEAR BASE</button>
-            </div>
-            <div><a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world.</a></div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <textarea ref={inputRef} onKeyDown={handleKeyDown} style={{ marginRight: '10px' }} />
-                <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
-                    <button onClick={handleAdd} style={{ marginRight: '10px' }}>ADD</button>
-                    <Radio
-                        choice={mapLevel}
-                        choices={['map', 'base']}
-                        onSwitch={(mapLevel) => setMapLevel(mapLevel)}
-                        id='mapLevel'
-                    />
-                </div>
-                <button className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock} style={{ marginRight: '10px' }}>FIT BASE</button>
-                <select onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel} style={{ marginRight: '10px' }}>
+        <div>
+            <Map 
+                    mapData={mapData}
+                    setClickChange={setClickChange}
+                    isMeterHovered={isMeterHovered}
+                    maxPair={maxPair} 
+            />
+            <div id='map-controls'>
+                <textarea id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
+                <button id='add-button' onClick={handleAdd}>ADD</button>
+                <Radio
+                    choice={mapLevel}
+                    choices={['map', 'base']}
+                    onSwitch={(mapLevel) => setMapLevel(mapLevel)}
+                    id='mapLevel'
+                />
+                <button id='base-fitter' className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock}>FIT BASE</button>
+                <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
                     {embeddingModels.map(model => (
                         <option key={model} value={model}>
                             {model}
@@ -226,25 +223,26 @@ export default function App() {
                     choice={reducer}
                     choices={['pca', 'proj']}
                     onSwitch={reducer => setReducer(reducer)}
-                    id='reducer'
+                    id='choose-reducer'
                 />
-            </div>
-            {loadingInset && <LoadingInset />}
-            <Map 
-                mapData={mapData}
-                setClickChange={setClickChange}
-                isMeterHovered={isMeterHovered}
-                maxPair={maxPair} 
-            />
-            <div id='meterContainer'>
-                <div id='projectionMode' className={reducer === 'proj' ? 'projectionModeVisible' : 'projectionModeInvisible'} >PROJECTION MODE</div>
-                <div id='spreadMeter'
-                    onMouseEnter={() => setIsMeterHovered(true)}
-                    onMouseLeave={() => setIsMeterHovered(false)}
-                >
-                    <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                {loadingInset && <LoadingInset />}
+                <button id='randomWords' onClick={handleFetchWords}>RANDOM</button>
+                <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
+                <div id='clearButtons'>
+                    <button onClick={() => setMapList(prevList => prevList.filter(item => item.lvl === 'b'))}>CLEAR MAP</button>
+                    <button onClick={handleClearBase}>CLEAR BASE</button>
+                </div>
+                <div id='meterContainer'>
+                    <div id='projectionMode' className={reducer === 'proj' ? 'projectionModeVisible' : 'projectionModeInvisible'} >PROJECTION MODE</div>
+                    <div id='spreadMeter'
+                        onMouseEnter={() => setIsMeterHovered(true)}
+                        onMouseLeave={() => setIsMeterHovered(false)}
+                    >
+                        <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                    </div>
                 </div>
             </div>
+            <a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world.</a>
         </div>
     );
     
