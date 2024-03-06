@@ -28,7 +28,7 @@ button {
     border: 2px solid black;
     border-radius: 10px;
     font-size: 16px;
-    background-color: dodgerblue;
+    background-color: transparent;
     color: white;
 }
 
@@ -42,8 +42,7 @@ button.locked {
 }
 
 button.unlocked {
-    background-color: white;
-    color: black;
+    background-color: transparent;
 }
 
 svg {
@@ -132,8 +131,7 @@ textarea {
 }
 
 #randomWords {
-    color: black;
-    background-color: white;
+    
 }
 
 #mapLevel-group {
@@ -218,7 +216,7 @@ select {
 #choose-reducer {
     position: fixed;
     margin: 0;
-    top: 30vh;
+    top: 20vh;
     right: 2vw;
 }
 
@@ -255,12 +253,38 @@ select {
 }
 
 #basemap-toggle-container {
-    background-color: transparent; 
+    background-color: transparent;
     padding: 10px;
     border-radius: 10px;
     position: fixed;
-    top: 30vh;
-    left: 2vw;
+    top: 20vh;
+    left: 0;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+}
+
+#basemap-toggle-container.open {
+    transform: translateX(0);
+}
+
+.toggle-button {
+    position: absolute;
+    top: 50%;
+    right: -24px;
+    transform: translateY(-50%) rotate(180deg);
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    z-index: 2;
+    color: white;
+    font-size: 24px;
+}
+
+.toggle-button.open {
+    transform: translateY(-50%) rotate(0deg);
+}
+
+.toggle-button:hover {
+    color: coral;
 }
 
 .basemap-toggle-label {
@@ -269,10 +293,9 @@ select {
     margin: 2px; 
     cursor: pointer;
     font-size: 16px;
-    font-weight: 100;
+    font-weight: 200;
     color: gainsboro;
     padding: 2px; 
-    transition: background-color 0.3s;
 }
 
 .basemap-toggle-checkbox {
