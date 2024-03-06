@@ -207,7 +207,7 @@ export default function App() {
             />
             <div id='map-controls'>
                 <div id='input-group'>
-                    <textarea id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
+                    <textarea placeholder='enter text samples separated by newlines...' id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
                     <div id='add-group'>
                         <button id='add-button' onClick={handleAdd}>ADD</button>
                         <button id='randomWords' onClick={handleFetchWords}>RAND</button>
