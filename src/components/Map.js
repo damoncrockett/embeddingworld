@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { transition } from 'd3-transition';
 import { select } from 'd3-selection';
-import { zoom, zoomTransform } from 'd3-zoom';
+import { zoom, zoomTransform, zoomIdentity } from 'd3-zoom';
 import { scaleLinear } from 'd3-scale';
 import { min, max } from 'd3-array';
 import { calculateLineEndpoints } from '../../utils/geometry';
@@ -18,6 +18,7 @@ const transitionDuration = 750;
 export default function Map({ mapData, setClickChange, isMeterHovered, maxPair}) {
     
     const svgRef = useRef(null);
+    const zoomRef = useRef();
     
     let clickTimer = null;
 
@@ -57,6 +58,10 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
 
     }
 
+    const resetZoom = () => {
+        select(svgRef.current).transition().duration(transitionDuration).call(zoomRef.current.transform, zoomIdentity);
+    };
+
     useEffect(() => {
         const svg = select(svgRef.current);
         
@@ -69,6 +74,8 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
             .extent([[0, 0], [svgWidth, svgHeight]])
             .scaleExtent([0.25, 5])
             .on('zoom', handleZoom);
+
+        zoomRef.current = initialZoom
     
         svg.call(initialZoom)
            .on('dblclick.zoom', null); 
@@ -186,13 +193,16 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
     }, [mapData, isMeterHovered, maxPair]);
 
     return (
-        <svg
-            id="svg-canvas"
-            ref={svgRef} 
-            width={svgWidth} 
-            height={svgHeight}
-        >
-        </svg>
+        <>
+            <button id='reset-zoom' className='material-icons' onClick={resetZoom}>flip_camera_ios</button>
+            <svg
+                id="svg-canvas"
+                ref={svgRef} 
+                width={svgWidth} 
+                height={svgHeight}
+            >
+            </svg>
+        </>
     );
 };
 
