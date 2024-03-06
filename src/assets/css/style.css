@@ -25,12 +25,16 @@ h2 {
 button {
     font-weight: 400;
     padding: 10px;
-    margin: 10px;
     border: 2px solid black;
     border-radius: 10px;
     font-size: 16px;
     background-color: dodgerblue;
     color: white;
+}
+
+button:hover {
+    border-color: white;
+    cursor: pointer;
 }
 
 button.locked {
@@ -40,11 +44,6 @@ button.locked {
 button.unlocked {
     background-color: white;
     color: black;
-}
-
-button:hover {
-    border-color: white;
-    cursor: pointer;
 }
 
 svg {
@@ -102,35 +101,56 @@ svg text:hover {
     z-index: 2;
 }
 
-#text-input {
+#input-group {
     position: fixed;
     margin: 0;
-    padding: 0;
     top: 2vh;
     left: 2vw;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5vh;
+}
+
+#text-input {
+    margin: 0;
 }
 
 textarea {
     width: 28vw;
+    height: 8vh;
     padding: 10px;
-    margin: 10px;
     border: 2px solid black;
     border-radius: 10px;
     font-size: 16px;
 }
 
-#add-button {
-    position: fixed;
+#add-group {
     margin: 0;
-    top: 2vh;
-    left: 32vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+}
+
+#randomWords {
+    color: black;
+    background-color: white;
+}
+
+#mapLevel-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
 }
 
 #mapLevel {
-    position: fixed;
     margin: 0;
-    top: 2vh;
-    left: 36vw;
+    display: flex;
+    flex-direction: row;
+}
+
+.radio-switch {
+    display: flex;
+    flex-direction: column;
 }
 
 .radio-switch input[type="radio"] {
@@ -139,52 +159,41 @@ textarea {
 
 .radio-switch label {
     font-weight: 400;
-    background-color: transparent; 
-    color: white; 
-    padding: 20px 20px;
-    border: 2px solid black; 
+    background-color: transparent;
+    color: white;
+    padding: 10px;
+    border: 2px solid black;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin: 0;
+    text-align: center;
 }
-  
+
 .radio-switch input[type="radio"]:checked + label {
     background-color: coral;
 }
 
+/* top-left | top-right | bottom-right | bottom-left */
 #label-mapLevel-map {
-    /* top-left | top-right | bottom-right | bottom-left */
     border-radius: 10px 0 0 10px;
 }
 
 #label-mapLevel-base {
-    /* top-left | top-right | bottom-right | bottom-left */
     border-radius: 0 10px 10px 0;
 }
 
-#label-reducer-pca {
-    /* top-left | top-right | bottom-right | bottom-left */
-    border-radius: 10px 0 0 10px;
+#clearButton {
 }
 
-#label-reducer-proj {
-    /* top-left | top-right | bottom-right | bottom-left */
-    border-radius: 0 10px 10px 0;
-}
-
-#base-fitter {
+#model-group {
     position: fixed;
     margin: 0;
     top: 2vh;
-    left: 46vw;
+    right: 2vw;
 }
 
 #model-menu {
-    position: fixed;
-    margin: 0;
-    top: 2vh;
-    left: 56vw;
     width: 20vw;
-
 }
 
 select {
@@ -206,18 +215,31 @@ select {
     background-size: 12px; 
 }
 
-select:hover {
-    border-color: white; 
-    background-color: dodgerblue; 
-    color: white; 
-}
-
 #choose-reducer {
     position: fixed;
     margin: 0;
-    top: 2vh;
-    left: 82vw;
+    top: 30vh;
+    right: 2vw;
+}
 
+#label-choose-reducer-pca {
+    border-radius: 10px 10px 0 0;
+    padding: 15px;
+}
+
+#label-choose-reducer-proj {
+    border-radius: 0 0 0 0;
+    padding: 15px;
+}
+
+#label-choose-reducer-nn {
+    border-radius: 0 0 0 0;
+    padding: 15px;
+}
+
+#label-choose-reducer-path {
+    border-radius: 0 0 10px 10px;
+    padding: 15px;
 }
 
 #loadingInsetContainer {
@@ -230,6 +252,15 @@ select:hover {
     font-family: "Micro 5";
     font-size: 24px;
     color: white;
+}
+
+#basemap-toggle-container {
+    background-color: transparent; 
+    padding: 10px;
+    border-radius: 10px;
+    position: fixed;
+    top: 30vh;
+    left: 2vw;
 }
 
 .basemap-toggle-label {
@@ -248,59 +279,15 @@ select:hover {
     margin-right: 10px; 
 }
 
-.basemap-toggle-container {
-    background-color: transparent; 
-    padding: 10px;
-    border-radius: 10px;
-    position: fixed;
-    top: 40vh;
-    left: 1vw;
-}
-
-#randomWords {
-    position: fixed;
-    top: 8vh;
-    left: 2vw;
-    color: black;
-    border: 2px solid black;
-    background-color: white;
-}
-
-#clearButtons {
-    position: fixed;
-    bottom: 30vh;
-    left: 1vw;
-}
-
-#clearButtons button {
-    font-size: 10px;
-    margin: 2px;
-    padding: 6px;
-    color: black;
-    border: 1px solid black;
-    background-color: white;
-}
-
-#clearButtons button:hover {
-    border-color: white;
-}
-
-#meterContainer {
+#spreadMeter {
     position: fixed;
     bottom: 2vh;
     left: 46vw;
     background-color: transparent;
-  }
-
-.meter {
-    /* margin 20px left and right; 10px top and bottom */
-    margin: 10px 20px;
-}
-
-#spreadMeter {
     border: 2px dotted transparent;
     transition: border-color 0.75s;
     border-radius: 10px;
+    padding: 15px;
 }
 
 #spreadMeter:hover {
@@ -317,6 +304,7 @@ select:hover {
 }
 
 #title {
+    z-index: 2;
     color: white;
     text-align: left;
     padding: 20px 20px 0 20px;
@@ -338,20 +326,7 @@ select:hover {
     to { opacity: 1; }
   }
   
-  .fade-in {
-    animation: fadeIn 1s ease-out;
-  }
-
-.projectionModeInvisible {
-    color: transparent;
+.fade-in {
+animation: fadeIn 1s ease-out;
 }
-
-.projectionModeVisible {
-    color: coral;
-}
-
-#projectionMode {
-    margin-right: 20px;
-}
-
 

@@ -37,13 +37,12 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
         event.preventDefault();
         event.stopPropagation();
 
-        clearTimeout(clickTimer); // Cancel the pending single click action
+        clearTimeout(clickTimer); 
         clickTimer = null;
     
-        // Set a timeout to delay the action after double click
         setTimeout(() => {
             setClickChange({changeType: 'remove', smp: d.smp})
-        }, 250); // Adjust the delay as needed
+        }, 250); 
     };
 
     const handleZoom = (event) => {
@@ -72,7 +71,7 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
             .on('zoom', handleZoom);
     
         svg.call(initialZoom)
-           .on('dblclick.zoom', null); // Disable double-click zoom
+           .on('dblclick.zoom', null); 
 
     }, []);
     
@@ -94,7 +93,6 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
-        // Text elements drawing
         mapTexts = mapPointsContainer.selectAll('text.map')
             .data(mapData, d => d.smp + "-" + d.lvl)
             .join(
@@ -127,7 +125,6 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
 
                 const rectStrokeWidth = 2;
     
-                // Draw rectangles based on measured text sizes
                 rectData.forEach(({ smp, bbox }) => {
                     mapPointsContainer.append('rect')
                         .attr('class', 'maxPairRect')
@@ -165,14 +162,14 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
                     if (!originalTextElement.empty()) {
                         const bbox = originalTextElement.node().getBBox();
                         mapPointsContainer.append('text')
-                            .attr('x', bbox.x + bbox.width / 2) // Centering text in the rectangle
+                            .attr('x', bbox.x + bbox.width / 2) 
                             .attr('y', bbox.y + bbox.height / 2)
-                            .attr('class', 'highlighted-text') // Use this class for specific styling
-                            .style('fill', 'black') // Specify the color directly or in CSS
-                            .attr('text-anchor', 'middle') // Center align text
-                            .attr('dy', "0.35em") // Vertically center align text
+                            .attr('class', 'highlighted-text') 
+                            .style('fill', 'black') 
+                            .attr('text-anchor', 'middle') 
+                            .attr('dy', "0.35em") 
                             .text(originalTextElement.text())
-                            .attr('data-smp', smp) // Tagging for easy removal
+                            .attr('data-smp', smp) 
                             .style('opacity', 0)
                             .transition().duration(transitionDuration).style('opacity', 1);
                     }

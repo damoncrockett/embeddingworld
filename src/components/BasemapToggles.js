@@ -8,7 +8,7 @@ const BasemapToggles = ({ basemaps, onToggle }) => {
     };
 
     return (
-        <div className="basemap-toggle-container">
+        <div id="basemap-toggle-container">
             {Object.keys(basemaps).map((basemapName) => (
                 <label key={basemapName} className="basemap-toggle-label">
                     <input

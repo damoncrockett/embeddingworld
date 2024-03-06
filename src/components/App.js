@@ -76,14 +76,18 @@ export default function App() {
         }
     };
 
-    const handleClearBase = () => {
+    const handleClear = () => {
 
-        setMapList(prevList => prevList.filter(item => item.lvl === 'm'));
+        if ( mapLevel === 'map' ) {
+            setMapList(prevList => prevList.filter(item => item.lvl === 'b'))
+        } else if ( mapLevel === 'base' ) {
+            setMapList(prevList => prevList.filter(item => item.lvl === 'm'));
 
-        const basemapToggles = document.querySelectorAll('.basemap-toggle-checkbox');
-        basemapToggles.forEach(toggle => {
-            toggle.checked = false;
-        });
+            const basemapToggles = document.querySelectorAll('.basemap-toggle-checkbox');
+            basemapToggles.forEach(toggle => {
+                toggle.checked = false;
+            });
+        }   
     }
 
     const handleBasemapLock = () => {
@@ -154,10 +158,9 @@ export default function App() {
         const distanceFunctionName = reducer === 'pca' ? 'euclidean' : 'cosine';
         const maxDistanceAndPair = computePairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
         
-        
         setMaxDistance(maxDistanceAndPair[0]);
-        // safer than saving just the indices, because they change a lot
         
+        // safer than saving just the indices, because they change a lot
         const maxPairSamples = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].smp, mapList[maxDistanceAndPair[1][1]].smp] : null;
         setMaxPair(maxPairSamples);
         
@@ -203,43 +206,42 @@ export default function App() {
                     maxPair={maxPair} 
             />
             <div id='map-controls'>
-                <textarea id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
-                <button id='add-button' onClick={handleAdd}>ADD</button>
-                <Radio
-                    choice={mapLevel}
-                    choices={['map', 'base']}
-                    onSwitch={(mapLevel) => setMapLevel(mapLevel)}
-                    id='mapLevel'
-                />
-                <button id='base-fitter' className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock}>FIT BASE</button>
-                <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
-                    {embeddingModels.map(model => (
-                        <option key={model} value={model}>
-                            {model}
-                        </option>
-                    ))}
-                </select>
+                <div id='input-group'>
+                    <textarea id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
+                    <div id='add-group'>
+                        <button id='add-button' onClick={handleAdd}>ADD</button>
+                        <button id='randomWords' onClick={handleFetchWords}>RAND</button>
+                    </div>
+                    <div id='mapLevel-group'>
+                        <Radio
+                            choice={mapLevel}
+                            choices={['map', 'base']}
+                            onSwitch={(mapLevel) => setMapLevel(mapLevel)}
+                            id='mapLevel'
+                        />
+                        <button id='clearButton' onClick={handleClear}>CLEAR</button>
+                    </div>
+                </div>
+                <div id='model-group'>
+                    <button id='base-fitter' className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock}>FIT BASE</button>
+                    <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
+                        {embeddingModels.map(model => (
+                            <option key={model} value={model}>
+                                {model}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <Radio
                     choice={reducer}
-                    choices={['pca', 'proj']}
+                    choices={['pca', 'proj', 'nn', 'path']}
                     onSwitch={reducer => setReducer(reducer)}
                     id='choose-reducer'
                 />
                 {loadingInset && <LoadingInset />}
-                <button id='randomWords' onClick={handleFetchWords}>RANDOM</button>
                 <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
-                <div id='clearButtons'>
-                    <button onClick={() => setMapList(prevList => prevList.filter(item => item.lvl === 'b'))}>CLEAR MAP</button>
-                    <button onClick={handleClearBase}>CLEAR BASE</button>
-                </div>
-                <div id='meterContainer'>
-                    <div id='projectionMode' className={reducer === 'proj' ? 'projectionModeVisible' : 'projectionModeInvisible'} >PROJECTION MODE</div>
-                    <div id='spreadMeter'
-                        onMouseEnter={() => setIsMeterHovered(true)}
-                        onMouseLeave={() => setIsMeterHovered(false)}
-                    >
-                        <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
-                    </div>
+                <div id='spreadMeter' onMouseEnter={() => setIsMeterHovered(true)} onMouseLeave={() => setIsMeterHovered(false)}>
+                    <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                 </div>
             </div>
             <a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world.</a>
