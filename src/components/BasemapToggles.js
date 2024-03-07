@@ -26,7 +26,7 @@ const BasemapToggles = ({ basemaps, onToggle }) => {
                         {basemapName.toUpperCase()}
                     </label>
                 ))}
-                <div title='pre-made basemaps' className={`toggle-button ${isOpen ? 'open' : ''}`} onClick={toggleModal}>← </div>
+                <div title='pre-made basemaps' className={`toggle-button material-icons ${isOpen ? 'open' : ''}`} onClick={toggleModal}>double_arrow</div>
             </div>
         </>
     );

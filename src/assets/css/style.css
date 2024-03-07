@@ -315,7 +315,7 @@ select:focus {
     position: absolute;
     top: 50%;
     right: -24px;
-    transform: translateY(-50%) rotate(180deg);
+    transform: translateY(-50%) rotate(0deg);
     cursor: pointer;
     transition: transform 0.3s ease-in-out;
     z-index: 2;
@@ -324,7 +324,7 @@ select:focus {
 }
 
 .toggle-button.open {
-    transform: translateY(-50%) rotate(0deg);
+    transform: translateY(-50%) rotate(180deg);
 }
 
 .toggle-button:hover {
