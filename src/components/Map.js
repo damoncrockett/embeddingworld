@@ -15,36 +15,61 @@ let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 
 const transitionDuration = 750;
 
-export default function Map({ mapData, setClickChange, isMeterHovered, maxPair}) {
+export default function Map({ 
+    mapData, 
+    setClickChange, 
+    isMeterHovered, 
+    maxPair, 
+    selectMode, 
+    selections, 
+    setSelections
+}) {
     
     const svgRef = useRef(null);
     const zoomRef = useRef();
     
-    let clickTimer = null;
+    const clickTimer = useRef(null);
+    const handleClickRef = useRef();
+    const handleDoubleClickRef = useRef();
 
-    const handleClick = (event, d) => {
-        if (clickTimer === null) {
-            clickTimer = setTimeout(() => {
-                
-                setClickChange({changeType: 'switch', smp: d.smp})
-                
-                clickTimer = null;
-            }, 250);
-        }
-    };
+    useEffect(() => { // we redefine the click handlers when selectMode or selections change
 
-    const handleDoubleClick = (event, d) => {
-        // prevent zoom on double click
-        event.preventDefault();
-        event.stopPropagation();
+        handleClickRef.current = (event, d) => {
+            if (clickTimer.current === null) {
+                clickTimer.current = setTimeout(() => {
+                    if (selectMode) {
+                        if (selections.includes(d.smp)) {
+                            return;
+                        } else {
+                            const nullIndex = selections.indexOf(null);
+                            if (nullIndex !== -1) {
+                                const newSelections = [...selections];
+                                newSelections[nullIndex] = d.smp;
+                                setSelections(newSelections);
+                            }
+                        }
+                    } else {
+                        setClickChange({changeType: 'switch', smp: d.smp});
+                    }
+                    clickTimer.current = null;
+                }, 250);
+            }
+        };
 
-        clearTimeout(clickTimer); 
-        clickTimer = null;
-    
-        setTimeout(() => {
-            setClickChange({changeType: 'remove', smp: d.smp})
-        }, 250); 
-    };
+        handleDoubleClickRef.current = (event, d) => {
+            // prevent zoom on double click
+            event.preventDefault();
+            event.stopPropagation();
+
+            clearTimeout(clickTimer.current);
+            clickTimer.current = null;
+
+            if (!selectMode) {
+                setClickChange({changeType: 'remove', smp: d.smp});
+            }
+        };
+
+    }, [selectMode, selections, setSelections, setClickChange]);
 
     const handleZoom = (event) => {
         const { transform } = event;
@@ -109,8 +134,8 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
                             .attr('y', d => yScaleZoomed(d.y))
                             .text(d => d.smp)
                             .attr('data-smp', d => d.smp) // use for rect sizing
-                            .on('click', handleClick)
-                            .on('dblclick', handleDoubleClick),
+                            .on('click', (event, d) => handleClickRef.current(event, d))
+                            .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d)),
                 update => update.transition().duration(transitionDuration)
                                 .attr('x', d => xScaleZoomed(d.x))
                                 .attr('y', d => yScaleZoomed(d.y)),
@@ -189,6 +214,11 @@ export default function Map({ mapData, setClickChange, isMeterHovered, maxPair})
             mapPointsContainer.selectAll('.maxPairLine').transition().duration(transitionDuration).style('opacity', 0).remove();
             mapPointsContainer.selectAll('.highlighted-text[data-smp]').transition().duration(transitionDuration).style('opacity', 0).remove();
         }
+
+
+        return () => {
+            mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
+        };
         
     }, [mapData, isMeterHovered, maxPair]);
 

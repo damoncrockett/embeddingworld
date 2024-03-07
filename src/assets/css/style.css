@@ -36,11 +36,11 @@ button:hover {
     cursor: pointer;
 }
 
-button.locked {
+button.on {
     background-color: coral;
 }
 
-button.unlocked {
+button.off {
     background-color: transparent;
 }
 
@@ -264,7 +264,7 @@ textarea::placeholder {
 select {
     font-weight: 400;
     padding: 10px; 
-    margin: 10px; 
+    margin-left: 10px; 
     border: 2px solid black; 
     border-radius: 10px; 
     background-color: transparent; 
@@ -295,34 +295,76 @@ select:focus {
     color: white;
 }
 
-#choose-reducer {
+#layout-group {
     position: fixed;
     margin: 0;
     top: 20vh;
     right: 2vw;
 }
 
+#choose-reducer {
+    
+}
+
 #label-choose-reducer-pca {
     border-radius: 10px 10px 0 0;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: -1px;
 }
 
 #label-choose-reducer-proj {
     border-radius: 0 0 0 0;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: -1px;
 }
 
 #label-choose-reducer-nn {
     border-radius: 0 0 0 0;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: -1px;
 }
 
 #label-choose-reducer-path {
     border-radius: 0 0 10px 10px;
-    padding: 15px;
+    padding: 20px;
+}
+
+#select-group {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+
+}
+
+#selection-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.selection-slot {
+    border: 2px;
+    padding: 5px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.empty {
+    color: transparent;
+    border-color: grey;
+    border-style: dotted;
+}
+
+.filled {
+    color: white;
+    border-color: white;
+    border-style: solid;
+}
+
+.filled:hover {
+    border-color: coral;
+    cursor: pointer;
 }
 
 #basemap-toggle-container {

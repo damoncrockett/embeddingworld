@@ -29,6 +29,7 @@ export default function App() {
     const [isMeterHovered, setIsMeterHovered] = useState(false);
     const [infoModal, setInfoModal] = useState(false);
     const [selectMode, setSelectMode] = useState(false);
+    const [selections, setSelections] = useState([null, null, null, null]);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
@@ -195,7 +196,7 @@ export default function App() {
             const index = currentList.findIndex(item => item.smp === clickChange.smp);
             currentList.splice(index, 1);
             setMapList(currentList);
-        }
+        }        
     }, [clickChange]);
     
     return (
@@ -205,7 +206,10 @@ export default function App() {
                     mapData={mapData}
                     setClickChange={setClickChange}
                     isMeterHovered={isMeterHovered}
-                    maxPair={maxPair} 
+                    maxPair={maxPair}
+                    selectMode={selectMode}
+                    selections={selections}
+                    setSelections={setSelections} 
             />
             <div id='map-controls'>
                 <div id='input-group'>
@@ -225,7 +229,7 @@ export default function App() {
                     </div>
                 </div>
                 <div id='model-group'>
-                    <button id='base-fitter' className={basemapLocked ? 'locked' : 'unlocked'} onClick={handleBasemapLock}>FIT BASE</button>
+                    <button id='base-fitter' className={basemapLocked ? 'on' : 'off'} onClick={handleBasemapLock}>FIT BASE</button>
                     <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
                         {embeddingModels.map(model => (
                             <option key={model} value={model}>
@@ -235,13 +239,23 @@ export default function App() {
                     </select>
                     {loadingInset && <LoadingInset />}
                 </div>
-                <Radio
-                    choice={reducer}
-                    choices={['pca', 'proj', 'nn', 'path']}
-                    onSwitch={reducer => setReducer(reducer)}
-                    id='choose-reducer'
-                />
                 <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
+                <div id='layout-group'>
+                    <Radio
+                        choice={reducer}
+                        choices={['pca', 'proj', 'nn', 'path']}
+                        onSwitch={reducer => setReducer(reducer)}
+                        id='choose-reducer'
+                    />
+                    <div id='select-group'>
+                        <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
+                        <div id='selection-slots'>
+                            {selections.map((d, i) => (
+                                <div key={i} className={d ? 'selection-slot filled' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
                 <div id='spreadMeter' onMouseEnter={() => setIsMeterHovered(true)} onMouseLeave={() => setIsMeterHovered(false)}>
                     <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                 </div>
