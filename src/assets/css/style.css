@@ -158,6 +158,10 @@ textarea {
     background-color: transparent;
 }
 
+textarea:focus {
+    outline: none;
+}
+
 #add-group {
     margin: 0;
     display: flex;
@@ -246,6 +250,11 @@ select {
     background-repeat: no-repeat;
     background-position: right 10px center; 
     background-size: 12px; 
+}
+
+select:focus {
+    outline: none;
+
 }
 
 #choose-reducer {
