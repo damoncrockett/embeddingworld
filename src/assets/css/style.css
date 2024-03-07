@@ -68,6 +68,31 @@ svg text:hover {
     fill: coral;
 }
 
+.material-icons-outlined {
+    font-family: 'Material Icons Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+  
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+  
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+  
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
 .material-icons {
     font-family: 'Material Icons';
     font-weight: normal;
@@ -204,7 +229,7 @@ textarea::placeholder {
     border: 2px solid black;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin: 0;
+    margin: -1px;
     text-align: center;
 }
 
@@ -370,22 +395,61 @@ select:focus {
     color: white;
 }
 
-#title {
-    z-index: 2;
-    color: grey;
-    text-align: left;
-    padding: 20px 20px 0 20px;
-    font-size: 40px;
-    font-weight: 400;
-    font-family: "Micro 5";
+#title-group {
     position: fixed;
     bottom: 2vh;
     left: 0;
+    z-index: 2;
+}
+
+#title {
+    margin-left: 20px;
+    color: grey;
+    text-align: left;
+    font-size: 40px;
+    font-weight: 400;
+    font-family: "Micro 5";
     background-color: transparent;
 }
 
 #title:hover {
     color: coral;
+}
+
+#info-button {
+    color: grey;
+    cursor: pointer;
+    margin-left: 10px;
+    position: relative;
+    top: 3px;
+}
+
+#info-button:hover {
+    color: coral;
+}
+
+#info-modal {
+    height: 70%;
+    width: 40%;
+    position: fixed;
+    top: 15%;
+    left: 30%;
+    background-color: #222;
+    padding: 20px;
+    border: 1px solid white;
+    border-radius: 10px;
+    z-index: 3;
+    overflow-y: auto;
+}
+
+#info-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
 }
 
 @keyframes fadeIn {

@@ -27,6 +27,7 @@ export default function App() {
     const [maxPair, setMaxPair] = useState(null); // [i, j] indices of the pair with max distance
     const [meterModelSignal, setMeterModelSignal] = useState(0);
     const [isMeterHovered, setIsMeterHovered] = useState(false);
+    const [infoModal, setInfoModal] = useState(false);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
@@ -244,7 +245,16 @@ export default function App() {
                     <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                 </div>
             </div>
-            <a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world.</a>
+            <div id='title-group'>
+                <a id='title' href="https://github.com/damoncrockett/embeddingworld" target='_blank'>embedding world</a>
+                <div id='info-button' className='material-icons-outlined' onClick={() => setInfoModal(true)}>info</div>
+            </div>
+            {infoModal && 
+                <>
+                    <div id='info-modal'></div>
+                    <div id='info-modal-backdrop' onClick={() => setInfoModal(false)}></div>
+                </>
+            }
         </div>
     );
     
