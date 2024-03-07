@@ -28,6 +28,7 @@ export default function App() {
     const [meterModelSignal, setMeterModelSignal] = useState(0);
     const [isMeterHovered, setIsMeterHovered] = useState(false);
     const [infoModal, setInfoModal] = useState(false);
+    const [selectMode, setSelectMode] = useState(false);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
@@ -232,6 +233,7 @@ export default function App() {
                             </option>
                         ))}
                     </select>
+                    {loadingInset && <LoadingInset />}
                 </div>
                 <Radio
                     choice={reducer}
@@ -239,7 +241,6 @@ export default function App() {
                     onSwitch={reducer => setReducer(reducer)}
                     id='choose-reducer'
                 />
-                {loadingInset && <LoadingInset />}
                 <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
                 <div id='spreadMeter' onMouseEnter={() => setIsMeterHovered(true)} onMouseLeave={() => setIsMeterHovered(false)}>
                     <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />

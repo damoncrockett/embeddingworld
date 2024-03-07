@@ -229,7 +229,6 @@ textarea::placeholder {
     border: 2px solid black;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin: -1px;
     text-align: center;
 }
 
@@ -240,6 +239,7 @@ textarea::placeholder {
 /* top-left | top-right | bottom-right | bottom-left */
 #label-mapLevel-map {
     border-radius: 10px 0 0 10px;
+    margin-right: -1px;
 }
 
 #label-mapLevel-base {
@@ -254,6 +254,7 @@ textarea::placeholder {
     margin: 0;
     top: 2vh;
     right: 2vw;
+    text-align: center;
 }
 
 #model-menu {
@@ -283,6 +284,17 @@ select:focus {
 
 }
 
+#loadingInsetContainer {
+    position: relative;
+    width: auto;
+}
+
+#loadingInset {
+    font-family: "Micro 5";
+    font-size: 24px;
+    color: white;
+}
+
 #choose-reducer {
     position: fixed;
     margin: 0;
@@ -293,33 +305,24 @@ select:focus {
 #label-choose-reducer-pca {
     border-radius: 10px 10px 0 0;
     padding: 15px;
+    margin-bottom: -1px;
 }
 
 #label-choose-reducer-proj {
     border-radius: 0 0 0 0;
     padding: 15px;
+    margin-bottom: -1px;
 }
 
 #label-choose-reducer-nn {
     border-radius: 0 0 0 0;
     padding: 15px;
+    margin-bottom: -1px;
 }
 
 #label-choose-reducer-path {
     border-radius: 0 0 10px 10px;
     padding: 15px;
-}
-
-#loadingInsetContainer {
-    position: fixed;
-    top: 8vh;
-    left: 40vw;
-}
-
-#loadingInset {
-    font-family: "Micro 5";
-    font-size: 24px;
-    color: white;
 }
 
 #basemap-toggle-container {

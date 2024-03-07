@@ -9,7 +9,7 @@ import { calculateLineEndpoints } from '../../utils/geometry';
 const svgHeight = window.innerHeight;
 const svgWidth = window.innerWidth;
 
-const padding = { top: 80, right: 80, bottom: 80, left: 80 };
+const padding = { top: 200, right: 160, bottom: 40, left: 40 };
 
 let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 
