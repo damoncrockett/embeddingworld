@@ -27,7 +27,6 @@ button {
     padding: 10px;
     border: 2px solid black;
     border-radius: 10px;
-    font-size: 16px;
     background-color: transparent;
     color: white;
 }
@@ -148,18 +147,21 @@ svg text:hover {
 }
 
 textarea {
-    width: 28vw;
-    height: 8vh;
+    width: 24vw;
+    height: 82px;
     padding: 10px;
     border: 2px solid black;
     border-radius: 10px;
-    font-size: 16px;
     color: white;
     background-color: transparent;
 }
 
 textarea:focus {
     outline: none;
+}
+
+textarea::placeholder {
+    font-style: italic;
 }
 
 #add-group {
@@ -230,7 +232,7 @@ textarea:focus {
 }
 
 #model-menu {
-    width: 20vw;
+    width: 300px;
 }
 
 select {
@@ -239,7 +241,6 @@ select {
     margin: 10px; 
     border: 2px solid black; 
     border-radius: 10px; 
-    font-size: 16px; 
     background-color: transparent; 
     color: white; 
     cursor: pointer; 
@@ -336,7 +337,6 @@ select:focus {
     align-items: center; 
     margin: 2px; 
     cursor: pointer;
-    font-size: 16px;
     font-weight: 200;
     color: gainsboro;
     padding: 2px; 
@@ -372,7 +372,7 @@ select:focus {
 
 #title {
     z-index: 2;
-    color: white;
+    color: grey;
     text-align: left;
     padding: 20px 20px 0 20px;
     font-size: 40px;

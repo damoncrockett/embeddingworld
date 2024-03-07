@@ -20,7 +20,7 @@ export default function App() {
     const [mapData, setMapData] = useState(null);
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
-    const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[0]);
+    const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[4]);
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [maxDistance, setMaxDistance] = useState(0);
