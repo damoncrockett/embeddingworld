@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "start": "webpack serve --hot --mode development",
     "deploy": "aws s3 sync /Users/damoncrockett/embeddingworld/dist/ s3://embedding.world/",
-    "sync": "aws s3 sync /Users/damoncrockett/embeddingworld/src/assets/txt/ s3://embedding.world/"
+    "sync": "aws s3 sync /Users/damoncrockett/embeddingworld/src/assets/ s3://embedding.world/"
   },
   "keywords": [],
   "author": "",

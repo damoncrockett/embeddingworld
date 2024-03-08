@@ -68,6 +68,10 @@ svg text:hover {
     fill: coral;
 }
 
+svg path:hover {
+    fill: coral;
+}
+
 .material-icons-outlined {
     font-family: 'Material Icons Outlined';
     font-weight: normal;
@@ -484,37 +488,34 @@ animation: fadeIn 1s ease-out;
     margin-right: 10px; 
 }
 
-#title-group {
+#info-group {
     position: fixed;
     bottom: 2vh;
-    left: 0;
+    left: 1vw;
     z-index: 2;
-}
-
-#title {
-    margin-left: 20px;
-    color: grey;
-    text-align: left;
-    font-size: 40px;
-    font-weight: 400;
-    font-family: "Micro 5";
-    background-color: transparent;
-}
-
-#title:hover {
-    color: coral;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 30px;
 }
 
 #info-button {
-    color: grey;
+    color: #333;
     cursor: pointer;
-    margin-left: 10px;
-    position: relative;
-    top: 3px;
+    font-size: 36px;
+    text-align: center;
 }
 
 #info-button:hover {
     color: coral;
+}
+
+#github-icon {
+    fill: #333;
+    width: 30px;
+    height: 30px;
+    text-align: center;
 }
 
 #info-modal {
