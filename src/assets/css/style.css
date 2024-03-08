@@ -253,6 +253,7 @@ textarea::placeholder {
 
 #label-mapLevel-base {
     border-radius: 0 10px 10px 0;
+    margin-left: -1px
 }
 
 #clearButton {
@@ -309,7 +310,6 @@ select:focus {
     margin: 0;
     top: 10vh;
     right: 2vw;
-    width: 100px;
 }
 
 #choose-reducer {
@@ -318,25 +318,28 @@ select:focus {
 
 #label-choose-reducer-pca {
     border-radius: 10px 10px 0 0;
-    padding: 20px;
+    padding: 10px;
     margin-bottom: -1px;
 }
 
 #label-choose-reducer-project {
     border-radius: 0 0 0 0;
-    padding: 20px;
+    padding: 10px;
     margin-bottom: -1px;
+    margin-top: -1px;
 }
 
 #label-choose-reducer-nearest {
     border-radius: 0 0 0 0;
-    padding: 20px;
+    padding: 10px;
     margin-bottom: -1px;
+    margin-top: -1px;
 }
 
 #label-choose-reducer-paths {
     border-radius: 0 0 10px 10px;
-    padding: 20px;
+    padding: 10px;
+    margin-top: -1px;
 }
 
 #select-group {
@@ -510,6 +513,7 @@ animation: fadeIn 1s ease-out;
     cursor: pointer;
     font-size: 36px;
     text-align: center;
+    transition: color 0.3s;
 }
 
 #info-button:hover {
@@ -521,6 +525,11 @@ animation: fadeIn 1s ease-out;
     width: 30px;
     height: 30px;
     text-align: center;
+    transition: fill 0.3s;
+}
+
+#github-icon:hover {
+    fill: coral;
 }
 
 #info-modal {
