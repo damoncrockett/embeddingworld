@@ -18,7 +18,8 @@ const transitionDuration = 750;
 export default function Map({ 
     mapData, 
     setClickChange, 
-    isSpreadMeterHovered, 
+    isSpreadMeterHovered,
+    isOutlierMeterHovered, 
     maxPair,
     maxZscoreSample, 
     selectMode, 
@@ -148,19 +149,19 @@ export default function Map({
         mapTexts.on('click', (event, d) => handleClickRef.current(event, d))
                 .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d));
 
+        const rectStrokeWidth = 2;
+
         if (isSpreadMeterHovered && maxPair && maxPair.length === 2) {
             
             setTimeout(() => { // to ensure text elements are already drawn
-                const rectData = maxPair.map(smp => {
+                const spreadRectData = maxPair.map(smp => {
                     const textElement = mapPointsContainer.select(`text[data-smp="${smp}"]`).node();
                     if (!textElement) return null;
                     const bbox = textElement.getBBox();
                     return { smp, bbox };
                 }).filter(Boolean); // remove null values
-
-                const rectStrokeWidth = 2;
     
-                rectData.forEach(({ smp, bbox }) => {
+                spreadRectData.forEach(({ smp, bbox }) => {
                     mapPointsContainer.append('rect')
                         .attr('class', 'maxPairRect')
                         .attr('x', bbox.x - 5)
@@ -176,8 +177,8 @@ export default function Map({
                         .transition().duration(transitionDuration).style('opacity', 1);
                 });
     
-                if (rectData.length === 2) {
-                    const { lineStart, lineEnd } = calculateLineEndpoints(rectData[0].bbox, rectData[1].bbox, rectStrokeWidth);
+                if (spreadRectData.length === 2) {
+                    const { lineStart, lineEnd } = calculateLineEndpoints(spreadRectData[0].bbox, spreadRectData[1].bbox, rectStrokeWidth);
 
                     mapPointsContainer.append('line')
                         .attr('class', 'maxPairLine')
@@ -209,8 +210,6 @@ export default function Map({
                             .transition().duration(transitionDuration).style('opacity', 1);
                     }
                 });
-                
-
             }, 0); // timeout is 0 but this will still put the code at the end of the event loop
         } else {
             mapPointsContainer.selectAll('.maxPairRect').transition().duration(transitionDuration).style('opacity', 0).remove();
@@ -218,12 +217,54 @@ export default function Map({
             mapPointsContainer.selectAll('.highlighted-text[data-smp]').transition().duration(transitionDuration).style('opacity', 0).remove();
         }
 
+        if (isOutlierMeterHovered && maxZscoreSample) {
+            
+            // exactly as above, but for a single item only, and thus no line is drawn
+            setTimeout(() => {
+                const textElement = mapPointsContainer.select(`text[data-smp="${maxZscoreSample}"]`).node();
+                if (textElement) {
+                    const bbox = textElement.getBBox();
+                    mapPointsContainer.append('rect')
+                        .attr('class', 'maxZscoreRect')
+                        .attr('x', bbox.x - 5)
+                        .attr('y', bbox.y - 5)
+                        .attr('width', bbox.width + 10)
+                        .attr('height', bbox.height + 10)
+                        .attr('rx', 5)
+                        .attr('fill', 'white')
+                        .attr('stroke', 'coral')
+                        .attr('stroke-width', rectStrokeWidth)
+                        .attr('data-smp', maxZscoreSample)
+                        .style('opacity', 0)
+                        .transition().duration(transitionDuration).style('opacity', 1);
+
+                    const originalTextElement = mapPointsContainer.select(`text[data-smp="${maxZscoreSample}"]`);
+                    if (!originalTextElement.empty()) {
+                        const bbox = originalTextElement.node().getBBox();
+                        mapPointsContainer.append('text')
+                            .attr('x', bbox.x + bbox.width / 2) 
+                            .attr('y', bbox.y + bbox.height / 2)
+                            .attr('class', 'highlighted-text') 
+                            .style('fill', 'black') 
+                            .attr('text-anchor', 'middle') 
+                            .attr('dy', "0.35em") 
+                            .text(originalTextElement.text())
+                            .attr('data-smp', maxZscoreSample) 
+                            .style('opacity', 0)
+                            .transition().duration(transitionDuration).style('opacity', 1);
+                    }
+                }
+            }, 0);
+        } else {
+            mapPointsContainer.selectAll('.maxZscoreRect').transition().duration(transitionDuration).style('opacity', 0).remove();
+            mapPointsContainer.selectAll('.highlighted-text[data-smp]').transition().duration(transitionDuration).style('opacity', 0).remove();
+        }
 
         return () => {
             mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
         };
         
-    }, [mapData, isSpreadMeterHovered, maxPair, selectMode, selections]);
+    }, [mapData, isSpreadMeterHovered, isOutlierMeterHovered, maxPair, maxZscoreSample, selectMode, selections]);
 
     return (
         <>

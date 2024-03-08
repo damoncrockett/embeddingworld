@@ -227,6 +227,7 @@ export default function App() {
                     mapData={mapData}
                     setClickChange={setClickChange}
                     isSpreadMeterHovered={isSpreadMeterHovered}
+                    isOutlierMeterHovered={isOutlierMeterHovered}
                     maxPair={maxPair}
                     maxZscoreSample={maxZscoreSample}
                     selectMode={selectMode}
