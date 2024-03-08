@@ -139,7 +139,7 @@ svg text:hover {
 
 #reset-zoom {
     position: fixed;
-    top: 20vh;
+    top: 15vh;
     left: 50vw;
     z-index: 2;
 
@@ -298,7 +298,7 @@ select:focus {
 #layout-group {
     position: fixed;
     margin: 0;
-    top: 20vh;
+    top: 15vh;
     right: 2vw;
     width: 100px;
 }
@@ -387,6 +387,23 @@ select:focus {
     cursor: pointer;
 }
 
+#outlierMeter {
+    display: flex;
+    flex-direction: column;
+    margin-top: 40px;
+    background-color: transparent;
+    border: 2px dotted transparent;
+    transition: border-color 0.75s;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+#outlierMeter:hover {
+    border: 2px dotted coral;
+    transition: border-color 0.75s;
+    cursor: pointer;
+}
+
 .meter {
     text-align: center;
 }
@@ -423,7 +440,7 @@ animation: fadeIn 1s ease-out;
     padding: 10px;
     border-radius: 10px;
     position: fixed;
-    top: 20vh;
+    top: 15vh;
     left: 0;
     transition: transform 0.3s ease-in-out;
     transform: translateX(-100%);

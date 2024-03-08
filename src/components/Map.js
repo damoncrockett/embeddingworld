@@ -18,8 +18,9 @@ const transitionDuration = 750;
 export default function Map({ 
     mapData, 
     setClickChange, 
-    isMeterHovered, 
-    maxPair, 
+    isSpreadMeterHovered, 
+    maxPair,
+    maxZscoreSample, 
     selectMode, 
     selections, 
     setSelections
@@ -147,7 +148,7 @@ export default function Map({
         mapTexts.on('click', (event, d) => handleClickRef.current(event, d))
                 .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d));
 
-        if (isMeterHovered && maxPair && maxPair.length === 2) {
+        if (isSpreadMeterHovered && maxPair && maxPair.length === 2) {
             
             setTimeout(() => { // to ensure text elements are already drawn
                 const rectData = maxPair.map(smp => {
@@ -222,7 +223,7 @@ export default function Map({
             mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
         };
         
-    }, [mapData, isMeterHovered, maxPair, selectMode, selections]);
+    }, [mapData, isSpreadMeterHovered, maxPair, selectMode, selections]);
 
     return (
         <>

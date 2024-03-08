@@ -7,7 +7,7 @@ import BasemapToggles from './BasemapToggles';
 import Map from './Map';
 import Loading from './Loading';
 import LoadingInset from './LoadingInset';
-import { computePairwiseDistances } from '../../utils/geometry';
+import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data'; 
 
@@ -24,9 +24,12 @@ export default function App() {
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [maxDistance, setMaxDistance] = useState(0);
-    const [maxPair, setMaxPair] = useState(null); // [i, j] indices of the pair with max distance
+    const [maxPair, setMaxPair] = useState(null);
+    const [maxZscore, setMaxZscore] = useState(0);
+    const [maxZscoreSample, setMaxZscoreSample] = useState(null); 
     const [meterModelSignal, setMeterModelSignal] = useState(0);
-    const [isMeterHovered, setIsMeterHovered] = useState(false);
+    const [isSpreadMeterHovered, setIsSpreadMeterHovered] = useState(false);
+    const [isOutlierMeterHovered, setIsOutlierMeterHovered] = useState(false);
     const [infoModal, setInfoModal] = useState(false);
     const [selectMode, setSelectMode] = useState(false);
     const [selections, setSelections] = useState([null, null, null, null]);
@@ -173,16 +176,20 @@ export default function App() {
         }
 
         const distanceFunctionName = reducer === 'pca' ? 'euclidean' : 'cosine';
-        const maxDistanceAndPair = computePairwiseDistances(mapList.map(d => d.vec), distanceFunctionName);
+        const { distance, pair } = getMaxPairwiseDistance(mapList.map(d => d.vec), distanceFunctionName);
+        const { outlierIndex, zScore } = findBiggestOutlier(mapList.map(d => d.vec), distanceFunctionName);
         
-        setMaxDistance(maxDistanceAndPair[0]);
+        setMaxDistance(distance);
+        setMaxZscore(zScore);
         
         // safer than saving just the indices, because they change a lot
-        const maxPairSamples = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].smp, mapList[maxDistanceAndPair[1][1]].smp] : null;
+        const maxPairSamples = pair ? [mapList[pair[0]].smp, mapList[pair[1]].smp] : null;
+        const maxZscoreSample = outlierIndex ? mapList[outlierIndex].smp : null;
+        
         setMaxPair(maxPairSamples);
+        setMaxZscoreSample(maxZscoreSample);
         
-        
-        const maxPairCoords = maxDistanceAndPair[1] ? [mapList[maxDistanceAndPair[1][0]].vec, mapList[maxDistanceAndPair[1][1]].vec] : null;
+        const maxPairCoords = pair ? [mapList[pair[0]].vec, mapList[pair[1]].vec] : null;
         const coords = reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords);
 
         if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
@@ -219,8 +226,9 @@ export default function App() {
             <Map 
                     mapData={mapData}
                     setClickChange={setClickChange}
-                    isMeterHovered={isMeterHovered}
+                    isSpreadMeterHovered={isSpreadMeterHovered}
                     maxPair={maxPair}
+                    maxZscoreSample={maxZscoreSample}
                     selectMode={selectMode}
                     selections={selections}
                     setSelections={setSelections} 
@@ -261,6 +269,12 @@ export default function App() {
                         onSwitch={reducer => setReducer(reducer)}
                         id='choose-reducer'
                     />
+                    <div id='spreadMeter' onMouseEnter={() => setIsSpreadMeterHovered(true)} onMouseLeave={() => setIsSpreadMeterHovered(false)}>
+                        <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                    </div>
+                    <div id='outlierMeter' onMouseEnter={() => setIsOutlierMeterHovered(true)} onMouseLeave={() => setIsOutlierMeterHovered(false)}>
+                        <Meter key={'outlier' + meterModelSignal} initialValue={maxZscore} labelText="Max Z-Score" className="meter" />
+                    </div>
                     <div id='select-group'>
                         <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
                         <div id='selection-slots'>
@@ -268,9 +282,6 @@ export default function App() {
                                 <div key={i} title={d ? d : '[empty]'} onClick={handleRemoveSelection} className={d ? 'selection-slot filled' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
                             ))}
                         </div>
-                    </div>
-                    <div id='spreadMeter' onMouseEnter={() => setIsMeterHovered(true)} onMouseLeave={() => setIsMeterHovered(false)}>
-                        <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
                     </div>
                 </div>
             </div>

@@ -8,16 +8,16 @@ function cosineDistance(arrA, arrB) {
     let normB = 0;
     
     for (let i = 0; i < arrA.length; i++) {
-      dotProduct += arrA[i] * arrB[i]; // Sum of product of each corresponding elements
-      normA += arrA[i] * arrA[i]; // Sum of squares of elements in arrA
-      normB += arrB[i] * arrB[i]; // Sum of squares of elements in arrB
+      dotProduct += arrA[i] * arrB[i]; 
+      normA += arrA[i] * arrA[i]; 
+      normB += arrB[i] * arrB[i]; 
     }
   
-    normA = Math.sqrt(normA); // Square root of sum of squares of arrA
-    normB = Math.sqrt(normB); // Square root of sum of squares of arrB
+    normA = Math.sqrt(normA); 
+    normB = Math.sqrt(normB); 
   
     const cosineSimilarity = dotProduct / (normA * normB);
-    const cosineDistance = 1 - cosineSimilarity; // Convert similarity to distance
+    const cosineDistance = 1 - cosineSimilarity;
   
     return cosineDistance;
   }  
@@ -32,26 +32,31 @@ function generatePairwiseComparisons(length) {
     return pairs;
 }
 
-export function computePairwiseDistances(arrays, distanceFunctionName) {
+export function getMaxPairwiseDistance(arrays, distanceFunctionName) {
+
+    let distance, pair;
 
     if (arrays.length < 2) {
-        return [0, null];
+        
+        distance = 0;
+        pair = null;
+
+    } else {
+
+      const distanceFunction = distanceFunctionName === 'cosine' ? cosineDistance : euclideanDistance;
+
+      const pairs = generatePairwiseComparisons(arrays.length);
+      const distances = pairs.map(pair => ({
+          pair,
+          distance: distanceFunction(arrays[pair[0]], arrays[pair[1]])
+      }));
+
+      distance = Math.max(...distances.map(d => d.distance));
+      pair = distances.find(d => d.distance === distance).pair;
+
     }
-
-    const pairs = generatePairwiseComparisons(arrays.length);
-
-    const distanceFunction = distanceFunctionName === 'cosine' ? cosineDistance : euclideanDistance;
-
-    const distances = pairs.map(pair => ({
-        pair,
-        distance: distanceFunction(arrays[pair[0]], arrays[pair[1]])
-    }));
-
-    const maxDistance = Math.max(...distances.map(d => d.distance));
-    const maxPair = distances.find(d => d.distance === maxDistance).pair;
-    
-    return [maxDistance, maxPair];
-}
+    return { distance, pair };
+  }
 
 //
 //
@@ -122,5 +127,54 @@ export function projectPointOntoLine(point, v1, v2) {
   const vectorToPoint = subtractVectors(point, v1);
   return dotProduct(vectorToPoint, normalizedDirection);
 }
+
+//
+//
+//
+//
+//
+
+export function findBiggestOutlier(points, distanceFunctionName) {
+
+  let outlierIndex, zScore;
+  const n = points.length;
+
+  if (n < 3) {
+    
+    outlierIndex = null;
+    zScore = 0;
+
+  } else {
+
+    const dimensions = points[0].length; // all points have same dimensionality
+    let centroid = new Array(dimensions).fill(0);
+    let distances = new Array(n).fill(0);
+
+    points.forEach(point => {
+        point.forEach((value, i) => {
+            centroid[i] += value / n;
+        });
+    });
+
+    const distanceFunction = distanceFunctionName === 'cosine' ? cosineDistance : euclideanDistance;
+
+    let meanDistance = 0;
+    points.forEach((point, index) => {
+        const distance = distanceFunction(centroid, point);
+        distances[index] = distance;
+        meanDistance += distance / n;
+    });
+
+    let variance = distances.reduce((acc, val) => acc + Math.pow(val - meanDistance, 2), 0) / (n - 1);
+    let stdDev = Math.sqrt(variance);
+
+    let maxDistance = Math.max(...distances);
+    outlierIndex = distances.indexOf(maxDistance);
+    zScore = (maxDistance - meanDistance) / stdDev;
+
+  }
+  return { outlierIndex, zScore };
+}
+
 
 
