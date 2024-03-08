@@ -28,7 +28,7 @@ button {
     border: 2px solid black;
     border-radius: 10px;
     background-color: transparent;
-    color: white;
+    color: grey;
 }
 
 button:hover {
@@ -38,6 +38,7 @@ button:hover {
 
 button.on {
     background-color: coral;
+    color: white;
 }
 
 button.off {
@@ -228,12 +229,16 @@ textarea::placeholder {
 .radio-switch label {
     font-weight: 400;
     background-color: transparent;
-    color: white;
+    color: grey;
     padding: 10px;
     border: 2px solid black;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, color 0.3s;
     text-align: center;
+}
+
+.radio-switch label.radioactive {
+    color: white;
 }
 
 .radio-switch input[type="radio"]:checked + label {
@@ -272,12 +277,12 @@ select {
     border: 2px solid black; 
     border-radius: 10px; 
     background-color: transparent; 
-    color: white; 
+    color: grey; 
     cursor: pointer; 
     -webkit-appearance: none; 
     -moz-appearance: none; 
     appearance: none; 
-    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><path fill="white" d="M2048 640v128h-2048v-128h2048zm0 640v128h-2048v-128h2048z"/></svg>');
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><path fill="grey" d="M2048 640v128h-2048v-128h2048zm0 640v128h-2048v-128h2048z"/></svg>');
     background-repeat: no-repeat;
     background-position: right 10px center; 
     background-size: 12px; 

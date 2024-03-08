@@ -19,6 +19,7 @@ export default function Radio({ choice, choices, onSwitch, id }) {
                     <label
                         htmlFor={inputIds[index]}
                         id={labelIds[index]}
+                        className={choice === choiceValue ? 'radioactive' : ''}
                     >
                         {choiceValue.toUpperCase()}
                     </label>
