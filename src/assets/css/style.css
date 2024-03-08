@@ -310,6 +310,7 @@ select:focus {
     margin: 0;
     top: 10vh;
     right: 2vw;
+    width: 100px;
 }
 
 #choose-reducer {

@@ -34,15 +34,13 @@ export default function Map({
     const handleClickRef = useRef();
     const handleDoubleClickRef = useRef();
 
-    useEffect(() => { // we redefine the click handlers when selectMode or selections change
+    useEffect(() => {
 
-        handleClickRef.current = (event, d) => {
+        const handleClick = (event, d) => {
             if (clickTimer.current === null) {
                 clickTimer.current = setTimeout(() => {
                     if (selectMode) {
-                        if (selections.includes(d.smp)) {
-                            return;
-                        } else {
+                        if (!selections.includes(d.smp)) {
                             const nullIndex = selections.indexOf(null);
                             if (nullIndex !== -1) {
                                 const newSelections = [...selections];
@@ -53,25 +51,38 @@ export default function Map({
                     } else {
                         setClickChange({changeType: 'switch', smp: d.smp});
                     }
+                    clearTimeout(clickTimer.current);
                     clickTimer.current = null;
                 }, 250);
+            } else {
+                clearTimeout(clickTimer.current);
+                clickTimer.current = null;
             }
-        };
-
-        handleDoubleClickRef.current = (event, d) => {
+        };        
+        
+        handleClickRef.current = handleClick;
+    
+        const handleDoubleClick = (event, d) => {
             // prevent zoom on double click
             event.preventDefault();
             event.stopPropagation();
-
+    
             clearTimeout(clickTimer.current);
             clickTimer.current = null;
-
+    
             if (!selectMode) {
                 setClickChange({changeType: 'remove', smp: d.smp});
             }
         };
-
+    
+        handleDoubleClickRef.current = handleDoubleClick;
+    
+        return () => {
+            clearTimeout(clickTimer.current); 
+            clickTimer.current = null;
+        };
     }, [selectMode, selections]);
+    
 
     const handleZoom = (event) => {
         const { transform } = event;
