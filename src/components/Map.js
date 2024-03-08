@@ -69,7 +69,7 @@ export default function Map({
             }
         };
 
-    }, [selectMode, selections, setSelections, setClickChange]);
+    }, [selectMode, selections]);
 
     const handleZoom = (event) => {
         const { transform } = event;
@@ -144,6 +144,8 @@ export default function Map({
                             .remove()
             );
 
+        mapTexts.on('click', (event, d) => handleClickRef.current(event, d))
+                .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d));
 
         if (isMeterHovered && maxPair && maxPair.length === 2) {
             
@@ -220,7 +222,7 @@ export default function Map({
             mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
         };
         
-    }, [mapData, isMeterHovered, maxPair]);
+    }, [mapData, isMeterHovered, maxPair, selectMode, selections]);
 
     return (
         <>

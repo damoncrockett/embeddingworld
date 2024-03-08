@@ -251,7 +251,7 @@ export default function App() {
                         <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
                         <div id='selection-slots'>
                             {selections.map((d, i) => (
-                                <div key={i} className={d ? 'selection-slot filled' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
+                                <div key={i} className={d ? 'selection-slot' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
                             ))}
                         </div>
                     </div>
