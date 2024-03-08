@@ -49,4 +49,4 @@ function sampleRandomWords(wordsArray, sampleSize = 10) {
     return shuffled.slice(0, sampleSize);
   }
 
-export { basemaps, chooseThreeMostImportantWords, sampleRandomWords };
+export { basemaps, sampleRandomWords };

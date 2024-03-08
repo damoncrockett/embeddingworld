@@ -125,6 +125,20 @@ export default function App() {
         }
     }
 
+    const handleRemoveSelection = (event) => {
+        const index = Array.from(event.target.parentNode.children).indexOf(event.target);
+        let newSelections = [...selections];
+        newSelections[index] = null; 
+        
+        // move nulls to the end
+        const nonNullSelections = newSelections.filter(item => item !== null);
+        const nullCount = newSelections.length - nonNullSelections.length;
+        
+        newSelections = [...nonNullSelections, ...Array(nullCount).fill(null)];
+        
+        setSelections(newSelections);
+    };
+    
     useEffect(() => {
         initializeEmbedder(
             embeddingModel, 
@@ -243,7 +257,7 @@ export default function App() {
                 <div id='layout-group'>
                     <Radio
                         choice={reducer}
-                        choices={['pca', 'proj', 'nn', 'path']}
+                        choices={['pca', 'project', 'nearest', 'paths']}
                         onSwitch={reducer => setReducer(reducer)}
                         id='choose-reducer'
                     />
@@ -251,13 +265,13 @@ export default function App() {
                         <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
                         <div id='selection-slots'>
                             {selections.map((d, i) => (
-                                <div key={i} className={d ? 'selection-slot' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
+                                <div key={i} title={d ? d : '[empty]'} onClick={handleRemoveSelection} className={d ? 'selection-slot filled' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
                             ))}
                         </div>
                     </div>
-                </div>
-                <div id='spreadMeter' onMouseEnter={() => setIsMeterHovered(true)} onMouseLeave={() => setIsMeterHovered(false)}>
-                    <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                    <div id='spreadMeter' onMouseEnter={() => setIsMeterHovered(true)} onMouseLeave={() => setIsMeterHovered(false)}>
+                        <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                    </div>
                 </div>
             </div>
             <div id='title-group'>

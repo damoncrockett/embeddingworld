@@ -54,14 +54,14 @@ export default function Meter({ initialValue, labelText, className }) {
   }, []);
 
   return (
-    <div className={`${className} ${fadeIn ? 'fade-in' : ''}`} style={{ textAlign: 'center' }}>
-      <p style={{ color, margin: 0 }}>
+    <div className={`${className} ${fadeIn ? 'fade-in' : ''}`}>
+      <p style={{ color }}>
         {displayValue.toFixed(3)}
-        <span style={{ color: 'grey', marginLeft: '10px' }}>
+        <span className='meter-max'>
           {maxValue.toFixed(3)}
         </span>
       </p>
-      <div style={{ color: 'grey', fontSize: '13px' }}>
+      <div className='meter-label'>
         {labelText.toUpperCase()}
       </div>
     </div>

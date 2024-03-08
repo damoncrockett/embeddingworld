@@ -19,7 +19,6 @@ async function initializeEmbedder(
         const newEmbedder = await pipeline('feature-extraction', embeddingModel);
         embedderRef.current = newEmbedder;
         setEmbedderChangeCounter(counter => counter + 1);
-        console.log('incremented counter');
         setLoading(false);
         setLoadingInset(false);
     } catch (error) {
