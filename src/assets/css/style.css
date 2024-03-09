@@ -354,16 +354,17 @@ select:focus {
 #selection-slots {
     display: flex;
     flex-direction: column;
-    gap: 1vh;
 }
 
 .selection-slot {
     border: 2px;
     padding: 5px;
+    margin-bottom: 10px;
     border-radius: 10px;
     text-align: center;
     overflow-wrap: break-word;
     hyphens: auto;
+    user-select: none;
 }
 
 .empty {
@@ -378,11 +379,6 @@ select:focus {
     border-style: solid;
 }
 
-.filled:hover {
-    border-color: coral;
-    cursor: pointer;
-}
-
 .idle {
     color: grey;
     border-color: grey;
@@ -393,6 +389,10 @@ select:focus {
     color: white;
     border-color: white;
     border-style: dotted;
+}
+
+.dragging {
+    border-color: coral;
 }
 
 #spreadMeter {

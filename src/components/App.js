@@ -10,7 +10,7 @@ import LoadingInset from './LoadingInset';
 import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'; 
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 export default function App() {
 
@@ -221,35 +221,24 @@ export default function App() {
         }        
     }, [clickChange]);
 
-    const getItemStyle = (isDragging, draggableStyle) => ({
-        userSelect: 'none',
-        padding: grid * 2,
-        margin: `0 0 ${grid}px 0`,
-        background: isDragging ? 'lightgreen' : 'grey',
-        ...draggableStyle,
-        });
-    
-    const getListStyle = isDraggingOver => ({
-      background: isDraggingOver ? 'lightblue' : 'lightgrey',
-      padding: grid,
-      width: 100,
-    });
-
-    const grid = 8;
+    const reorderSelections = (list, startIndex, endIndex) => {
+        const result = Array.from(list);
+        const [removed] = result.splice(startIndex, 1);
+        result.splice(endIndex, 0, removed);
+        return result;
+    };
 
     const onDragEnd = result => {
         if (!result.destination) {
           return;
         }
-    
         const newSelections = reorderSelections(
-          selections,
-          result.source.index,
-          result.destination.index
+            selections,
+            result.source.index,
+            result.destination.index
         );
-    
         setSelections(newSelections);
-      };
+    };
     
     return (
         loading ? <Loading /> :
@@ -312,26 +301,23 @@ export default function App() {
                         <div id='selection-slots'>
                             <DragDropContext onDragEnd={onDragEnd}>
                                 <Droppable droppableId="droppable">
-                                    {(provided, snapshot) => (
+                                    {(provided, _) => (
                                     <div
                                         {...provided.droppableProps}
                                         ref={provided.innerRef}
-                                        style={getListStyle(snapshot.isDraggingOver)}
                                     >
                                         {selections.map((item, index) => (
-                                        <Draggable key={`${item}${index}`} draggableId={item} index={index}>
+                                        <Draggable key={`${item}${index}`} draggableId={`${item}${index}`} index={index}>
                                             {(provided, snapshot) => (
                                             <div
                                                 ref={provided.innerRef}
-                                                className={`selection-slot ${selectionSlotStatus(item, index, reducer, selections)}`}
+                                                className={`selection-slot ${selectionSlotStatus(item, index, reducer, selections)} ${snapshot.isDragging ? 'dragging' : ''}`}
+                                                onClick={handleRemoveSelection}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                style={getItemStyle(
-                                                snapshot.isDragging,
-                                                provided.draggableProps.style
-                                                )}
+                                                style={provided.draggableProps.style}
                                             >
-                                                {item}
+                                                {item ? item : 'LANDSCAPE'}
                                             </div>
                                             )}
                                         </Draggable>
@@ -396,9 +382,3 @@ function selectionSlotStatus(d, i, reducer, selections) {
     }
 }
 
-function reorderSelections(list, startIndex, endIndex) {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    return result;
-  };
