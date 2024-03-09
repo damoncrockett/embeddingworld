@@ -9,7 +9,8 @@ import Loading from './Loading';
 import LoadingInset from './LoadingInset';
 import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
 import Meter from './Meter';
-import { returnDomain } from '../../utils/data'; 
+import { returnDomain } from '../../utils/data';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'; 
 
 export default function App() {
 
@@ -219,6 +220,36 @@ export default function App() {
             setMapList(currentList);
         }        
     }, [clickChange]);
+
+    const getItemStyle = (isDragging, draggableStyle) => ({
+        userSelect: 'none',
+        padding: grid * 2,
+        margin: `0 0 ${grid}px 0`,
+        background: isDragging ? 'lightgreen' : 'grey',
+        ...draggableStyle,
+        });
+    
+    const getListStyle = isDraggingOver => ({
+      background: isDraggingOver ? 'lightblue' : 'lightgrey',
+      padding: grid,
+      width: 100,
+    });
+
+    const grid = 8;
+
+    const onDragEnd = result => {
+        if (!result.destination) {
+          return;
+        }
+    
+        const newSelections = reorderSelections(
+          selections,
+          result.source.index,
+          result.destination.index
+        );
+    
+        setSelections(newSelections);
+      };
     
     return (
         loading ? <Loading /> :
@@ -279,9 +310,37 @@ export default function App() {
                     <div id='select-group'>
                         <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
                         <div id='selection-slots'>
-                            {selections.map((d, i) => (
-                                <div key={i} title={d ? d : '[empty]'} onClick={handleRemoveSelection} className={`selection-slot ${selectionSlotStatus(d, i, reducer, selections)}`}>{d ? d : 'LANDSCAPE'}</div>
-                            ))}
+                            <DragDropContext onDragEnd={onDragEnd}>
+                                <Droppable droppableId="droppable">
+                                    {(provided, snapshot) => (
+                                    <div
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        style={getListStyle(snapshot.isDraggingOver)}
+                                    >
+                                        {selections.map((item, index) => (
+                                        <Draggable key={`${item}${index}`} draggableId={item} index={index}>
+                                            {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                className={`selection-slot ${selectionSlotStatus(item, index, reducer, selections)}`}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={getItemStyle(
+                                                snapshot.isDragging,
+                                                provided.draggableProps.style
+                                                )}
+                                            >
+                                                {item}
+                                            </div>
+                                            )}
+                                        </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         </div>
                     </div>
                 </div>
@@ -336,3 +395,10 @@ function selectionSlotStatus(d, i, reducer, selections) {
         }
     }
 }
+
+function reorderSelections(list, startIndex, endIndex) {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };

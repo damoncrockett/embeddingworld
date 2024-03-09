@@ -41,7 +41,7 @@ export default function Map({
                 clickTimer.current = setTimeout(() => {
                     if (selectMode) {
                         if (!selections.includes(d.smp)) {
-                            const newSelections = [d.smp, ...selections.slice(0, 3)];
+                            const newSelections = [d.smp, ...selections.slice(0, 3)]; // d.smp enqueued; selections[3] dequeued
                             setSelections(newSelections);
                         }
                     } else {
