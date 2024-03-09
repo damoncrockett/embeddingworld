@@ -323,13 +323,6 @@ select:focus {
     margin-bottom: -1px;
 }
 
-#label-choose-reducer-project {
-    border-radius: 0 0 0 0;
-    padding: 10px;
-    margin-bottom: -1px;
-    margin-top: -1px;
-}
-
 #label-choose-reducer-nearest {
     border-radius: 0 0 0 0;
     padding: 10px;
@@ -338,6 +331,13 @@ select:focus {
 }
 
 #label-choose-reducer-paths {
+    border-radius: 0 0 0 0;
+    padding: 10px;
+    margin-bottom: -1px;
+    margin-top: -1px;
+}
+
+#label-choose-reducer-project {
     border-radius: 0 0 10px 10px;
     padding: 10px;
     margin-top: -1px;
@@ -381,6 +381,18 @@ select:focus {
 .filled:hover {
     border-color: coral;
     cursor: pointer;
+}
+
+.idle {
+    color: grey;
+    border-color: grey;
+    border-style: dotted;
+}
+
+.lonely {
+    color: white;
+    border-color: white;
+    border-style: dotted;
 }
 
 #spreadMeter {

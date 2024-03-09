@@ -266,7 +266,7 @@ export default function App() {
                 <div id='layout-group'>
                     <Radio
                         choice={reducer}
-                        choices={['pca', 'project', 'nearest', 'paths']}
+                        choices={['pca', 'nearest', 'paths', 'project']}
                         onSwitch={reducer => setReducer(reducer)}
                         id='choose-reducer'
                     />
@@ -280,7 +280,7 @@ export default function App() {
                         <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
                         <div id='selection-slots'>
                             {selections.map((d, i) => (
-                                <div key={i} title={d ? d : '[empty]'} onClick={handleRemoveSelection} className={d ? 'selection-slot filled' : 'selection-slot empty'}>{d ? d : 'LANDSCAPE'}</div>
+                                <div key={i} title={d ? d : '[empty]'} onClick={handleRemoveSelection} className={`selection-slot ${selectionSlotStatus(d, i, reducer, selections)}`}>{d ? d : 'LANDSCAPE'}</div>
                             ))}
                         </div>
                     </div>
@@ -303,4 +303,36 @@ export default function App() {
         </div>
     );
     
+}
+
+function selectionSlotStatus(d, i, reducer, selections) {
+
+    if (d === null) return 'empty';
+    if (reducer === 'pca')  return 'idle';
+
+    if (reducer === 'nearest') {
+        if (i === 0) return 'filled';
+        if (i > 0) return 'idle';
+    } else if (reducer === 'paths') {
+        if (i === 0) {
+            if (selections[1] === null) return 'lonely';
+            if (selections[1] !== null) return 'filled';
+        } else if (i === 1) {
+            return 'filled'; // if 1 is filled, 0 is also filled
+        } else if (i > 1) {
+            return 'idle';
+        }
+    } else if (reducer === 'project') {
+        if (i === 0) {
+            if (selections[1] === null) return 'lonely';
+            if (selections[1] !== null) return 'filled';
+        } else if (i === 1) {
+            return 'filled'; // if 1 is filled, 0 is also filled
+        } else if (i === 2) {
+            if (selections[3] === null) return 'lonely';
+            if (selections[3] !== null) return 'filled';
+        } else if (i === 3) {
+            return 'filled'; // if 3 is filled, 2 is also filled
+        }
+    }
 }

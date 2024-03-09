@@ -41,12 +41,8 @@ export default function Map({
                 clickTimer.current = setTimeout(() => {
                     if (selectMode) {
                         if (!selections.includes(d.smp)) {
-                            const nullIndex = selections.indexOf(null);
-                            if (nullIndex !== -1) {
-                                const newSelections = [...selections];
-                                newSelections[nullIndex] = d.smp;
-                                setSelections(newSelections);
-                            }
+                            const newSelections = [d.smp, ...selections.slice(0, 3)];
+                            setSelections(newSelections);
                         }
                     } else {
                         setClickChange({changeType: 'switch', smp: d.smp});
@@ -58,8 +54,8 @@ export default function Map({
                 clearTimeout(clickTimer.current);
                 clickTimer.current = null;
             }
-        };        
-        
+        };
+                        
         handleClickRef.current = handleClick;
     
         const handleDoubleClick = (event, d) => {
