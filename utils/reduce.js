@@ -1,7 +1,7 @@
 import { PCA } from 'ml-pca';
 import { projectPointOntoLine } from './geometry';
 
-export function reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords) {
+export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
     if (mapList.length === 0) return [];
 
     const toFit = basemapLocked ? mapList.filter(d => d.lvl === 'b') : mapList;
@@ -18,10 +18,31 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords)
         
         if (mapList.length === 1) return [[0, 0]];       
 
-        const projected = mapList.map(d => projectPointOntoLine(d.vec, maxPairCoords[0], maxPairCoords[1]))
-        coords = projected.map(d => [d, 0])
+        if (selections[0] && selections[1]) {
+            const selectionVecs = mapList.filter(d => d.smp === selections[0] || d.smp === selections[1]).map(d => d.vec);
+            
+            if (selectionVecs.length !== 2) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
+
+            const projectedX = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
+
+            if (selections[2] && selections[3]) {
+                const selectionVecs = mapList.filter(d => d.smp === selections[2] || d.smp === selections[3]).map(d => d.vec);
+
+                if (selectionVecs.length !== 2) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
+
+                const projectedY = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
+                
+                coords = projectedX.map((d, i) => [d, projectedY[i]]);
+
+            } else {
+
+                coords = projectedX.map(d => [d, 0])
+            }
+        } else {
+            
+            coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
+        }
     } else {
-        // coords are random between -1 and 1
         coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
     }
 

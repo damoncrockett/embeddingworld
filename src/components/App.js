@@ -159,6 +159,15 @@ export default function App() {
     
         recomputeEmbeddings();
     }, [embedderChangeCounter]);
+
+    useEffect(() => { // make sure deleted map items are removed from selections
+
+        if (selections.every(item => mapList.some(e => e.smp === item))) return;
+        
+        const newSelections = selections.map(item => mapList.some(e => e.smp === item) ? item : null);
+        setSelections(newSelections);
+
+    }, [mapList]);
     
     useEffect(() => {
 
@@ -182,8 +191,7 @@ export default function App() {
         setMaxPair(maxPairSamples);
         setMaxZscoreSample(maxZscoreSample);
         
-        const maxPairCoords = pair ? [mapList[pair[0]].vec, mapList[pair[1]].vec] : null;
-        const coords = reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords);
+        const coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
 
         if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
 
@@ -197,7 +205,7 @@ export default function App() {
         
         setMapData(mapListAndCoords);
     
-    } , [mapList, basemapLocked, reducer]);
+    } , [mapList, basemapLocked, reducer, selections]);
 
     useEffect(() => {
         if ( clickChange && clickChange.changeType === 'switch' ) {
@@ -212,15 +220,6 @@ export default function App() {
             setMapList(currentList);
         }        
     }, [clickChange]);
-
-    useEffect(() => { // make sure deleted map items are removed from selections
-
-        if (selections.every(item => mapList.some(e => e.smp === item))) return;
-        
-        const newSelections = selections.map(item => mapList.some(e => e.smp === item) ? item : null);
-        setSelections(newSelections);
-
-    }, [mapList]);
     
     return (
         loading ? <Loading /> :
