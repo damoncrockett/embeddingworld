@@ -24,7 +24,8 @@ export default function Map({
     maxZscoreSample, 
     selectMode, 
     selections, 
-    setSelections
+    setSelections,
+    reducer
 }) {
     
     const svgRef = useRef(null);
@@ -41,7 +42,21 @@ export default function Map({
                 clickTimer.current = setTimeout(() => {
                     if (selectMode) {
                         if (!selections.includes(d.smp)) {
-                            const newSelections = [d.smp, ...selections.slice(0, 3)]; // d.smp enqueued; selections[3] dequeued
+                            let newSelections;
+                            const nullIndex = selections.indexOf(null);
+                            if (reducer === 'nearest') { // new selection pushes others down and first null (if any) gets filled
+                                if (nullIndex !== -1) {
+                                    newSelections = [d.smp, ...selections.slice(0, nullIndex), ...selections.slice(nullIndex + 1)];
+                                } else {
+                                    newSelections = [d.smp, ...selections.slice(0, selections.length - 1)];
+                                }
+                            } else { // new selection fills first null or replaces last selection
+                                if (nullIndex !== -1) {
+                                    newSelections = [...selections.slice(0, nullIndex), d.smp, ...selections.slice(nullIndex + 1)];
+                                } else {
+                                    newSelections = [...selections.slice(0, selections.length - 1), d.smp];
+                                }
+                            }    
                             setSelections(newSelections);
                         }
                     } else {
@@ -77,7 +92,7 @@ export default function Map({
             clearTimeout(clickTimer.current); 
             clickTimer.current = null;
         };
-    }, [selectMode, selections]);
+    }, [selectMode, selections, reducer]);
     
 
     const handleZoom = (event) => {

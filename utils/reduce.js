@@ -21,7 +21,8 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, maxPairCoords)
         const projected = mapList.map(d => projectPointOntoLine(d.vec, maxPairCoords[0], maxPairCoords[1]))
         coords = projected.map(d => [d, 0])
     } else {
-        coords = mapList.map(d => [0, 0]);
+        // coords are random between -1 and 1
+        coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
     }
 
     return coords;

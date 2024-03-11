@@ -10,7 +10,7 @@ import LoadingInset from './LoadingInset';
 import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Selections from './Selections';
 
 export default function App() {
 
@@ -44,15 +44,13 @@ export default function App() {
           .then(response => response.text())
           .then(text => {
             const wordsArray = text.split('\n').map(line => line.trim()).filter(Boolean);
-            const sampled = sampleRandomWords(wordsArray); // Assuming this function is defined
+            const sampled = sampleRandomWords(wordsArray); 
             
             if (inputRef.current) {
-              inputRef.current.value = sampled.join('\n'); // Join the sampled words with newlines
+              inputRef.current.value = sampled.join('\n'); 
               
-              // Set focus to the textarea
               inputRef.current.focus();
               
-              // Optional: Place the cursor at the end of the textarea content
               const length = inputRef.current.value.length;
               inputRef.current.setSelectionRange(length, length);
             }
@@ -134,12 +132,6 @@ export default function App() {
         let newSelections = [...selections];
         newSelections[index] = null; 
         
-        // move nulls to the end
-        const nonNullSelections = newSelections.filter(item => item !== null);
-        const nullCount = newSelections.length - nonNullSelections.length;
-        
-        newSelections = [...nonNullSelections, ...Array(nullCount).fill(null)];
-        
         setSelections(newSelections);
     };
     
@@ -220,25 +212,6 @@ export default function App() {
             setMapList(currentList);
         }        
     }, [clickChange]);
-
-    const reorderSelections = (list, startIndex, endIndex) => {
-        const result = Array.from(list);
-        const [removed] = result.splice(startIndex, 1);
-        result.splice(endIndex, 0, removed);
-        return result;
-    };
-
-    const onDragEnd = result => {
-        if (!result.destination) {
-          return;
-        }
-        const newSelections = reorderSelections(
-            selections,
-            result.source.index,
-            result.destination.index
-        );
-        setSelections(newSelections);
-    };
     
     return (
         loading ? <Loading /> :
@@ -252,7 +225,8 @@ export default function App() {
                     maxZscoreSample={maxZscoreSample}
                     selectMode={selectMode}
                     selections={selections}
-                    setSelections={setSelections} 
+                    setSelections={setSelections}
+                    reducer={reducer} 
             />
             <div id='map-controls'>
                 <div id='input-group'>
@@ -298,36 +272,12 @@ export default function App() {
                     </div>
                     <div id='select-group'>
                         <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
-                        <div id='selection-slots'>
-                            <DragDropContext onDragEnd={onDragEnd}>
-                                <Droppable droppableId="droppable">
-                                    {(provided, _) => (
-                                    <div
-                                        {...provided.droppableProps}
-                                        ref={provided.innerRef}
-                                    >
-                                        {selections.map((item, index) => (
-                                        <Draggable key={`${item}${index}`} draggableId={`${item}${index}`} index={index}>
-                                            {(provided, snapshot) => (
-                                            <div
-                                                ref={provided.innerRef}
-                                                className={`selection-slot ${selectionSlotStatus(item, index, reducer, selections)} ${snapshot.isDragging ? 'dragging' : ''}`}
-                                                onClick={handleRemoveSelection}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                style={provided.draggableProps.style}
-                                            >
-                                                {item ? item : 'LANDSCAPE'}
-                                            </div>
-                                            )}
-                                        </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                    )}
-                                </Droppable>
-                            </DragDropContext>
-                        </div>
+                        <Selections
+                            selections={selections}
+                            setSelections={setSelections}
+                            handleRemoveSelection={handleRemoveSelection}
+                            reducer={reducer} 
+                        />
                     </div>
                 </div>
             </div>
@@ -348,37 +298,5 @@ export default function App() {
         </div>
     );
     
-}
-
-function selectionSlotStatus(d, i, reducer, selections) {
-
-    if (d === null) return 'empty';
-    if (reducer === 'pca')  return 'idle';
-
-    if (reducer === 'nearest') {
-        if (i === 0) return 'filled';
-        if (i > 0) return 'idle';
-    } else if (reducer === 'paths') {
-        if (i === 0) {
-            if (selections[1] === null) return 'lonely';
-            if (selections[1] !== null) return 'filled';
-        } else if (i === 1) {
-            return 'filled'; // if 1 is filled, 0 is also filled
-        } else if (i > 1) {
-            return 'idle';
-        }
-    } else if (reducer === 'project') {
-        if (i === 0) {
-            if (selections[1] === null) return 'lonely';
-            if (selections[1] !== null) return 'filled';
-        } else if (i === 1) {
-            return 'filled'; // if 1 is filled, 0 is also filled
-        } else if (i === 2) {
-            if (selections[3] === null) return 'lonely';
-            if (selections[3] !== null) return 'filled';
-        } else if (i === 3) {
-            return 'filled'; // if 3 is filled, 2 is also filled
-        }
-    }
 }
 
