@@ -212,6 +212,15 @@ export default function App() {
             setMapList(currentList);
         }        
     }, [clickChange]);
+
+    useEffect(() => { // make sure deleted map items are removed from selections
+
+        if (selections.every(item => mapList.some(e => e.smp === item))) return;
+        
+        const newSelections = selections.map(item => mapList.some(e => e.smp === item) ? item : null);
+        setSelections(newSelections);
+
+    }, [mapList]);
     
     return (
         loading ? <Loading /> :
