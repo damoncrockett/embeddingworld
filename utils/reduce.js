@@ -1,5 +1,5 @@
 import { PCA } from 'ml-pca';
-import { projectPointOntoLine } from './geometry';
+import { projectPointOntoLine, euclideanDistance, angleBetweenVectors, polarToCartesian } from './geometry';
 
 export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
     if (mapList.length === 0) return [];
@@ -42,6 +42,25 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
             
             coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
         }
+    } else if (reducer === 'nearest') {
+
+        if (selections[0]) {
+
+            const selectionVec = mapList.find(d => d.smp === selections[0]).vec;
+
+            if (!selectionVec) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
+
+            const euclideanDistances = mapList.map(d => euclideanDistance(d.vec, selectionVec));
+            console.log('euclideanDistances', euclideanDistances);
+            const anglesBetween = mapList.map(d => angleBetweenVectors(d.vec, selectionVec));
+            console.log('anglesBetween', anglesBetween);
+            coords = euclideanDistances.map((d, i) => polarToCartesian(d, anglesBetween[i]));
+            console.log('coords', coords);
+
+        } else {
+            coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
+        }
+        
     } else {
         coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
     }

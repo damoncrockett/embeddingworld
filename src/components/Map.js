@@ -138,6 +138,9 @@ export default function Map({
         xDomain = [min(mapData, d => d.x), max(mapData, d => d.x)];
         yDomain = [min(mapData, d => d.y), max(mapData, d => d.y)];
 
+        console.log('xDomain', xDomain);
+        console.log('yDomain', yDomain);
+
         xScale = scaleLinear()
             .domain(xDomain)
             .range([padding.left, svgWidth - padding.right]);
