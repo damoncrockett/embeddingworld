@@ -2,7 +2,7 @@ export function euclideanDistance(arr1, arr2) {
     return Math.sqrt(arr1.reduce((sum, current, index) => sum + Math.pow(current - arr2[index], 2), 0));
 }
 
-function cosineDistance(arrA, arrB, outmetric = 'distance') {
+export function cosineDistance(arrA, arrB, outmetric = 'distance') {
     let dotProduct = 0;
     let normA = 0;
     let normB = 0;

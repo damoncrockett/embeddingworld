@@ -4,7 +4,7 @@ import { reduceEmbeddings } from '../../utils/reduce';
 import { basemaps, sampleRandomWords, iconPath } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
-import Map from './Map';
+import World from './World';
 import Loading from './Loading';
 import LoadingInset from './LoadingInset';
 import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
@@ -197,13 +197,21 @@ export default function App() {
 
         prevEmbeddingModel.current = embeddingModel;
                         
-        const mapListAndCoords = mapList.map((item, index) => ({
+        if (reducer !== 'paths') {
+            
+            const mapListAndCoords = mapList.map((item, index) => ({
             ...item,
             x: coords[index][0],
             y: coords[index][1]
         }));
         
         setMapData(mapListAndCoords);
+        
+        } else {
+            
+            setMapData(coords); // this is really 'graph'
+
+        }
     
     } , [mapList, basemapLocked, reducer, selections]);
 
@@ -224,7 +232,7 @@ export default function App() {
     return (
         loading ? <Loading /> :
         <div>
-            <Map 
+            <World 
                     mapData={mapData}
                     setClickChange={setClickChange}
                     isSpreadMeterHovered={isSpreadMeterHovered}

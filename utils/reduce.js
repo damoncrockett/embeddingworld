@@ -1,5 +1,6 @@
 import { PCA } from 'ml-pca';
-import { projectPointOntoLine, euclideanDistance, angleBetweenVectors, polarToCartesian } from './geometry';
+import { projectPointOntoLine, euclideanDistance, cosineDistance, angleBetweenVectors, polarToCartesian } from './geometry';
+import { map } from 'lodash';
 
 export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
     if (mapList.length === 0) return [];
@@ -62,7 +63,28 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
         }
         
     } else {
-        coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
+
+        const graph = new Map();
+
+        // when mapList has many items, threshold should be lower
+        const threshold = 2 / Math.sqrt(mapList.length);
+
+        mapList.forEach((item, index) => {
+            
+            graph.set(index, { connections: [], smp: item.smp });
+            
+            mapList.forEach((otherItem, otherIndex) => {
+                if (index !== otherIndex) {
+                    const dist = cosineDistance(item.vec, otherItem.vec);
+                    if (dist < threshold) { 
+                        graph.get(index).connections.push({ node: otherIndex, weight: dist });
+                    }
+                }
+            });
+        });
+
+        return graph;
+
     }
 
     return coords;
