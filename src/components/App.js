@@ -6,7 +6,6 @@ import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import World from './World';
 import Loading from './Loading';
-import LoadingInset from './LoadingInset';
 import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
@@ -21,7 +20,7 @@ export default function App() {
     const [mapData, setMapData] = useState(null);
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
-    const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[4]);
+    const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
     const [reducer, setReducer] = useState('pca');
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [maxDistance, setMaxDistance] = useState(0);
@@ -230,89 +229,90 @@ export default function App() {
     }, [clickChange]);
     
     return (
-        loading ? <Loading /> :
-        <div>
-            <World 
-                    mapData={mapData}
-                    setClickChange={setClickChange}
-                    isSpreadMeterHovered={isSpreadMeterHovered}
-                    isOutlierMeterHovered={isOutlierMeterHovered}
-                    maxPair={maxPair}
-                    maxZscoreSample={maxZscoreSample}
-                    selectMode={selectMode}
-                    selections={selections}
-                    setSelections={setSelections}
-                    reducer={reducer} 
-            />
-            <div id='map-controls'>
-                <div id='input-group'>
-                    <textarea placeholder='enter text samples separated by newlines...' id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
-                    <div id='add-group'>
-                        <button id='add-button' onClick={handleAdd}>ADD</button>
-                        <button id='randomWords' onClick={handleFetchWords}>RAND</button>
+        <>
+            {loading ? <Loading /> : null}
+            {loadingInset && <div className='loading-overlay'></div>}
+            <div>
+                <World 
+                        mapData={mapData}
+                        setClickChange={setClickChange}
+                        isSpreadMeterHovered={isSpreadMeterHovered}
+                        isOutlierMeterHovered={isOutlierMeterHovered}
+                        maxPair={maxPair}
+                        maxZscoreSample={maxZscoreSample}
+                        selectMode={selectMode}
+                        selections={selections}
+                        setSelections={setSelections}
+                        reducer={reducer} 
+                />
+                <div id='map-controls'>
+                    <div id='input-group'>
+                        <textarea placeholder='enter text samples separated by newlines...' id='text-input' ref={inputRef} onKeyDown={handleKeyDown}/>
+                        <div id='add-group'>
+                            <button id='add-button' onClick={handleAdd}>ADD</button>
+                            <button id='randomWords' onClick={handleFetchWords}>RAND</button>
+                        </div>
+                        <div id='mapLevel-group'>
+                            <Radio
+                                choice={mapLevel}
+                                choices={['map', 'base']}
+                                onSwitch={(mapLevel) => setMapLevel(mapLevel)}
+                                id='mapLevel'
+                            />
+                            <button id='clearButton' onClick={handleClear}>CLEAR</button>
+                        </div>
                     </div>
-                    <div id='mapLevel-group'>
+                    <div id='model-group'>
+                        <button id='base-fitter' className={basemapLocked ? 'on' : 'off'} onClick={handleBasemapLock}>FIT BASE</button>
+                        <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
+                            {embeddingModels.map(model => (
+                                <option key={model} value={model}>
+                                    {model}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
+                    <div id='layout-group'>
                         <Radio
-                            choice={mapLevel}
-                            choices={['map', 'base']}
-                            onSwitch={(mapLevel) => setMapLevel(mapLevel)}
-                            id='mapLevel'
+                            choice={reducer}
+                            choices={['pca', 'nearest', 'paths', 'project']}
+                            onSwitch={reducer => setReducer(reducer)}
+                            id='choose-reducer'
                         />
-                        <button id='clearButton' onClick={handleClear}>CLEAR</button>
+                        <div id='spreadMeter' onMouseEnter={() => setIsSpreadMeterHovered(true)} onMouseLeave={() => setIsSpreadMeterHovered(false)}>
+                            <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
+                        </div>
+                        <div id='outlierMeter' onMouseEnter={() => setIsOutlierMeterHovered(true)} onMouseLeave={() => setIsOutlierMeterHovered(false)}>
+                            <Meter key={'outlier' + meterModelSignal} initialValue={maxZscore} labelText="Max Z-Score" className="meter" />
+                        </div>
+                        <div id='select-group'>
+                            <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
+                            <Selections
+                                selections={selections}
+                                setSelections={setSelections}
+                                handleRemoveSelection={handleRemoveSelection}
+                                reducer={reducer} 
+                            />
+                        </div>
                     </div>
                 </div>
-                <div id='model-group'>
-                    <button id='base-fitter' className={basemapLocked ? 'on' : 'off'} onClick={handleBasemapLock}>FIT BASE</button>
-                    <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
-                        {embeddingModels.map(model => (
-                            <option key={model} value={model}>
-                                {model}
-                            </option>
-                        ))}
-                    </select>
-                    {loadingInset && <LoadingInset />}
+                <div id='info-group'>
+                    <a href="https://github.com/damoncrockett/embeddingworld" target='_blank'>
+                        <svg id='github-icon' viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" clipRule="evenodd" d={iconPath}></path>
+                        </svg>
+                    </a>
+                    <div id='info-button' className='material-icons-outlined' onClick={() => setInfoModal(true)}>info</div>
                 </div>
-                <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
-                <div id='layout-group'>
-                    <Radio
-                        choice={reducer}
-                        choices={['pca', 'nearest', 'paths', 'project']}
-                        onSwitch={reducer => setReducer(reducer)}
-                        id='choose-reducer'
-                    />
-                    <div id='spreadMeter' onMouseEnter={() => setIsSpreadMeterHovered(true)} onMouseLeave={() => setIsSpreadMeterHovered(false)}>
-                        <Meter key={'spread' + meterModelSignal} initialValue={maxDistance} labelText="Max Distance" className="meter" />
-                    </div>
-                    <div id='outlierMeter' onMouseEnter={() => setIsOutlierMeterHovered(true)} onMouseLeave={() => setIsOutlierMeterHovered(false)}>
-                        <Meter key={'outlier' + meterModelSignal} initialValue={maxZscore} labelText="Max Z-Score" className="meter" />
-                    </div>
-                    <div id='select-group'>
-                        <button id='select-mode' className={selectMode ? 'on' : 'off'} onClick={() => setSelectMode(prev => !prev)}>SELECT</button>
-                        <Selections
-                            selections={selections}
-                            setSelections={setSelections}
-                            handleRemoveSelection={handleRemoveSelection}
-                            reducer={reducer} 
-                        />
-                    </div>
-                </div>
+                {infoModal && 
+                    <>
+                        <div id='info-modal'></div>
+                        <div id='info-modal-backdrop' onClick={() => setInfoModal(false)}></div>
+                    </>
+                }
             </div>
-            <div id='info-group'>
-                <a href="https://github.com/damoncrockett/embeddingworld" target='_blank'>
-                    <svg id='github-icon' viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" clipRule="evenodd" d={iconPath}></path>
-                    </svg>
-                </a>
-                <div id='info-button' className='material-icons-outlined' onClick={() => setInfoModal(true)}>info</div>
-            </div>
-            {infoModal && 
-                <>
-                    <div id='info-modal'></div>
-                    <div id='info-modal-backdrop' onClick={() => setInfoModal(false)}></div>
-                </>
-            }
-        </div>
-    );
-    
+        </>
+    ); 
 }
 

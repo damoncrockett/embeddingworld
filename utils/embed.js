@@ -6,7 +6,9 @@ const embeddingModels = [
     'Xenova/all-MiniLM-L6-v2',
     'Xenova/bert-base-uncased',
     'Xenova/bge-m3',
-    'Xenova/jina-embeddings-v2-small-en',
+    'mixedbread-ai/mxbai-embed-large-v1',
+    'Xenova/jina-embeddings-v2-small-en'
+    
 ]
 
 async function initializeEmbedder(

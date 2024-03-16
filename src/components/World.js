@@ -167,11 +167,15 @@ export default function World({
                 });
                 });
             });
+
+            // scale weights to [0,1]
+            const maxWeight = max(links, d => d.weight);
+            links.forEach(link => link.weight /= maxWeight);
   
             const simulation = forceSimulation(nodes)
-            .force("link", forceLink(links).id(d => d.id)) // Use 'id' or 'smp' depending on your choice above
-            .force("charge", forceManyBody().strength(-500))
-            .force("center", forceCenter(svgWidth / 2, svgHeight / 2));
+                .force("link", forceLink(links).id(d => d.id)) // Use 'id' or 'smp' depending on your choice above
+                .force("charge", forceManyBody().strength(-500))
+                .force("center", forceCenter(svgWidth / 2, svgHeight / 2));
 
 
             // Clear the SVG to prevent duplicate elements on data update
@@ -190,7 +194,7 @@ export default function World({
                 .selectAll("line")
                 .data(links)
                 .join("line")
-                .attr("stroke-width", d => Math.sqrt(d.weight));
+                .attr("stroke-width", d => d.weight * 2);
               
             simulation.on("tick", () => {
                 link

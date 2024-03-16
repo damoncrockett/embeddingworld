@@ -66,8 +66,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
 
         const graph = new Map();
 
-        // when mapList has many items, threshold should be lower
-        const threshold = 2 / Math.sqrt(mapList.length);
+        const threshold = 0.15;
 
         mapList.forEach((item, index) => {
             
