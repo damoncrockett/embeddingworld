@@ -18,6 +18,7 @@ export default function App() {
     const [mapLevel, setMapLevel] = useState('map'); 
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
+    const [graphData, setGraphData] = useState(null);
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
@@ -176,7 +177,7 @@ export default function App() {
             return; // must return bc setBasemapLocked won't fire fast enough to prevent plotting error
         }
 
-        const distanceFunctionName = reducer === 'pca' ? 'euclidean' : 'cosine';
+        const distanceFunctionName = reducer === 'pca' || reducer === 'paths' ? 'euclidean' : 'cosine';
         const { distance, pair } = getMaxPairwiseDistance(mapList.map(d => d.vec), distanceFunctionName);
         const { outlierIndex, zScore } = findBiggestOutlier(mapList.map(d => d.vec), distanceFunctionName);
         
@@ -189,28 +190,33 @@ export default function App() {
         
         setMaxPair(maxPairSamples);
         setMaxZscoreSample(maxZscoreSample);
-        
-        const coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
 
         if ( prevEmbeddingModel.current !== embeddingModel ) setMeterModelSignal(prev => prev + 1);
-
         prevEmbeddingModel.current = embeddingModel;
+
+        let coords;
                         
         if (reducer !== 'paths') {
+
+            coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
             
-            const mapListAndCoords = mapList.map((item, index) => ({
+        } else {
+
+            const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+            
+            setGraphData(graphAndCoords.graph); 
+
+            coords = graphAndCoords.coords;
+
+        }
+
+        const mapListAndCoords = mapList.map((item, index) => ({
             ...item,
             x: coords[index][0],
             y: coords[index][1]
         }));
-        
-        setMapData(mapListAndCoords);
-        
-        } else {
-            
-            setMapData(coords); // this is really 'graph'
 
-        }
+        setMapData(mapListAndCoords);
     
     } , [mapList, basemapLocked, reducer, selections]);
 

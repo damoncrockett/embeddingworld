@@ -64,6 +64,9 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
         
     } else {
 
+        const pca = new PCA(toFit.map(d => Array.from(d.vec)), { center: true });
+        coords = pca.predict(mapList.map(d => d.vec), { nComponents: 2 } )['data'];
+
         const graph = new Map();
 
         const threshold = 0.15;
@@ -82,7 +85,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
             });
         });
 
-        return graph;
+        return { graph, coords };
 
     }
 
