@@ -235,7 +235,7 @@ export default function App() {
                             linesData.push({
                                 source: startPoint,
                                 target: endPoint,
-                                weight: conn.weight > 0.075 ? 1 : 4
+                                weight: conn.weight > 0.125 ? 1 : conn.weight > 0.0625 ? 4 : 8
                             });
 
                             addedLines.add(lineId);

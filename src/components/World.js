@@ -201,11 +201,14 @@ export default function World({
                             .attr('y', d => yScaleZoomed(d.y))
                             .text(d => d.smp)
                             .attr('data-smp', d => d.smp) // use for rect sizing
+                            .attr('fill', 'coral')
                             .on('click', (event, d) => handleClickRef.current(event, d))
-                            .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d)),
+                            .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
+                            .call(enter => enter.transition().duration(transitionDuration * 2)
+                                .attr('fill', 'white')),
                 update => update.transition().duration(transitionDuration)
-                                .attr('x', d => xScaleZoomed(d.x))
-                                .attr('y', d => yScaleZoomed(d.y)),
+                            .attr('x', d => xScaleZoomed(d.x))
+                            .attr('y', d => yScaleZoomed(d.y)),
                 exit => exit.transition().duration(transitionDuration)
                             .style('opacity', 0)
                             .remove()

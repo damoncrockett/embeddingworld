@@ -67,7 +67,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
         const pca = new PCA(toFit.map(d => Array.from(d.vec)), { center: true });
         coords = pca.predict(mapList.map(d => d.vec), { nComponents: 2 } )['data'];
 
-        const threshold = 0.125;
+        const threshold = 0.15;
         const graph = new Map();
 
         mapList.forEach((item, index) => {

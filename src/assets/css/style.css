@@ -69,13 +69,11 @@ svg:active {
 }
 
 svg .textMap {
-    fill: white;
     font-weight: 500;
 
 }
 
 svg .textBasemap {
-    fill: grey;
     font-weight: 100;
 
 }
