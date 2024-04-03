@@ -39,6 +39,15 @@ export default function App() {
     const embedderRef = useRef(null);
     const prevEmbeddingModel = useRef(embeddingModel);
 
+    const clearRemovedSelections = () => {
+        if (selections.some(item => !mapList.some(e => e.smp === item))) {
+               
+            const newSelections = selections.map(item => 
+                mapList.some(e => e.smp === item) ? item : null);
+            setSelections(newSelections);
+        }
+    }
+
     const handleFetchWords = () => {
         fetch(returnDomain() + 'txt/wikiwords.txt')
           .then(response => response.text())
@@ -78,6 +87,8 @@ export default function App() {
         } else {
             const filteredList = currentList.filter(item => !itemsToAddOrRemove.includes(item.smp));
             setMapList(filteredList);
+
+            clearRemovedSelections();
         }
     };
 
@@ -92,7 +103,9 @@ export default function App() {
             basemapToggles.forEach(toggle => {
                 toggle.checked = false;
             });
-        }   
+        } 
+        
+        clearRemovedSelections();
     }
 
     const handleBasemapLock = () => {
@@ -159,15 +172,6 @@ export default function App() {
     
         recomputeEmbeddings();
     }, [embedderChangeCounter]);
-
-    useEffect(() => { // make sure deleted map items are removed from selections
-
-        if (selections.every(item => mapList.some(e => e.smp === item))) return;
-        
-        const newSelections = selections.map(item => mapList.some(e => e.smp === item) ? item : null);
-        setSelections(newSelections);
-
-    }, [mapList]);
     
     useEffect(() => {
 
@@ -203,11 +207,46 @@ export default function App() {
             
         } else {
 
-            const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
-            
-            setGraphData(graphAndCoords.graph); 
-            coords = graphAndCoords.coords;
+            console.log('mapList', mapList);
 
+            const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+
+            if (graphAndCoords.coords) {
+                coords = graphAndCoords.coords; 
+            } else {
+                coords = [];
+            }
+            
+            if (graphAndCoords.graph) {
+                const linesData = [];
+                const addedLines = new Set();
+
+                graphAndCoords.graph.forEach((value, key) => {
+                    const startPoint = { x: coords[key][0], y: coords[key][1], smp: mapList[key].smp };
+                    if (!startPoint) return;
+
+                    value.connections.forEach(conn => {
+                        const endPoint = { x: coords[conn.node][0], y: coords[conn.node][1], smp: mapList[conn.node].smp };
+                        if (!endPoint) return;
+
+                        const lineId = [startPoint.smp, endPoint.smp].sort().join('-'); // to avoid dupes
+
+                        if (!addedLines.has(lineId)) {
+                            linesData.push({
+                                source: startPoint,
+                                target: endPoint,
+                                weight: conn.weight > 0.075 ? 1 : 4
+                            });
+
+                            addedLines.add(lineId);
+                        }
+                    });
+                });
+
+                setGraphData(linesData); 
+            } else {
+                setGraphData([]); 
+            }
         }
 
         const mapListAndCoords = mapList.map((item, index) => ({
@@ -231,6 +270,8 @@ export default function App() {
             const index = currentList.findIndex(item => item.smp === clickChange.smp);
             currentList.splice(index, 1);
             setMapList(currentList);
+
+            clearRemovedSelections();
         }        
     }, [clickChange]);
     

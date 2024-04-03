@@ -155,25 +155,10 @@ export default function World({
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
-        const linesData = [];
-        graphData.forEach((value, key) => {
-            const startPoint = mapData[key];
-            if (!startPoint) return;
-
-            value.connections.forEach(conn => {
-                const endPoint = mapData[conn.node];
-                if (!endPoint) return;
-
-                linesData.push({
-                    source: startPoint,
-                    target: endPoint,
-                    weight: conn.weight > 0.1 ? 1 : 4
-                });
-            });
-        });
+        console.log('fire', graphData);
 
         mapPointsContainer.selectAll('line.connectionLine')
-            .data(linesData, d => `${d.source.smp}-${d.target.smp}`)
+            .data(graphData, d => `${d.source.smp}-${d.target.smp}`)
             .join(
                 enter => {
                     const initialEnter = enter.append('line')
@@ -184,19 +169,17 @@ export default function World({
                                             .attr('x2', d => xScaleZoomed(d.target.x))
                                             .attr('y2', d => yScaleZoomed(d.target.y))
                                             .attr('stroke-width', d => d.weight)
-                                            .attr('stroke-opacity', 0); // Initially invisible
+                                            .attr('stroke-opacity', 0); 
 
-                    // First transition: fade in
                     initialEnter.transition()
                                 .delay(transitionDuration)
                                 .duration(transitionDuration)
-                                .attr('stroke-opacity', 0.5); // Fade in to partial opacity
+                                .attr('stroke-opacity', 0.5); 
 
-                    // Second transition: change color from white to black
                     initialEnter.transition()
-                                .delay(transitionDuration * 2) // Wait for the fade-in to complete
+                                .delay(transitionDuration * 2) 
                                 .duration(transitionDuration)
-                                .attr('stroke', 'black'); // Transition to black color
+                                .attr('stroke', 'black'); 
                 },
                 update => update.transition().duration(transitionDuration)
                                     .attr('x1', d => xScaleZoomed(d.source.x))
