@@ -40,7 +40,7 @@ export default function App() {
     const prevEmbeddingModel = useRef(embeddingModel);
 
     const handleFetchWords = () => {
-        fetch(returnDomain() + 'txt/mit10000.txt')
+        fetch(returnDomain() + 'txt/wikiwords.txt')
           .then(response => response.text())
           .then(text => {
             const wordsArray = text.split('\n').map(line => line.trim()).filter(Boolean);
