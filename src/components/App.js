@@ -18,7 +18,7 @@ export default function App() {
     const [mapLevel, setMapLevel] = useState('map'); 
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
-    const [graphData, setGraphData] = useState(null);
+    const [graphData, setGraphData] = useState([]);
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
@@ -198,6 +198,7 @@ export default function App() {
                         
         if (reducer !== 'paths') {
 
+            setGraphData([]); 
             coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
             
         } else {
@@ -205,7 +206,6 @@ export default function App() {
             const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
             
             setGraphData(graphAndCoords.graph); 
-
             coords = graphAndCoords.coords;
 
         }
@@ -241,6 +241,7 @@ export default function App() {
             <div>
                 <World 
                         mapData={mapData}
+                        graphData={graphData}
                         setClickChange={setClickChange}
                         isSpreadMeterHovered={isSpreadMeterHovered}
                         isOutlierMeterHovered={isOutlierMeterHovered}

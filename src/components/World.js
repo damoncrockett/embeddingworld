@@ -16,7 +16,8 @@ let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
 const transitionDuration = 750;
 
 export default function World({ 
-    mapData, 
+    mapData,
+    graphData, 
     setClickChange, 
     isSpreadMeterHovered,
     isOutlierMeterHovered, 
@@ -104,6 +105,12 @@ export default function World({
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y));
 
+        select(svgRef.current).selectAll('line.connectionLine')
+            .attr('x1', d => xScaleZoomed(d.source.x))
+            .attr('y1', d => yScaleZoomed(d.source.y))
+            .attr('x2', d => xScaleZoomed(d.target.x))
+            .attr('y2', d => yScaleZoomed(d.target.y));
+
     }
     
     const resetZoom = () => {
@@ -147,6 +154,60 @@ export default function World({
 
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
+
+        const linesData = [];
+        graphData.forEach((value, key) => {
+            const startPoint = mapData[key];
+            if (!startPoint) return;
+
+            value.connections.forEach(conn => {
+                const endPoint = mapData[conn.node];
+                if (!endPoint) return;
+
+                linesData.push({
+                    source: startPoint,
+                    target: endPoint,
+                    weight: conn.weight > 0.1 ? 1 : 4
+                });
+            });
+        });
+
+        mapPointsContainer.selectAll('line.connectionLine')
+            .data(linesData, d => `${d.source.smp}-${d.target.smp}`)
+            .join(
+                enter => {
+                    const initialEnter = enter.append('line')
+                                            .attr('class', 'connectionLine')
+                                            .attr('stroke', 'white') // Start with white
+                                            .attr('x1', d => xScaleZoomed(d.source.x))
+                                            .attr('y1', d => yScaleZoomed(d.source.y))
+                                            .attr('x2', d => xScaleZoomed(d.target.x))
+                                            .attr('y2', d => yScaleZoomed(d.target.y))
+                                            .attr('stroke-width', d => d.weight)
+                                            .attr('stroke-opacity', 0); // Initially invisible
+
+                    // First transition: fade in
+                    initialEnter.transition()
+                                .delay(transitionDuration)
+                                .duration(transitionDuration)
+                                .attr('stroke-opacity', 0.5); // Fade in to partial opacity
+
+                    // Second transition: change color from white to black
+                    initialEnter.transition()
+                                .delay(transitionDuration * 2) // Wait for the fade-in to complete
+                                .duration(transitionDuration)
+                                .attr('stroke', 'black'); // Transition to black color
+                },
+                update => update.transition().duration(transitionDuration)
+                                    .attr('x1', d => xScaleZoomed(d.source.x))
+                                    .attr('y1', d => yScaleZoomed(d.source.y))
+                                    .attr('x2', d => xScaleZoomed(d.target.x))
+                                    .attr('y2', d => yScaleZoomed(d.target.y))
+                                    .attr('stroke-width', d => d.weight),
+                exit => exit.transition().duration(transitionDuration)
+                                    .attr('stroke-opacity', 0) // Fade out before removing
+                                    .remove()
+            );
 
         mapTexts = mapPointsContainer.selectAll('text.map')
             .data(mapData, d => d.smp + "-" + d.lvl)

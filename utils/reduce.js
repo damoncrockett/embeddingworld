@@ -69,7 +69,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
 
         const graph = new Map();
 
-        const threshold = 0.15;
+        const threshold = 0.125;
 
         mapList.forEach((item, index) => {
             
@@ -79,7 +79,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
                 if (index !== otherIndex) {
                     const dist = cosineDistance(item.vec, otherItem.vec);
                     if (dist < threshold) { 
-                        graph.get(index).connections.push({ node: otherIndex, weight: dist });
+                        graph.get(index).connections.push({ node: otherIndex, weight: Number(dist.toFixed(3)) });
                     }
                 }
             });
