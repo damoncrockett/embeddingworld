@@ -19,6 +19,10 @@ html, body {
     z-index: 4; 
   }
 
+.opaque {
+    background-color: #222;
+}
+
 a {
     text-decoration: none;
     color: inherit;
