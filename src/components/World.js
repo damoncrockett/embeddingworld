@@ -155,15 +155,13 @@ export default function World({
         const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
-        console.log('fire', graphData);
-
         mapPointsContainer.selectAll('line.connectionLine')
-            .data(graphData, d => `${d.source.smp}-${d.target.smp}`)
+            .data(graphData.lines, d => `${d.source.smp}-${d.target.smp}`)
             .join(
                 enter => {
                     const initialEnter = enter.append('line')
                                             .attr('class', 'connectionLine')
-                                            .attr('stroke', 'white') // Start with white
+                                            .attr('stroke', 'white')
                                             .attr('x1', d => xScaleZoomed(d.source.x))
                                             .attr('y1', d => yScaleZoomed(d.source.y))
                                             .attr('x2', d => xScaleZoomed(d.target.x))
@@ -179,14 +177,15 @@ export default function World({
                     initialEnter.transition()
                                 .delay(transitionDuration * 2) 
                                 .duration(transitionDuration)
-                                .attr('stroke', 'black'); 
+                                .attr('stroke', d => graphData.path.includes(`${d.source.smp}-${d.target.smp}`) ? 'aqua' : 'black'); 
                 },
                 update => update.transition().duration(transitionDuration)
                                     .attr('x1', d => xScaleZoomed(d.source.x))
                                     .attr('y1', d => yScaleZoomed(d.source.y))
                                     .attr('x2', d => xScaleZoomed(d.target.x))
                                     .attr('y2', d => yScaleZoomed(d.target.y))
-                                    .attr('stroke-width', d => d.weight),
+                                    .attr('stroke-width', d => d.weight)
+                                    .attr('stroke', d => graphData.path.includes(`${d.source.smp}-${d.target.smp}`) ? 'aqua' : 'black'),
                 exit => exit.transition().duration(transitionDuration)
                                     .attr('stroke-opacity', 0) // Fade out before removing
                                     .remove()
@@ -205,7 +204,7 @@ export default function World({
                             .on('click', (event, d) => handleClickRef.current(event, d))
                             .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
                             .call(enter => enter.transition().duration(transitionDuration * 2)
-                                .attr('fill', 'white')),
+                                .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey')),
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y)),

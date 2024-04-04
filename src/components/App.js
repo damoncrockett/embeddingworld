@@ -6,10 +6,11 @@ import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import World from './World';
 import Loading from './Loading';
-import { getMaxPairwiseDistance, findBiggestOutlier } from '../../utils/geometry';
+import { getMaxPairwiseDistance, findBiggestOutlier, findShortestPath } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
 import Selections from './Selections';
+import { set } from 'lodash';
 
 export default function App() {
 
@@ -18,7 +19,7 @@ export default function App() {
     const [mapLevel, setMapLevel] = useState('map'); 
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
-    const [graphData, setGraphData] = useState([]);
+    const [graphData, setGraphData] = useState({lines: [], path: []});
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
@@ -202,12 +203,10 @@ export default function App() {
                         
         if (reducer !== 'paths') {
 
-            setGraphData([]); 
+            setGraphData({lines: [], path: []}); 
             coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
             
         } else {
-
-            console.log('mapList', mapList);
 
             const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
 
@@ -218,6 +217,7 @@ export default function App() {
             }
             
             if (graphAndCoords.graph) {
+                
                 const linesData = [];
                 const addedLines = new Set();
 
@@ -242,10 +242,32 @@ export default function App() {
                         }
                     });
                 });
+                
+                if ( selections[0] !== null && selections[1] !== null ) {
+                    
+                    const startNode = mapList.findIndex(item => item.smp === selections[0]);
+                    const endNode = mapList.findIndex(item => item.smp === selections[1]);
+                    const path = findShortestPath(graphAndCoords.graph, startNode, endNode);
+                    
+                    if (path) {
+                        
+                        const smpPath = path.map(node => mapList[node].smp);                        
+                        const pathSegments = [];
+                        for (let i = 0; i < smpPath.length - 1; i++) {
+                            pathSegments.push(`${smpPath[i]}-${smpPath[i + 1]}`);
+                            pathSegments.push(`${smpPath[i + 1]}-${smpPath[i]}`);
+                        }
 
-                setGraphData(linesData); 
+                        setGraphData({lines: linesData, path: pathSegments});
+                    } else {
+                        setGraphData({lines: linesData, path: []});
+                    }
+                } else {
+                    setGraphData({lines: linesData, path: []});
+                }
+
             } else {
-                setGraphData([]); 
+                setGraphData({lines: [], path: []}); 
             }
         }
 

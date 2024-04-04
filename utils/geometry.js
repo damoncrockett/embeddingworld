@@ -192,5 +192,61 @@ export function findBiggestOutlier(points, distanceFunctionName) {
   return { outlierIndex, zScore };
 }
 
+//
+//
+//
+//
+//
+
+export function findShortestPath(graph, startNode, endNode) {
+  const distances = new Map();
+  const previous = new Map();
+  const queue = [];
+
+  // Initialize distances and queue
+  graph.forEach((value, key) => {
+      distances.set(key, Infinity);
+      queue.push({node: key, priority: Infinity});
+  });
+
+  distances.set(startNode, 0);
+  queue.push({node: startNode, priority: 0});
+
+  while (queue.length > 0) {
+      // Sort queue by priority and take the node with the smallest distance
+      queue.sort((a, b) => a.priority - b.priority);
+      const { node } = queue.shift();
+
+      // Early exit if we found the target node
+      if (node === endNode) break;
+
+      // Relaxation step
+      const neighbors = graph.get(node).connections;
+      neighbors.forEach(({node: neighbor, weight}) => {
+          let alt = distances.get(node) + weight;
+          if (alt < distances.get(neighbor)) {
+              distances.set(neighbor, alt);
+              previous.set(neighbor, node);
+              queue.push({node: neighbor, priority: alt});
+          }
+      });
+  }
+
+  // Reconstruct the path
+  const path = [];
+  let current = endNode;
+
+  while (previous.has(current)) {
+      path.unshift(current);
+      current = previous.get(current);
+  }
+
+  path.unshift(startNode);
+  if (path.length === 0 || path[0] !== startNode) return null; 
+  
+  return path; 
+}
+
+
 
 
