@@ -1,12 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { select } from 'd3-selection';
 
-export default function PathString({ pathString }) {
+export default function PathString({ pathString, mapList }) {
   const ref = useRef();
 
-  function isSeparator(item) {
+  const isSeparator = item => {
     const separators = ["-","=","≡"]; 
     return separators.includes(item);
+  }
+
+  const getLevelFromMapList = (item) => {
+    const level = mapList.find((d) => d.smp === item);
+    return level ? level.lvl : 0;
   }
   
   useEffect(() => {
@@ -16,10 +21,9 @@ export default function PathString({ pathString }) {
 
     spans.enter()
       .append("span")
-      .attr("class", d => isSeparator(d) ? "pathString sep" : "pathString")
+      .attr("class", d => isSeparator(d) ? "pathString sep" : getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b")
       .text(d => d)
       .style("opacity", 0)
-      .style("color", d => isSeparator(d) ? "coral" : "white")
       .transition().duration(500) 
       .style("opacity", 1);
 

@@ -417,7 +417,21 @@ select:focus {
 
 .pathString {
     margin: 5px;
-    
+}
+
+.sep {
+    font-weight: 500;
+    color: coral;
+}
+
+.m {
+    color: white;
+    font-weight: 500;
+}
+
+.b {
+    color: grey;
+    font-weight: 100;
 }
 
 #spreadMeter {
