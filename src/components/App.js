@@ -20,7 +20,7 @@ export default function App() {
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
     const [graphData, setGraphData] = useState({lines: [], path: []});
-    const [pathString, setPathString] = useState([]);
+    const [pathSmpsAndWeightChars, setPathSmpsAndWeightChars] = useState({"smps": [], "weights": []});
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
@@ -256,12 +256,7 @@ export default function App() {
                         const weightCharacters = pathWeights.map(w => weightBinner(w, "character"));
                         const smpPath = path.map(node => mapList[node].smp);
                         
-                        const smpsAndWeights = smpPath.reduce((acc, smp, i) => {
-                            if (i === 0) return [smp];
-                            return [...acc, weightCharacters[i - 1], smp];
-                        }, []);
-
-                        setPathString(smpsAndWeights);
+                        setPathSmpsAndWeightChars({"smps": smpPath, "weights": weightCharacters});
 
                         const pathSegments = [];
                         for (let i = 0; i < smpPath.length - 1; i++) {
@@ -272,13 +267,16 @@ export default function App() {
                         setGraphData({lines: linesData, path: pathSegments});
                     } else {
                         setGraphData({lines: linesData, path: []});
+                        setPathSmpsAndWeightChars({"smps": [], "weights": []});
                     }
                 } else {
                     setGraphData({lines: linesData, path: []});
+                    setPathSmpsAndWeightChars({"smps": [], "weights": []});
                 }
 
             } else {
                 setGraphData({lines: [], path: []}); 
+                setPathSmpsAndWeightChars({"smps": [], "weights": []});
             }
         }
 
@@ -303,7 +301,6 @@ export default function App() {
             const index = currentList.findIndex(item => item.smp === clickChange.smp);
             currentList.splice(index, 1);
             setMapList(currentList);
-
             clearRemovedSelections();
         }        
     }, [clickChange]);
@@ -378,7 +375,7 @@ export default function App() {
                         </div>
                     </div>
                 </div>
-                <PathString pathString={pathString} mapList={mapList} />
+                <PathString pathSmpsAndWeightChars={pathSmpsAndWeightChars} mapList={mapList} />
                 <div id='info-group'>
                     <a href="https://github.com/damoncrockett/embeddingworld" target='_blank'>
                         <svg id='github-icon' viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">

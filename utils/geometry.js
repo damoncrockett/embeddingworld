@@ -268,13 +268,13 @@ export function weightBinner(weight, returnType = "strokeWidth", thresholds = [0
     if (returnType === "strokeWidth") {
       return 1;
     } else if (returnType === "character") {
-      return "-";
+      return "---";
     }
   } else if ( weight > thresholds[1] ) {
     if (returnType === "strokeWidth") {
       return 4;
     } else if (returnType === "character") {
-      return "=";
+      return "==";
     }
   } else {
     if (returnType === "strokeWidth") {

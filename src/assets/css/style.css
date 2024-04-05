@@ -411,12 +411,15 @@ select:focus {
 #pathStringContainer {
     position: absolute;
     bottom: 2vh;
-    left: 50vw;
-    transform: translateX(-50%);
+    left: 40vw;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap; 
+    align-items: center; 
 }
 
-.pathString {
-    margin: 5px;
+.segment {
+    
 }
 
 .sep {

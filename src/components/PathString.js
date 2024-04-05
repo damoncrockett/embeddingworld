@@ -1,13 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { select } from 'd3-selection';
 
-export default function PathString({ pathString, mapList }) {
-  const ref = useRef();
+const transitionDuration = 750;
 
-  const isSeparator = item => {
-    const separators = ["-","=","≡"]; 
-    return separators.includes(item);
-  }
+export default function PathString({ pathSmpsAndWeightChars, mapList }) {
+  const ref = useRef();
 
   const getLevelFromMapList = (item) => {
     const level = mapList.find((d) => d.smp === item);
@@ -16,23 +13,50 @@ export default function PathString({ pathString, mapList }) {
   
   useEffect(() => {
     const container = select(ref.current);
-    const spans = container.selectAll("span")
-        .data(pathString, (d, i) => `${d}-${i}`);
+    const segments = container.selectAll("div.segment")
+      .data(pathSmpsAndWeightChars.smps, (d, i) => `${d}-${i}`);
+  
+    const exitSelection = segments.exit();
+    let exits = exitSelection.size(); 
+  
+    if (exits === 0) {
+      enterNewElements();
+    } else {
+      exitSelection.transition().duration(transitionDuration)
+        .style("opacity", 0)
+        .on("end", function() {
+          exits -= 1; 
+          if (exits === 0) {
+            enterNewElements();
+          }
+        })
+        .remove();
+    }
 
-    spans.enter()
-      .append("span")
-      .attr("class", d => isSeparator(d) ? "pathString sep" : getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b")
-      .text(d => d)
-      .style("opacity", 0)
-      .transition().duration(500) 
-      .style("opacity", 1);
-
-    spans.exit()
-      .transition().duration(500)
-      .style("opacity", 0)
-      .remove();
-
-  }, [pathString]);
+    segments.each(function(d) {
+      const currentClass = getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b";
+      select(this).select("span.pathString")
+        .attr("class", currentClass)
+    });
+  
+    function enterNewElements() {
+      const enteredSegments = segments.enter()
+        .append("div")
+        .attr("class", "segment")
+        .style("opacity", 0);
+  
+      enteredSegments.append("span")
+        .attr("class", d => getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b")
+        .text(d => d);
+  
+      enteredSegments.append("span")
+        .attr("class", "sep")
+        .text((d, i) => pathSmpsAndWeightChars.weights[i] ? pathSmpsAndWeightChars.weights[i] : "");
+  
+      enteredSegments.transition().duration(transitionDuration)
+        .style("opacity", 1);
+    }
+  }, [pathSmpsAndWeightChars, mapList]);  
 
   return <div id='pathStringContainer' ref={ref}></div>;
 }
