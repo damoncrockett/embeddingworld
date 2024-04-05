@@ -177,7 +177,7 @@ export default function World({
                     initialEnter.transition()
                                 .delay(transitionDuration * 2) 
                                 .duration(transitionDuration)
-                                .attr('stroke', d => graphData.path.includes(`${d.source.smp}-${d.target.smp}`) ? 'aqua' : 'black'); 
+                                .attr('stroke', d => graphData.path.includes(`${d.source.smp}-${d.target.smp}`) ? 'coral' : 'black'); 
                 },
                 update => update.transition().duration(transitionDuration)
                                     .attr('x1', d => xScaleZoomed(d.source.x))
@@ -185,7 +185,7 @@ export default function World({
                                     .attr('x2', d => xScaleZoomed(d.target.x))
                                     .attr('y2', d => yScaleZoomed(d.target.y))
                                     .attr('stroke-width', d => d.weight)
-                                    .attr('stroke', d => graphData.path.includes(`${d.source.smp}-${d.target.smp}`) ? 'aqua' : 'black'),
+                                    .attr('stroke', d => graphData.path.includes(`${d.source.smp}-${d.target.smp}`) ? 'coral' : 'black'),
                 exit => exit.transition().duration(transitionDuration)
                                     .attr('stroke-opacity', 0) // Fade out before removing
                                     .remove()

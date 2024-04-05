@@ -247,6 +247,45 @@ export function findShortestPath(graph, startNode, endNode) {
   return path; 
 }
 
+export function getPathWeights(graph, path) {
+  const weights = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    const startNode = path[i];
+    const endNode = path[i + 1];
+    const connection = graph.get(startNode).connections.find(conn => conn.node === endNode);
+    if (connection) {
+      weights.push(connection.weight);
+    } else {
+      console.warn(`No connection found between ${startNode} and ${endNode}`);
+    }
+  }
+  return weights;
+}
+
+export function weightBinner(weight, returnType = "strokeWidth", thresholds = [0.125, 0.0625]) {
+
+  if ( weight > thresholds[0] ) {
+    if (returnType === "strokeWidth") {
+      return 1;
+    } else if (returnType === "character") {
+      return "-";
+    }
+  } else if ( weight > thresholds[1] ) {
+    if (returnType === "strokeWidth") {
+      return 4;
+    } else if (returnType === "character") {
+      return "=";
+    }
+  } else {
+    if (returnType === "strokeWidth") {
+      return 8;
+    } else if (returnType === "character") {
+      return "≡";
+    }
+  }
+}
+
+
 
 
 

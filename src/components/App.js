@@ -6,11 +6,11 @@ import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import World from './World';
 import Loading from './Loading';
-import { getMaxPairwiseDistance, findBiggestOutlier, findShortestPath } from '../../utils/geometry';
+import { getMaxPairwiseDistance, findBiggestOutlier, findShortestPath, getPathWeights, weightBinner } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
 import Selections from './Selections';
-import { set } from 'lodash';
+import PathString from './PathString';
 
 export default function App() {
 
@@ -20,6 +20,7 @@ export default function App() {
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
     const [graphData, setGraphData] = useState({lines: [], path: []});
+    const [pathString, setPathString] = useState([]);
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
@@ -235,7 +236,7 @@ export default function App() {
                             linesData.push({
                                 source: startPoint,
                                 target: endPoint,
-                                weight: conn.weight > 0.125 ? 1 : conn.weight > 0.0625 ? 4 : 8
+                                weight: weightBinner(conn.weight)
                             });
 
                             addedLines.add(lineId);
@@ -251,7 +252,17 @@ export default function App() {
                     
                     if (path) {
                         
-                        const smpPath = path.map(node => mapList[node].smp);                        
+                        const pathWeights = getPathWeights(graphAndCoords.graph, path);
+                        const weightCharacters = pathWeights.map(w => weightBinner(w, "character"));
+                        const smpPath = path.map(node => mapList[node].smp);
+                        
+                        const smpsAndWeights = smpPath.reduce((acc, smp, i) => {
+                            if (i === 0) return [smp];
+                            return [...acc, weightCharacters[i - 1], smp];
+                        }, []);
+
+                        setPathString(smpsAndWeights);
+
                         const pathSegments = [];
                         for (let i = 0; i < smpPath.length - 1; i++) {
                             pathSegments.push(`${smpPath[i]}-${smpPath[i + 1]}`);
@@ -367,6 +378,7 @@ export default function App() {
                         </div>
                     </div>
                 </div>
+                <PathString pathString={pathString} />
                 <div id='info-group'>
                     <a href="https://github.com/damoncrockett/embeddingworld" target='_blank'>
                         <svg id='github-icon' viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
