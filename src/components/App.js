@@ -19,6 +19,7 @@ export default function App() {
     const [mapLevel, setMapLevel] = useState('map'); 
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
+    const [selectionsData, setSelectionsData] = useState(null);
     const [graphData, setGraphData] = useState({lines: [], path: []});
     const [pathSmpsAndWeightChars, setPathSmpsAndWeightChars] = useState({"smps": [], "weights": []});
     const [clickChange, setClickChange] = useState(null);
@@ -287,6 +288,10 @@ export default function App() {
         }));
 
         setMapData(mapListAndCoords);
+
+        // used for selection highlights
+        const selectedMapListAndCoords = mapListAndCoords.filter(d => selections.includes(d.smp));
+        setSelectionsData(selectedMapListAndCoords);
     
     } , [mapList, basemapLocked, reducer, selections]);
 
@@ -312,6 +317,7 @@ export default function App() {
             <div>
                 <World 
                         mapData={mapData}
+                        selectionsData={selectionsData}
                         graphData={graphData}
                         setClickChange={setClickChange}
                         isSpreadMeterHovered={isSpreadMeterHovered}

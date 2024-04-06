@@ -10,13 +10,17 @@ const svgHeight = window.innerHeight;
 const svgWidth = window.innerWidth;
 
 const padding = { top: 200, right: 160, bottom: 40, left: 40 };
+const rectStrokeWidth = 2;
+const rectXAdjustment = 5;
+const rectYAdjustment = 20;
 
-let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer;
+let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer, xScaleZoomed, yScaleZoomed;
 
 const transitionDuration = 750;
 
 export default function World({ 
     mapData,
+    selectionsData,
     graphData, 
     setClickChange, 
     isSpreadMeterHovered,
@@ -98,8 +102,8 @@ export default function World({
     const handleZoom = (event) => {
         const { transform } = event;
         
-        const xScaleZoomed = transform.rescaleX(xScale);
-        const yScaleZoomed = transform.rescaleY(yScale);
+        xScaleZoomed = transform.rescaleX(xScale);
+        yScaleZoomed = transform.rescaleY(yScale);
         
         select(svgRef.current).selectAll('text.map')
             .attr('x', d => xScaleZoomed(d.x))
@@ -110,6 +114,14 @@ export default function World({
             .attr('y1', d => yScaleZoomed(d.source.y))
             .attr('x2', d => xScaleZoomed(d.target.x))
             .attr('y2', d => yScaleZoomed(d.target.y));
+
+        select(svgRef.current).selectAll('rect.selectedRect')
+            .attr('x', d => xScaleZoomed(d.x) - rectXAdjustment)
+            .attr('y', d => yScaleZoomed(d.y) - rectYAdjustment);
+
+        select(svgRef.current).selectAll('text.selectedText')
+            .attr('x', d => xScaleZoomed(d.x))
+            .attr('y', d => yScaleZoomed(d.y));
 
     }
     
@@ -152,9 +164,50 @@ export default function World({
             .domain(yDomain)
             .range([svgHeight - padding.bottom, padding.top]);
 
-        const xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
-        const yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
+        xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
+        yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
+        // map points
+        mapTexts = mapPointsContainer.selectAll('text.map')
+            .data(mapData, d => d.smp + "-" + d.lvl)
+            .join(
+                enter => enter.append('text')
+                            .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
+                            .attr('x', d => xScaleZoomed(d.x))
+                            .attr('y', d => yScaleZoomed(d.y))
+                            .text(d => d.smp)
+                            .attr('data-smp', d => d.smp) // use for rect sizing
+                            .attr('fill', 'coral')
+                            .on('click', (event, d) => handleClickRef.current(event, d))
+                            .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
+                            .call(enter => enter.transition().duration(transitionDuration * 2)
+                                .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey')),
+                update => update.transition().duration(transitionDuration)
+                            .attr('x', d => xScaleZoomed(d.x))
+                            .attr('y', d => yScaleZoomed(d.y)),
+                exit => exit.transition().duration(transitionDuration)
+                            .style('opacity', 0)
+                            .remove()
+            );
+
+        mapTexts.on('click', (event, d) => handleClickRef.current(event, d))
+                .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d));
+
+
+        return () => {
+            mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
+        };
+
+    }, [mapData, selectMode, selections]);
+
+    useEffect(() => {
+
+        if (mapData) {
+            xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
+            yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
+        }
+
+        // path lines
         mapPointsContainer.selectAll('line.connectionLine')
             .data(graphData.lines, d => `${d.source.smp}-${d.target.smp}`)
             .join(
@@ -190,34 +243,69 @@ export default function World({
                                     .attr('stroke-opacity', 0) // Fade out before removing
                                     .remove()
             );
+    }, [graphData]);
 
-        mapTexts = mapPointsContainer.selectAll('text.map')
-            .data(mapData, d => d.smp + "-" + d.lvl)
+    useEffect(() => {
+
+        if (!selectionsData) return;
+
+        if (mapData) {
+            xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
+            yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
+        }
+
+        const selectedTextSize = selectionsData.map(d => {
+            const textElement = mapPointsContainer.select(`text[data-smp="${d.smp}"]`).node();
+            if (!textElement) return null;
+            const bbox = textElement.getBBox();
+            return { smp: d.smp, width: bbox.width, height: bbox.height };
+        }).filter(Boolean); 
+        
+        mapPointsContainer.selectAll('rect.selectedRect')
+            .data(selectionsData, d => d.smp + "-" + d.lvl)
+            .join(
+                enter => {
+                    enter.append('rect')
+                            .attr('class', 'selectedRect')
+                            .attr('x', (d,i) => xScaleZoomed(d.x) - rectXAdjustment)
+                            .attr('y', (d,i) => yScaleZoomed(d.y) - rectYAdjustment)
+                            .attr('width', (d,i) => selectedTextSize[i].width + 10)
+                            .attr('height', (d,i) => selectedTextSize[i].height + 10)
+                            .attr('rx', 5)
+                            .attr('fill', 'white')
+                            .attr('stroke', 'coral')
+                            .attr('stroke-width', rectStrokeWidth)
+                            .style('opacity', 0)
+                            .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1))},
+                update => {
+                    update.transition().duration(transitionDuration)
+                            .attr('x', (d,i) => xScaleZoomed(d.x) - rectXAdjustment)
+                            .attr('y', (d,i) => yScaleZoomed(d.y) - rectYAdjustment)},
+                exit => {
+                    exit.transition().duration(transitionDuration).style('opacity', 0).remove()}
+            );
+
+        mapPointsContainer.selectAll('text.selectedText')
+            .data(selectionsData, d => d.smp + "-" + d.lvl)
             .join(
                 enter => enter.append('text')
-                            .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y))
+                            .attr('class', 'selectedText')
+                            .style('fill', 'black')
                             .text(d => d.smp)
-                            .attr('data-smp', d => d.smp) // use for rect sizing
-                            .attr('fill', 'coral')
-                            .on('click', (event, d) => handleClickRef.current(event, d))
-                            .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
-                            .call(enter => enter.transition().duration(transitionDuration * 2)
-                                .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey')),
+                            .style('opacity', 0)
+                            .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1)),
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y)),
-                exit => exit.transition().duration(transitionDuration)
-                            .style('opacity', 0)
-                            .remove()
+                exit => exit.transition().duration(transitionDuration).style('opacity', 0).remove()
             );
+    }, [selectionsData]);
 
-        mapTexts.on('click', (event, d) => handleClickRef.current(event, d))
-                .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d));
+    useEffect(() => {
 
-        const rectStrokeWidth = 2;
-
+        // highlight max pair
         if (isSpreadMeterHovered && maxPair && maxPair.length === 2) {
             
             setTimeout(() => { // to ensure text elements are already drawn
@@ -283,7 +371,11 @@ export default function World({
             mapPointsContainer.selectAll('.maxPairLine').transition().duration(transitionDuration).style('opacity', 0).remove();
             mapPointsContainer.selectAll('.highlighted-text[data-smp]').transition().duration(transitionDuration).style('opacity', 0).remove();
         }
+    }, [isSpreadMeterHovered, maxPair]);
 
+    useEffect(() => {
+
+        // highlight max z-score sample
         if (isOutlierMeterHovered && maxZscoreSample) {
             
             // exactly as above, but for a single item only, and thus no line is drawn
@@ -326,12 +418,7 @@ export default function World({
             mapPointsContainer.selectAll('.maxZscoreRect').transition().duration(transitionDuration).style('opacity', 0).remove();
             mapPointsContainer.selectAll('.highlighted-text[data-smp]').transition().duration(transitionDuration).style('opacity', 0).remove();
         }
-
-        return () => {
-            mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
-        };
-
-    }, [mapData, isSpreadMeterHovered, isOutlierMeterHovered, maxPair, maxZscoreSample, selectMode, selections]);
+    }, [isOutlierMeterHovered, maxZscoreSample]);
 
     return (
         <>
