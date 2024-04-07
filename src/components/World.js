@@ -14,7 +14,16 @@ const rectStrokeWidth = 2;
 const rectXAdjustment = 5;
 const rectYAdjustment = 20;
 
-let xDomain, yDomain, xScale, yScale, mapTexts, mapPointsContainer, xScaleZoomed, yScaleZoomed;
+let xDomain, 
+    yDomain, 
+    xScale, 
+    yScale, 
+    mapTexts, 
+    mapPointsContainer, 
+    xScaleZoomed, 
+    yScaleZoomed,
+    linesGroup,
+    selectionsGroup;
 
 const transitionDuration = 750;
 
@@ -136,6 +145,17 @@ export default function World({
         if (mapPointsContainer.empty()) {
             mapPointsContainer = svg.append('g').attr('class', 'mapPointsContainer');
         }
+
+        // lines will always sit below selections
+        linesGroup = mapPointsContainer.select('g.linesGroup');
+        if (linesGroup.empty()) {
+            linesGroup = mapPointsContainer.append('g').attr('class', 'linesGroup');
+        }
+
+        selectionsGroup = mapPointsContainer.select('g.selectionsGroup');
+        if (selectionsGroup.empty()) {
+            selectionsGroup = mapPointsContainer.append('g').attr('class', 'selectionsGroup');
+        }
     
         const initialZoom = zoom()
             .extent([[0, 0], [svgWidth, svgHeight]])
@@ -208,7 +228,7 @@ export default function World({
         }
 
         // path lines
-        mapPointsContainer.selectAll('line.connectionLine')
+        linesGroup.selectAll('line.connectionLine')
             .data(graphData.lines, d => `${d.source.smp}-${d.target.smp}`)
             .join(
                 enter => {
@@ -261,7 +281,7 @@ export default function World({
             return { smp: d.smp, width: bbox.width, height: bbox.height };
         }).filter(Boolean); 
         
-        mapPointsContainer.selectAll('rect.selectedRect')
+        selectionsGroup.selectAll('rect.selectedRect')
             .data(selectionsData, d => d.smp + "-" + d.lvl)
             .join(
                 enter => {
@@ -285,7 +305,7 @@ export default function World({
                     exit.transition().duration(transitionDuration).style('opacity', 0).remove()}
             );
 
-        mapPointsContainer.selectAll('text.selectedText')
+        selectionsGroup.selectAll('text.selectedText')
             .data(selectionsData, d => d.smp + "-" + d.lvl)
             .join(
                 enter => enter.append('text')
