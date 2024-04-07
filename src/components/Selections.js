@@ -26,41 +26,6 @@ export default function Selections({
         );
         setSelections(newSelections);
     };
-
-    const selectionSlotStatus = (d, i, reducer, selections) => {
-
-        if (d === null) return 'empty';
-        if (reducer === 'pca')  return 'idle';
-    
-        if (reducer === 'nearest') {
-            if (i === 0) return 'filled';
-            if (i > 0) return 'idle';
-        } else if (reducer === 'paths') {
-            if (i === 0) {
-                if (selections[1] === null) return 'lonely';
-                if (selections[1] !== null) return 'filled';
-            } else if (i === 1) {
-                if (selections[0] === null) return 'lonely';
-                if (selections[0] !== null) return 'filled';
-            } else if (i > 1) {
-                return 'idle';
-            }
-        } else if (reducer === 'project') {
-            if (i === 0) {
-                if (selections[1] === null) return 'lonely';
-                if (selections[1] !== null) return 'filled';
-            } else if (i === 1) {
-                if (selections[0] === null) return 'lonely';
-                if (selections[0] !== null) return 'filled';
-            } else if (i === 2) {
-                if (selections[3] === null) return 'lonely';
-                if (selections[3] !== null) return 'filled';
-            } else if (i === 3) {
-                if (selections[2] === null) return 'lonely';
-                if (selections[2] !== null) return 'filled';
-            }
-        }
-    }
     
     return (
         <div id='selection-slots'>
@@ -95,3 +60,38 @@ export default function Selections({
         </div>
     );
 };
+
+export function selectionSlotStatus(d, i, reducer, selections) {
+
+    if (d === null) return 'empty';
+    if (reducer === 'pca')  return 'idle';
+
+    if (reducer === 'nearest') {
+        if (i === 0) return 'filled';
+        if (i > 0) return 'idle';
+    } else if (reducer === 'paths') {
+        if (i === 0) {
+            if (selections[1] === null) return 'lonely';
+            if (selections[1] !== null) return 'filled';
+        } else if (i === 1) {
+            if (selections[0] === null) return 'lonely';
+            if (selections[0] !== null) return 'filled';
+        } else if (i > 1) {
+            return 'idle';
+        }
+    } else if (reducer === 'project') {
+        if (i === 0) {
+            if (selections[1] === null) return 'lonely';
+            if (selections[1] !== null) return 'filled';
+        } else if (i === 1) {
+            if (selections[0] === null) return 'lonely';
+            if (selections[0] !== null) return 'filled';
+        } else if (i === 2) {
+            if (selections[3] === null) return 'lonely';
+            if (selections[3] !== null) return 'filled';
+        } else if (i === 3) {
+            if (selections[2] === null) return 'lonely';
+            if (selections[2] !== null) return 'filled';
+        }
+    }
+}

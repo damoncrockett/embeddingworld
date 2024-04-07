@@ -9,7 +9,7 @@ import Loading from './Loading';
 import { getMaxPairwiseDistance, findBiggestOutlier, findShortestPath, getPathWeights, weightBinner } from '../../utils/geometry';
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
-import Selections from './Selections';
+import Selections, { selectionSlotStatus } from './Selections';
 import PathString from './PathString';
 
 export default function App() {
@@ -290,7 +290,9 @@ export default function App() {
         setMapData(mapListAndCoords);
 
         // used for selection highlights
-        const selectedMapListAndCoords = mapListAndCoords.filter(d => selections.includes(d.smp));
+        // filter first for selections that have the `filled` class
+        const filteredSelections = selections.filter((d, i) => selectionSlotStatus(d, i, reducer, selections) === 'filled');
+        const selectedMapListAndCoords = mapListAndCoords.filter(d => filteredSelections.includes(d.smp));
         setSelectionsData(selectedMapListAndCoords);
     
     } , [mapList, basemapLocked, reducer, selections]);
