@@ -44,6 +44,9 @@ export default function World({
     
     const svgRef = useRef(null);
     const zoomRef = useRef();
+
+    const zoomScaleMin = 0.25;
+    const zoomScaleMax = 5;
     
     const clickTimer = useRef(null);
     const handleClickRef = useRef();
@@ -108,15 +111,30 @@ export default function World({
         };
     }, [selectMode, selections, reducer]);
 
+    const truncateStringByZoomLevel = (s, zoomScaleMin, zoomScaleMax) => {
+        
+        const zoomScale = zoomTransform(svgRef.current).k;
+        const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
+        const maxChars = [10, 30, 50, 70, 90, 110];
+
+        return s.length > maxChars[zoomLevel] ? s.substring(0, maxChars[zoomLevel]) + '...' : s;
+
+    };
+
     const handleZoom = (event) => {
         const { transform } = event;
         
         xScaleZoomed = transform.rescaleX(xScale);
         yScaleZoomed = transform.rescaleY(yScale);
+
+        const texts = select(svgRef.current).selectAll('text.map');  
         
-        select(svgRef.current).selectAll('text.map')
-            .attr('x', d => xScaleZoomed(d.x))
-            .attr('y', d => yScaleZoomed(d.y));
+        texts.attr('x', d => xScaleZoomed(d.x))
+            .attr('y', d => yScaleZoomed(d.y))
+            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax));
+
+        texts.select('title').remove()
+        texts.append('title').text(d => d.smp);
 
         select(svgRef.current).selectAll('line.connectionLine')
             .attr('x1', d => xScaleZoomed(d.source.x))
@@ -128,12 +146,17 @@ export default function World({
             .attr('x', d => xScaleZoomed(d.x) - rectXAdjustment)
             .attr('y', d => yScaleZoomed(d.y) - rectYAdjustment);
 
-        select(svgRef.current).selectAll('text.selectedText')
-            .attr('x', d => xScaleZoomed(d.x))
-            .attr('y', d => yScaleZoomed(d.y));
+        const selectedTexts = select(svgRef.current).selectAll('text.selectedText')
+
+        selectedTexts.attr('x', d => xScaleZoomed(d.x))
+            .attr('y', d => yScaleZoomed(d.y))
+            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax));
+
+        selectedTexts.select('title').remove()
+        selectedTexts.append('title').text(d => d.smp);
 
     }
-    
+
     const resetZoom = () => {
         select(svgRef.current).transition().duration(transitionDuration).call(zoomRef.current.transform, zoomIdentity);
     };
@@ -159,7 +182,7 @@ export default function World({
     
         const initialZoom = zoom()
             .extent([[0, 0], [svgWidth, svgHeight]])
-            .scaleExtent([0.25, 5])
+            .scaleExtent([zoomScaleMin, zoomScaleMax])
             .on('zoom', handleZoom);
 
         zoomRef.current = initialZoom
@@ -195,13 +218,14 @@ export default function World({
                             .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y))
-                            .text(d => d.smp)
+                            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax))
                             .attr('data-smp', d => d.smp) // use for rect sizing
                             .attr('fill', 'coral')
                             .on('click', (event, d) => handleClickRef.current(event, d))
                             .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
                             .call(enter => enter.transition().duration(transitionDuration * 2)
-                                .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey')),
+                                .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey'))
+                            .append('title').text(d => d.smp),
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y)),
@@ -313,7 +337,8 @@ export default function World({
                             .attr('y', d => yScaleZoomed(d.y))
                             .attr('class', 'selectedText')
                             .style('fill', 'black')
-                            .text(d => d.smp)
+                            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax))
+                            .append('title').text(d => d.smp)
                             .style('opacity', 0)
                             .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1)),
                 update => update.transition().duration(transitionDuration)
