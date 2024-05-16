@@ -6,7 +6,16 @@ import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import World from './World';
 import Loading from './Loading';
-import { getMaxPairwiseDistance, findBiggestOutlier, findShortestPath, getPathWeights, weightBinner } from '../../utils/geometry';
+
+import { 
+    getMaxPairwiseDistance, 
+    findBiggestOutlier, 
+    findShortestPath, 
+    getPathWeights, 
+    weightBinner,
+    totalCoordMovement
+ } from '../../utils/geometry';
+
 import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
 import Selections, { selectionSlotStatus } from './Selections';
@@ -41,6 +50,7 @@ export default function App() {
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
     const prevEmbeddingModel = useRef(embeddingModel);
+    const prevMapData = useRef(null);
 
     const clearRemovedSelections = () => {
 
@@ -206,7 +216,7 @@ export default function App() {
             setGraphData({lines: [], path: []}); 
             coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
             
-        } else {
+        } else if (reducer === 'paths') {
 
             const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
 
@@ -279,11 +289,46 @@ export default function App() {
             }
         }
 
-        const mapListAndCoords = mapList.map((item, index) => ({
-            ...item,
-            x: coords[index][0],
-            y: coords[index][1]
-        }));
+        let mapListAndCoords;
+        if ( reducer === 'nearest' || reducer === 'project' || reducer === 'paths' ) {
+            mapListAndCoords = mapList.map((item, index) => ({
+                ...item,
+                x: coords[index][0],
+                y: coords[index][1]
+            }));
+        } else if ( reducer === 'pca' ) {
+            if ( prevMapData.current === null ) {
+                mapListAndCoords = mapList.map((item, index) => ({
+                    ...item,
+                    x: coords[index][0],
+                    y: coords[index][1]
+                }));
+            } else {
+                const candidateMapListAndCoords = mapList.map((item, index) => ({
+                    ...item,
+                    x: coords[index][0],
+                    y: coords[index][1]
+                }));
+
+                const prevMapSmps = prevMapData.current.map(d => d.smp);
+                const filteredCandidateMapListAndCoords = candidateMapListAndCoords.filter(d => prevMapSmps.includes(d.smp));
+                const prevCoords = prevMapData.current.map(d => [d.x, d.y]);
+                const filteredCandidateCoords = filteredCandidateMapListAndCoords.map(d => [d.x, d.y]);
+
+                // avoid flipping the pca
+                const signFlips = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+                const totalMovements = signFlips.map(signs => totalCoordMovement(prevCoords, filteredCandidateCoords, signs));
+                const minMovementIndex = totalMovements.indexOf(Math.min(...totalMovements));
+                const bestSigns = signFlips[minMovementIndex];
+
+                mapListAndCoords = mapList.map((item, index) => ({
+                    ...item,
+                    x: coords[index][0] * bestSigns[0],
+                    y: coords[index][1] * bestSigns[1]
+                }));
+            }
+            prevMapData.current = mapListAndCoords;
+        }
 
         setMapData(mapListAndCoords);
 

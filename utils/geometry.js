@@ -82,11 +82,9 @@ export function getMaxPairwiseDistance(arrays, distanceFunctionName) {
 
   export function calculateLineEndpoints(rect1, rect2, rectStrokeWidth = 1) {
     let lineStart = {}, lineEnd = {};
-    const offset = rectStrokeWidth + 2; // Half the stroke width to offset the line inside the rect
+    const offset = rectStrokeWidth + 2;
 
-    // Check if there is horizontal space between rects
     if (rect1.x + rect1.width < rect2.x || rect2.x + rect2.width < rect1.x) {
-        // There's horizontal space between rects
         if (rect1.x < rect2.x) {
             lineStart = { x: rect1.x + rect1.width + offset, y: rect1.y + rect1.height / 2 };
             lineEnd = { x: rect2.x - offset, y: rect2.y + rect2.height / 2 };
@@ -95,7 +93,6 @@ export function getMaxPairwiseDistance(arrays, distanceFunctionName) {
             lineEnd = { x: rect1.x - offset, y: rect1.y + rect1.height / 2 };
         }
     } else {
-        // No horizontal space, connect the bottom edge of the top rect to the top edge of the bottom rect
         if (rect1.y < rect2.y) {
             lineStart = { x: rect1.x + rect1.width / 2, y: rect1.y + rect1.height + offset };
             lineEnd = { x: rect2.x + rect2.width / 2, y: rect2.y - offset };
@@ -115,28 +112,23 @@ export function getMaxPairwiseDistance(arrays, distanceFunctionName) {
     //
     //
 
-    // Function to subtract two vectors
 function subtractVectors(v1, v2) {
   return v1.map((element, i) => element - v2[i]);
 }
 
-// Function to calculate the dot product of two vectors
 function dotProduct(v1, v2) {
   return v1.reduce((sum, current, i) => sum + current * v2[i], 0);
 }
 
-// Function to calculate the magnitude of a vector
 function magnitude(v) {
   return Math.sqrt(dotProduct(v, v));
 }
 
-// Function to normalize a vector
 function normalize(v) {
   const mag = magnitude(v);
   return v.map(element => element / mag);
 }
 
-// Function to project a point onto the axis defined by two points (v1 and v2)
 export function projectPointOntoLine(point, v1, v2) {
   const lineDirection = subtractVectors(v2, v1);
   const normalizedDirection = normalize(lineDirection);
@@ -203,7 +195,6 @@ export function findShortestPath(graph, startNode, endNode) {
   const previous = new Map();
   const queue = [];
 
-  // Initialize distances and queue
   graph.forEach((value, key) => {
       distances.set(key, Infinity);
       queue.push({node: key, priority: Infinity});
@@ -213,11 +204,9 @@ export function findShortestPath(graph, startNode, endNode) {
   queue.push({node: startNode, priority: 0});
 
   while (queue.length > 0) {
-      // Sort queue by priority and take the node with the smallest distance
       queue.sort((a, b) => a.priority - b.priority);
       const { node } = queue.shift();
 
-      // Early exit if we found the target node
       if (node === endNode) break;
 
       // Relaxation step
@@ -232,7 +221,6 @@ export function findShortestPath(graph, startNode, endNode) {
       });
   }
 
-  // Reconstruct the path
   const path = [];
   let current = endNode;
 
@@ -283,6 +271,24 @@ export function weightBinner(weight, returnType = "strokeWidth", thresholds = [0
       return "≡";
     }
   }
+}
+
+//
+//
+//
+//
+//
+
+export function totalCoordMovement(prevCoords, newCoords, signs) {
+  
+  const signedNewCoords = newCoords.map((coord, i) => coord.map((value, j) => value * signs[j]));
+
+  return prevCoords.reduce((acc, prevCoord, i) => {
+    return acc + euclideanDistance(prevCoord, signedNewCoords[i]);
+  }, 0);
+
+
+
 }
 
 

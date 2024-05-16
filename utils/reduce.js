@@ -1,6 +1,5 @@
 import { PCA } from 'ml-pca';
 import { projectPointOntoLine, euclideanDistance, cosineDistance, angleBetweenVectors, polarToCartesian } from './geometry';
-import { map } from 'lodash';
 
 export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
     if (mapList.length === 0) return [];
