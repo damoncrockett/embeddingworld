@@ -22,6 +22,7 @@ let xDomain,
     mapPointsContainer, 
     xScaleZoomed, 
     yScaleZoomed,
+    textGroup,
     linesGroup,
     selectionsGroup;
 
@@ -175,6 +176,11 @@ export default function World({
             mapPointsContainer = svg.append('g').attr('class', 'mapPointsContainer');
         }
 
+        textGroup = mapPointsContainer.select('g.textGroup');
+        if (textGroup.empty()) {
+            textGroup = mapPointsContainer.append('g').attr('class', 'textGroup');
+        }
+
         // lines will always sit below selections
         linesGroup = mapPointsContainer.select('g.linesGroup');
         if (linesGroup.empty()) {
@@ -220,7 +226,7 @@ export default function World({
         const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
 
         // map points
-        mapTexts = mapPointsContainer.selectAll('text.map')
+        mapTexts = textGroup.selectAll('text.map')
             .data(mapData, d => d.smp + "-" + d.lvl)
             .join(
                 enter => enter.append('text')
@@ -252,7 +258,7 @@ export default function World({
 
 
         return () => {
-            mapPointsContainer.selectAll('text.map').on('click', null).on('dblclick', null);
+            textGroup.selectAll('text.map').on('click', null).on('dblclick', null);
         };
 
     }, [mapData, selectMode, selections]);
