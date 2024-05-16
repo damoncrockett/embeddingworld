@@ -43,10 +43,12 @@ export default function App() {
     const prevEmbeddingModel = useRef(embeddingModel);
 
     const clearRemovedSelections = () => {
-        if (selections.some(item => !mapList.some(e => e.smp === item))) {
+
+        if (selections.some(item => item !== null && !mapList.some(e => e.smp === item))) {
                
             const newSelections = selections.map(item => 
                 mapList.some(e => e.smp === item) ? item : null);
+
             setSelections(newSelections);
         }
     }
@@ -90,8 +92,6 @@ export default function App() {
         } else {
             const filteredList = currentList.filter(item => !itemsToAddOrRemove.includes(item.smp));
             setMapList(filteredList);
-
-            clearRemovedSelections();
         }
     };
 
@@ -107,8 +107,6 @@ export default function App() {
                 toggle.checked = false;
             });
         } 
-        
-        clearRemovedSelections();
     }
 
     const handleBasemapLock = () => {
@@ -308,9 +306,13 @@ export default function App() {
             const index = currentList.findIndex(item => item.smp === clickChange.smp);
             currentList.splice(index, 1);
             setMapList(currentList);
-            clearRemovedSelections();
         }        
     }, [clickChange]);
+
+    useEffect(() => {
+        clearRemovedSelections();
+
+    }, [mapList]);
     
     return (
         <>
