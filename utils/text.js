@@ -1,19 +1,13 @@
-import actions from '../src/assets/json/actions.json';
-import emotions from '../src/assets/json/emotions.json';
-import phrases from '../src/assets/json/phrases.json';
-import questions from '../src/assets/json/questions.json';
-import things from '../src/assets/json/things.json';
-import timespace from '../src/assets/json/timespace.json';
-import wikicats from '../src/assets/json/wikicats.json';
+import words from '../src/assets/json/words.json';
+import sentences from '../src/assets/json/sentences.json';
+import smp from '../src/assets/txt/sample.txt';
+
+const passages = smp.split('\n\n').map(passage => passage.trim()).filter(passage => passage.length > 0);
 
 const basemaps = {
-    "actions": actions,
-    "emotions": emotions,
-    "phrases": phrases,
-    "questions": questions,
-    "things": things,
-    "timespace": timespace,
-    "wikicats": wikicats
+    "words": words,
+    "sentences": sentences,
+    "passages": passages
 }
 
 const chooseThreeMostImportantWords = (text) => {

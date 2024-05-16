@@ -44,6 +44,7 @@ export default function World({
     
     const svgRef = useRef(null);
     const zoomRef = useRef();
+    const zoomLevelRef = useRef();
 
     const zoomScaleMin = 0.25;
     const zoomScaleMax = 5;
@@ -111,10 +112,8 @@ export default function World({
         };
     }, [selectMode, selections, reducer]);
 
-    const truncateStringByZoomLevel = (s, zoomScaleMin, zoomScaleMax) => {
+    const truncateStringByZoomLevel = (s, zoomLevel) => {
         
-        const zoomScale = zoomTransform(svgRef.current).k;
-        const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
         const maxChars = [10, 30, 50, 70, 90, 110];
 
         return s.length > maxChars[zoomLevel] ? s.substring(0, maxChars[zoomLevel]) + '...' : s;
@@ -127,15 +126,10 @@ export default function World({
         xScaleZoomed = transform.rescaleX(xScale);
         yScaleZoomed = transform.rescaleY(yScale);
 
-        const texts = select(svgRef.current).selectAll('text.map');  
-        
-        texts.attr('x', d => xScaleZoomed(d.x))
+        select(svgRef.current).selectAll('text.map')
+            .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
-            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax));
-
-        texts.select('title').remove()
-        texts.append('title').text(d => d.smp);
-
+        
         select(svgRef.current).selectAll('line.connectionLine')
             .attr('x1', d => xScaleZoomed(d.source.x))
             .attr('y1', d => yScaleZoomed(d.source.y))
@@ -146,14 +140,26 @@ export default function World({
             .attr('x', d => xScaleZoomed(d.x) - rectXAdjustment)
             .attr('y', d => yScaleZoomed(d.y) - rectYAdjustment);
 
-        const selectedTexts = select(svgRef.current).selectAll('text.selectedText')
-
-        selectedTexts.attr('x', d => xScaleZoomed(d.x))
+        select(svgRef.current).selectAll('text.selectedText')
+            .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
-            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax));
+        
+        const zoomScale = transform.k;
+        const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
 
-        selectedTexts.select('title').remove()
-        selectedTexts.append('title').text(d => d.smp);
+        if (zoomLevelRef.current !== zoomLevel) {
+            zoomLevelRef.current = zoomLevel;
+            select(svgRef.current).selectAll('text.map')
+                .select('tspan')
+                .text(d => truncateStringByZoomLevel(d.smp, zoomLevel));
+            select(svgRef.current).selectAll('text.selectedText')
+                .select('tspan')
+                .text(d => truncateStringByZoomLevel(d.smp, zoomLevel));
+            select(svgRef.current).selectAll('rect.selectedRect')
+                .attr('width', (d,i) => select(mapPointsContainer.selectAll('text.selectedText').nodes()[i]).node().getBBox().width + 10)
+                .attr('height', (d,i) => select(mapPointsContainer.selectAll('text.selectedText').nodes()[i]).node().getBBox().height + 10);
+                
+        }
 
     }
 
@@ -210,6 +216,9 @@ export default function World({
         xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
         yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
 
+        const zoomScale = zoomTransform(svgRef.current).k;
+        const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
+
         // map points
         mapTexts = mapPointsContainer.selectAll('text.map')
             .data(mapData, d => d.smp + "-" + d.lvl)
@@ -218,14 +227,18 @@ export default function World({
                             .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y))
-                            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax))
                             .attr('data-smp', d => d.smp) // use for rect sizing
                             .attr('fill', 'coral')
                             .on('click', (event, d) => handleClickRef.current(event, d))
                             .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
                             .call(enter => enter.transition().duration(transitionDuration * 2)
                                 .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey'))
-                            .append('title').text(d => d.smp),
+                            .each(function(d) {
+                                select(this).append('tspan')
+                                    .text(truncateStringByZoomLevel(d.smp, zoomLevel));
+                                select(this).append('title')
+                                    .text(d.smp);
+                            }),
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y)),
@@ -329,6 +342,9 @@ export default function World({
                     exit.transition().duration(transitionDuration).style('opacity', 0).remove()}
             );
 
+        const zoomScale = zoomTransform(svgRef.current).k;
+        const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
+
         selectionsGroup.selectAll('text.selectedText')
             .data(selectionsData, d => d.smp + "-" + d.lvl)
             .join(
@@ -337,10 +353,14 @@ export default function World({
                             .attr('y', d => yScaleZoomed(d.y))
                             .attr('class', 'selectedText')
                             .style('fill', 'black')
-                            .text(d => truncateStringByZoomLevel(d.smp, zoomScaleMin, zoomScaleMax))
-                            .append('title').text(d => d.smp)
                             .style('opacity', 0)
-                            .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1)),
+                            .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1))
+                            .each(function(d) {
+                                select(this).append('tspan')
+                                    .text(truncateStringByZoomLevel(d.smp, zoomLevel));
+                                select(this).append('title')
+                                    .text(d.smp);
+                            }),
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y)),
@@ -404,7 +424,7 @@ export default function World({
                             .style('fill', 'black') 
                             .attr('text-anchor', 'middle') 
                             .attr('dy', "0.35em") 
-                            .text(originalTextElement.text())
+                            .text(originalTextElement.select('tspan').text())
                             .attr('data-smp', smp) 
                             .style('opacity', 0)
                             .transition().duration(transitionDuration).style('opacity', 1);
@@ -452,7 +472,7 @@ export default function World({
                             .style('fill', 'black') 
                             .attr('text-anchor', 'middle') 
                             .attr('dy', "0.35em") 
-                            .text(originalTextElement.text())
+                            .text(originalTextElement.select('tspan').text())
                             .attr('data-smp', maxZscoreSample) 
                             .style('opacity', 0)
                             .transition().duration(transitionDuration).style('opacity', 1);

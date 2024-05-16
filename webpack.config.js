@@ -9,7 +9,7 @@ const paths = {
 module.exports = {
   entry: path.resolve(paths.src, 'index.js'),
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.txt'], // Add .txt to the resolve extensions
   },
   output: {
     path: paths.dist,
@@ -39,6 +39,10 @@ module.exports = {
           { loader: "style-loader" },
           { loader: "css-loader" },
         ]
+      },
+      {
+        test: /\.txt$/,
+        use: 'raw-loader',
       },
     ]
   },
