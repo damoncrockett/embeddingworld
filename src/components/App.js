@@ -210,23 +210,76 @@ export default function App() {
         prevEmbeddingModel.current = embeddingModel;
 
         let coords;
-                        
-        if (reducer !== 'paths') {
+        let mapListAndCoords;
+                              
+        if (reducer === 'project' || reducer === 'nearest' ) {
 
             setGraphData({lines: [], path: []}); 
             coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+
+            mapListAndCoords = mapList.map((item, index) => ({
+                ...item,
+                x: coords[index][0],
+                y: coords[index][1]
+            }));
             
-        } else if (reducer === 'paths') {
+        } else if ( reducer === 'paths' || reducer === 'pca' ) {
 
-            const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+            let graphAndCoords;
 
-            if (graphAndCoords.coords) {
-                coords = graphAndCoords.coords; 
+            if ( reducer === 'pca' ) {
+
+                setGraphData({lines: [], path: []});
+                coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+
+            } else if ( reducer === 'paths' ) {
+
+                graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+
+                if (graphAndCoords.coords) {
+                    coords = graphAndCoords.coords; 
+                } else {
+                    coords = [];
+                }
+
+            }
+
+            if ( prevMapData.current === null ) {
+                mapListAndCoords = mapList.map((item, index) => ({
+                    ...item,
+                    x: coords[index][0],
+                    y: coords[index][1]
+                }));
             } else {
-                coords = [];
+                const candidateMapListAndCoords = mapList.map((item, index) => ({
+                    ...item,
+                    x: coords[index][0],
+                    y: coords[index][1]
+                }));
+
+                const prevMapSmps = prevMapData.current.map(d => d.smp);
+                const filteredCandidateMapListAndCoords = candidateMapListAndCoords.filter(d => prevMapSmps.includes(d.smp));
+                const prevCoords = prevMapData.current.map(d => [d.x, d.y]);
+                const filteredCandidateCoords = filteredCandidateMapListAndCoords.map(d => [d.x, d.y]);
+
+                // avoid flipping the pca
+                const signFlips = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+                const totalMovements = signFlips.map(signs => totalCoordMovement(prevCoords, filteredCandidateCoords, signs));
+                const minMovementIndex = totalMovements.indexOf(Math.min(...totalMovements));
+                const bestSigns = signFlips[minMovementIndex];
+
+                coords = coords.map(coord => [coord[0] * bestSigns[0], coord[1] * bestSigns[1]]);
+
+                mapListAndCoords = mapList.map((item, index) => ({
+                    ...item,
+                    x: coords[index][0],
+                    y: coords[index][1]
+                }));
             }
             
-            if (graphAndCoords.graph) {
+            prevMapData.current = mapListAndCoords;
+            
+            if ( reducer === 'paths' && graphAndCoords?.graph ) {
                 
                 const linesData = [];
                 const addedLines = new Set();
@@ -287,47 +340,6 @@ export default function App() {
                 setGraphData({lines: [], path: []}); 
                 setPathSmpsAndWeightChars({"smps": [], "weights": []});
             }
-        }
-
-        let mapListAndCoords;
-        if ( reducer === 'nearest' || reducer === 'project' || reducer === 'paths' ) {
-            mapListAndCoords = mapList.map((item, index) => ({
-                ...item,
-                x: coords[index][0],
-                y: coords[index][1]
-            }));
-        } else if ( reducer === 'pca' ) {
-            if ( prevMapData.current === null ) {
-                mapListAndCoords = mapList.map((item, index) => ({
-                    ...item,
-                    x: coords[index][0],
-                    y: coords[index][1]
-                }));
-            } else {
-                const candidateMapListAndCoords = mapList.map((item, index) => ({
-                    ...item,
-                    x: coords[index][0],
-                    y: coords[index][1]
-                }));
-
-                const prevMapSmps = prevMapData.current.map(d => d.smp);
-                const filteredCandidateMapListAndCoords = candidateMapListAndCoords.filter(d => prevMapSmps.includes(d.smp));
-                const prevCoords = prevMapData.current.map(d => [d.x, d.y]);
-                const filteredCandidateCoords = filteredCandidateMapListAndCoords.map(d => [d.x, d.y]);
-
-                // avoid flipping the pca
-                const signFlips = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
-                const totalMovements = signFlips.map(signs => totalCoordMovement(prevCoords, filteredCandidateCoords, signs));
-                const minMovementIndex = totalMovements.indexOf(Math.min(...totalMovements));
-                const bestSigns = signFlips[minMovementIndex];
-
-                mapListAndCoords = mapList.map((item, index) => ({
-                    ...item,
-                    x: coords[index][0] * bestSigns[0],
-                    y: coords[index][1] * bestSigns[1]
-                }));
-            }
-            prevMapData.current = mapListAndCoords;
         }
 
         setMapData(mapListAndCoords);
