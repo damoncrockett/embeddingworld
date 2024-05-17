@@ -24,6 +24,7 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
             if (selectionVecs.length !== 2) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
 
             const projectedX = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
+            const projectedXranks = projectedX.map(d => projectedX.filter(e => e < d).length);
 
             if (selections[2] && selections[3]) {
                 const selectionVecs = mapList.filter(d => d.smp === selections[2] || d.smp === selections[3]).map(d => d.vec);
@@ -31,12 +32,15 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
                 if (selectionVecs.length !== 2) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
 
                 const projectedY = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
+                const projectedYranks = projectedY.map(d => projectedY.filter(e => e < d).length);
                 
-                coords = projectedX.map((d, i) => [d, projectedY[i]]);
+                //coords = projectedX.map((d, i) => [d, projectedY[i]]);
+                coords = projectedXranks.map((d, i) => [d, projectedYranks[i]]);
 
             } else {
 
-                coords = projectedX.map(d => [d, 0])
+                //coords = projectedX.map(d => [d, 0])
+                coords = projectedXranks.map(d => [d, 0]);
             }
         } else {
             
@@ -51,11 +55,15 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
             if (!selectionVec) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
 
             const euclideanDistances = mapList.map(d => euclideanDistance(d.vec, selectionVec));
-            console.log('euclideanDistances', euclideanDistances);
+
+            let adjustedEuclideanDistances;
+            //adjustedEuclideanDistances = euclideanDistances.map(d => Math.log(d + 0.001));
+            //adjustedEuclideanDistances = euclideanDistances.map(d => (d - Math.min(...euclideanDistances)) / Math.max(...euclideanDistances));
+            adjustedEuclideanDistances = euclideanDistances.map(d => euclideanDistances.filter(e => e < d).length);
             const anglesBetween = mapList.map(d => angleBetweenVectors(d.vec, selectionVec));
-            console.log('anglesBetween', anglesBetween);
-            coords = euclideanDistances.map((d, i) => polarToCartesian(d, anglesBetween[i]));
-            console.log('coords', coords);
+            coords = adjustedEuclideanDistances.map((d, i) => polarToCartesian(d, anglesBetween[i]));
+
+            console.log(adjustedEuclideanDistances, anglesBetween, coords);
 
         } else {
             coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
