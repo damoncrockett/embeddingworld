@@ -47,7 +47,7 @@ export default function PathString({ pathSmpsAndWeightChars, mapList }) {
   
       enteredSegments.append("span")
         .attr("class", d => getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b")
-        .text(d => d);
+        .text(s => s.length > 20 ? s.substring(0, 20) + '...' : s)
   
       enteredSegments.append("span")
         .attr("class", "sep")

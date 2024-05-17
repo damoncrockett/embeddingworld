@@ -47,7 +47,7 @@ export default function Selections({
                                 {...provided.dragHandleProps}
                                 style={provided.draggableProps.style}
                             >
-                                {item ? item : 'LANDSCAPE'}
+                                {!item ? 'LANDSCAPE' : item.length > 20 ? item.substring(0, 20) + '...' : item}
                             </div>
                             )}
                         </Draggable>

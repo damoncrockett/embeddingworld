@@ -10,6 +10,14 @@ const basemaps = {
     "passages": passages
 }
 
+export const truncateStringByZoomLevel = (s, zoomLevel) => {
+        
+    const maxChars = [10, 30, 50, 70, 90, 110];
+
+    return s.length > maxChars[zoomLevel] ? s.substring(0, maxChars[zoomLevel]) + '...' : s;
+
+};
+
 const chooseThreeMostImportantWords = (text) => {
     const words = text.toLowerCase().split(/\s+/);
     const wordCounts = new Map();

@@ -5,6 +5,7 @@ import { zoom, zoomTransform, zoomIdentity } from 'd3-zoom';
 import { scaleLinear } from 'd3-scale';
 import { min, max } from 'd3-array';
 import { calculateLineEndpoints } from '../../utils/geometry';
+import { truncateStringByZoomLevel } from '../../utils/text';
 
 const svgHeight = window.innerHeight;
 const svgWidth = window.innerWidth;
@@ -112,14 +113,6 @@ export default function World({
             clickTimer.current = null;
         };
     }, [selectMode, selections, reducer]);
-
-    const truncateStringByZoomLevel = (s, zoomLevel) => {
-        
-        const maxChars = [10, 30, 50, 70, 90, 110];
-
-        return s.length > maxChars[zoomLevel] ? s.substring(0, maxChars[zoomLevel]) + '...' : s;
-
-    };
 
     const handleZoom = (event) => {
         const { transform } = event;
