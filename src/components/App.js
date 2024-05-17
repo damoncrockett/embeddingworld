@@ -239,7 +239,7 @@ export default function App() {
                 if (graphAndCoords.coords) {
                     coords = graphAndCoords.coords; 
                 } else {
-                    coords = [];
+                    coords = [[0, 0]];
                 }
 
             }
@@ -276,7 +276,7 @@ export default function App() {
                     y: coords[index][1]
                 }));
             }
-            
+
             prevMapData.current = mapListAndCoords;
             
             if ( reducer === 'paths' && graphAndCoords?.graph ) {
