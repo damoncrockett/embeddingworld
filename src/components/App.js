@@ -222,6 +222,8 @@ export default function App() {
                 x: coords[index][0],
                 y: coords[index][1]
             }));
+
+            prevMapData.current = null;
             
         } else if ( reducer === 'paths' || reducer === 'pca' ) {
 
