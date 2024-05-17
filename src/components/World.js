@@ -55,6 +55,14 @@ export default function World({
     const handleClickRef = useRef();
     const handleDoubleClickRef = useRef();
 
+    const reducerRef = useRef(reducer);
+    const selectionsRef = useRef(selections);
+
+    useEffect(() => {
+        reducerRef.current = reducer;
+        selectionsRef.current = selections;
+    }, [reducer, selections]);
+
     useEffect(() => {
 
         const handleClick = (event, d) => {
@@ -123,6 +131,7 @@ export default function World({
         select(svgRef.current).selectAll('text.map')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
+            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null);
         
         select(svgRef.current).selectAll('line.connectionLine')
             .attr('x1', d => xScaleZoomed(d.source.x))
@@ -132,11 +141,13 @@ export default function World({
 
         select(svgRef.current).selectAll('rect.selectedRect')
             .attr('x', d => xScaleZoomed(d.x) - rectXAdjustment)
-            .attr('y', d => yScaleZoomed(d.y) - rectYAdjustment);
+            .attr('y', d => yScaleZoomed(d.y) - rectYAdjustment)
+            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null);
 
         select(svgRef.current).selectAll('text.selectedText')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
+            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null);
         
         const zoomScale = transform.k;
         const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
@@ -223,28 +234,31 @@ export default function World({
             .data(mapData, d => d.smp + "-" + d.lvl)
             .join(
                 enter => enter.append('text')
-                            .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
-                            .attr('x', d => xScaleZoomed(d.x))
-                            .attr('y', d => yScaleZoomed(d.y))
-                            .attr('data-smp', d => d.smp) // use for rect sizing
-                            .attr('fill', 'coral')
-                            .on('click', (event, d) => handleClickRef.current(event, d))
-                            .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
-                            .call(enter => enter.transition().duration(transitionDuration * 2)
-                                .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey'))
-                            .each(function(d) {
-                                select(this).append('tspan')
-                                    .text(truncateStringByZoomLevel(d.smp, zoomLevel));
-                                select(this).append('title')
-                                    .text(d.smp);
-                            }),
+                    .attr('class', d => d.lvl === 'm' ? 'map textMap' : 'map textBasemap')
+                    .attr('x', d => xScaleZoomed(d.x))
+                    .attr('y', d => yScaleZoomed(d.y))
+                    .attr('data-smp', d => d.smp) // use for rect sizing
+                    .attr('fill', 'coral')
+                    .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null) 
+                    .on('click', (event, d) => handleClickRef.current(event, d))
+                    .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
+                    .call(enter => enter.transition().duration(transitionDuration * 2)
+                        .attr('fill', d => d.lvl === 'm' ? 'white' : 'grey'))
+                    .each(function(d) {
+                        select(this).append('tspan')
+                            .text(truncateStringByZoomLevel(d.smp, zoomLevel));
+                        select(this).append('title')
+                            .text(d.smp);
+                    }),
                 update => update.transition().duration(transitionDuration)
-                            .attr('x', d => xScaleZoomed(d.x))
-                            .attr('y', d => yScaleZoomed(d.y)),
+                    .attr('x', d => xScaleZoomed(d.x))
+                    .attr('y', d => yScaleZoomed(d.y))
+                    .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null), 
                 exit => exit.transition().duration(transitionDuration)
-                            .style('opacity', 0)
-                            .remove()
+                    .style('opacity', 0)
+                    .remove()
             );
+
 
         mapTexts.on('click', (event, d) => handleClickRef.current(event, d))
                 .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d));
@@ -329,6 +343,7 @@ export default function World({
                             .attr('height', (d,i) => selectedTextSize[i].height + 10)
                             .attr('rx', 5)
                             .attr('fill', 'white')
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null)
                             .attr('stroke', 'coral')
                             .attr('stroke-width', rectStrokeWidth)
                             .style('opacity', 0)
@@ -336,7 +351,8 @@ export default function World({
                 update => {
                     update.transition().duration(transitionDuration)
                             .attr('x', (d,i) => xScaleZoomed(d.x) - rectXAdjustment)
-                            .attr('y', (d,i) => yScaleZoomed(d.y) - rectYAdjustment)},
+                            .attr('y', (d,i) => yScaleZoomed(d.y) - rectYAdjustment)
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null)},
                 exit => {
                     exit.transition().duration(transitionDuration).style('opacity', 0).remove()}
             );
@@ -352,6 +368,7 @@ export default function World({
                             .attr('y', d => yScaleZoomed(d.y))
                             .attr('class', 'selectedText')
                             .style('fill', 'black')
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null)
                             .style('opacity', 0)
                             .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1))
                             .each(function(d) {
@@ -362,7 +379,8 @@ export default function World({
                             }),
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
-                            .attr('y', d => yScaleZoomed(d.y)),
+                            .attr('y', d => yScaleZoomed(d.y))
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null),
                 exit => exit.transition().duration(transitionDuration).style('opacity', 0).remove()
             );
     }, [selectionsData]);
