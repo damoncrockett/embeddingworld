@@ -1,7 +1,7 @@
 import { PCA } from 'ml-pca';
 import { projectPointOntoLine, euclideanDistance, cosineDistance, angleBetweenVectors, polarToCartesian } from './geometry';
 
-export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
+export function reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks) {
     if (mapList.length === 0) return [];
 
     const toFit = basemapLocked ? mapList.filter(d => d.lvl === 'b') : mapList;
@@ -23,24 +23,31 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
             
             if (selectionVecs.length !== 2) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
 
-            const projectedX = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
-            const projectedXranks = projectedX.map(d => projectedX.filter(e => e < d).length);
+            let projectedX;
+            projectedX = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
+
+            if (ranks) {
+                projectedX = projectedX.map(d => projectedX.filter(e => e < d).length);
+            }
 
             if (selections[2] && selections[3]) {
                 const selectionVecs = mapList.filter(d => d.smp === selections[2] || d.smp === selections[3]).map(d => d.vec);
 
                 if (selectionVecs.length !== 2) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
 
-                const projectedY = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
-                const projectedYranks = projectedY.map(d => projectedY.filter(e => e < d).length);
+                let projectedY;
+                projectedY = mapList.map(d => projectPointOntoLine(d.vec, selectionVecs[0], selectionVecs[1]))
+
+                if (ranks) {
+                    projectedY = projectedY.map(d => projectedY.filter(e => e < d).length);
+                }
                 
-                //coords = projectedX.map((d, i) => [d, projectedY[i]]);
-                coords = projectedXranks.map((d, i) => [d, projectedYranks[i]]);
+                coords = projectedX.map((d, i) => [d, projectedY[i]]);
 
             } else {
 
-                //coords = projectedX.map(d => [d, 0])
-                coords = projectedXranks.map(d => [d, 0]);
+                coords = projectedX.map(d => [d, 0])
+
             }
         } else {
             
@@ -54,16 +61,15 @@ export function reduceEmbeddings(mapList, basemapLocked, reducer, selections) {
 
             if (!selectionVec) return mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]); // need better fix
 
-            const euclideanDistances = mapList.map(d => euclideanDistance(d.vec, selectionVec));
+            let euclideanDistances;
+            euclideanDistances = mapList.map(d => euclideanDistance(d.vec, selectionVec));
 
-            let adjustedEuclideanDistances;
-            //adjustedEuclideanDistances = euclideanDistances.map(d => Math.log(d + 0.001));
-            //adjustedEuclideanDistances = euclideanDistances.map(d => (d - Math.min(...euclideanDistances)) / Math.max(...euclideanDistances));
-            adjustedEuclideanDistances = euclideanDistances.map(d => euclideanDistances.filter(e => e < d).length);
+            if (ranks) {
+                euclideanDistances = euclideanDistances.map(d => euclideanDistances.filter(e => e < d).length);
+            }
+
             const anglesBetween = mapList.map(d => angleBetweenVectors(d.vec, selectionVec));
-            coords = adjustedEuclideanDistances.map((d, i) => polarToCartesian(d, anglesBetween[i]));
-
-            console.log(adjustedEuclideanDistances, anglesBetween, coords);
+            coords = euclideanDistances.map((d, i) => polarToCartesian(d, anglesBetween[i]));
 
         } else {
             coords = mapList.map(d => [Math.random() * 2 - 1, Math.random() * 2 - 1]);

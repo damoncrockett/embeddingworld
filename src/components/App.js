@@ -35,6 +35,7 @@ export default function App() {
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
     const [reducer, setReducer] = useState('pca');
+    const [ranks, setRanks] = useState(false);
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
     const [maxDistance, setMaxDistance] = useState(0);
     const [maxPair, setMaxPair] = useState(null);
@@ -215,7 +216,7 @@ export default function App() {
         if (reducer === 'project' || reducer === 'nearest' ) {
 
             setGraphData({lines: [], path: []}); 
-            coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+            coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
 
             mapListAndCoords = mapList.map((item, index) => ({
                 ...item,
@@ -232,11 +233,11 @@ export default function App() {
             if ( reducer === 'pca' ) {
 
                 setGraphData({lines: [], path: []});
-                coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+                coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
 
             } else if ( reducer === 'paths' ) {
 
-                graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections);
+                graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
 
                 if (graphAndCoords.coords) {
                     coords = graphAndCoords.coords; 
@@ -352,7 +353,7 @@ export default function App() {
         const selectedMapListAndCoords = mapListAndCoords.filter(d => filteredSelections.includes(d.smp));
         setSelectionsData(selectedMapListAndCoords);
     
-    } , [mapList, basemapLocked, reducer, selections]);
+    } , [mapList, basemapLocked, reducer, selections, ranks]);
 
     useEffect(() => {
         if ( clickChange && clickChange.changeType === 'switch' ) {
@@ -410,7 +411,8 @@ export default function App() {
                         </div>
                     </div>
                     <div id='model-group'>
-                        <button id='base-fitter' className={basemapLocked ? 'on' : 'off'} onClick={handleBasemapLock}>FIT BASE</button>
+                        {(reducer === 'nearest' || reducer === 'project') && <button id='base-fitter' className={ranks ? 'on' : 'off'} onClick={() => setRanks(ranks => !ranks)}>RANKS</button>}
+                        {(reducer === 'pca' || reducer === 'paths') && <button id='base-fitter' className={basemapLocked ? 'on' : 'off'} onClick={handleBasemapLock}>FIT BASE</button>}
                         <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
                             {embeddingModels.map(model => (
                                 <option key={model} value={model}>
