@@ -6,6 +6,7 @@ import { scaleLinear } from 'd3-scale';
 import { min, max } from 'd3-array';
 import { calculateLineEndpoints } from '../../utils/geometry';
 import { truncateStringByZoomLevel } from '../../utils/text';
+import { map, pad } from 'lodash';
 
 const svgHeight = window.innerHeight;
 const svgWidth = window.innerWidth;
@@ -25,7 +26,8 @@ let xDomain,
     yScaleZoomed,
     textGroup,
     linesGroup,
-    selectionsGroup;
+    selectionsGroup,
+    axesGroup;
 
 const transitionDuration = 750;
 
@@ -128,6 +130,21 @@ export default function World({
         xScaleZoomed = transform.rescaleX(xScale);
         yScaleZoomed = transform.rescaleY(yScale);
 
+        const yMidpoint = (yDomain[0] + yDomain[1]) / 2;
+        const xMidpoint = (xDomain[0] + xDomain[1]) / 2;
+
+        axesGroup.selectAll('line.xAxis')
+            .attr('x1', xScaleZoomed(xDomain[0]))
+            .attr('x2', xScaleZoomed(xDomain[1]))
+            .attr('y1', selectionsRef.current[2] && selectionsRef.current[3] ? yScaleZoomed(yMidpoint) : yScaleZoomed(0))
+            .attr('y2', selectionsRef.current[2] && selectionsRef.current[3] ? yScaleZoomed(yMidpoint) : yScaleZoomed(0));
+
+        axesGroup.selectAll('line.yAxis')
+            .attr('x1', xScaleZoomed(xMidpoint))
+            .attr('x2', xScaleZoomed(xMidpoint))
+            .attr('y1', yScaleZoomed(yDomain[0]))
+            .attr('y2', yScaleZoomed(yDomain[1]));
+
         select(svgRef.current).selectAll('text.map')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
@@ -180,6 +197,11 @@ export default function World({
             mapPointsContainer = svg.append('g').attr('class', 'mapPointsContainer');
         }
 
+        axesGroup = mapPointsContainer.select('g.axesGroup');
+        if (axesGroup.empty()) {
+            axesGroup = mapPointsContainer.append('g').attr('class', 'axesGroup');
+        }
+
         textGroup = mapPointsContainer.select('g.textGroup');
         if (textGroup.empty()) {
             textGroup = mapPointsContainer.append('g').attr('class', 'textGroup');
@@ -207,7 +229,7 @@ export default function World({
            .on('dblclick.zoom', null); 
 
     }, []);
-    
+
     useEffect(() => {
 
         if (!mapData) return;
@@ -269,6 +291,67 @@ export default function World({
         };
 
     }, [mapData, selectMode, selections]);
+
+    useEffect(() => {
+        
+        if (mapData && mapData.length > 0) {
+            xScaleZoomed = zoomTransform(svgRef.current).rescaleX(xScale);
+            yScaleZoomed = zoomTransform(svgRef.current).rescaleY(yScale);
+        } else {
+            return;
+        }
+
+        const yMidpoint = (yDomain[0] + yDomain[1]) / 2;
+        const xMidpoint = (xDomain[0] + xDomain[1]) / 2;
+
+        if ( reducer === 'project' && selections[0] && selections[1] ) {
+
+            axesGroup.selectAll('line.xAxis')
+                .data([0])
+                .join(
+                    enter => enter.append('line')
+                        .attr('class', 'xAxis')
+                        .attr('x1', xScaleZoomed(xDomain[0]))
+                        .attr('y1', selections[2] && selections[3] ? yScaleZoomed(yMidpoint) : yScaleZoomed(0))
+                        .attr('x2', xScaleZoomed(xDomain[1]))
+                        .attr('y2', selections[2] && selections[3] ? yScaleZoomed(yMidpoint) : yScaleZoomed(0))
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1)
+                        .attr('stroke-dasharray', '5,5'),
+                    update => update.transition().duration(transitionDuration)
+                        .attr('x1', xScaleZoomed(xDomain[0]))
+                        .attr('y1', selections[2] && selections[3] ? yScaleZoomed(yMidpoint) : yScaleZoomed(0))
+                        .attr('x2', xScaleZoomed(xDomain[1]))
+                        .attr('y2', selections[2] && selections[3] ? yScaleZoomed(yMidpoint) : yScaleZoomed(0))
+                );
+            } else {
+                axesGroup.selectAll('line.xAxis').remove();
+            }
+
+        if ( reducer === 'project' && selections[0] && selections[1] && selections[2] && selections[3] ) {
+            axesGroup.selectAll('line.yAxis')
+                .data([0])
+                .join(
+                    enter => enter.append('line')
+                        .attr('class', 'yAxis')
+                        .attr('x1', xScaleZoomed(xMidpoint))
+                        .attr('y1', yScaleZoomed(yDomain[0]))
+                        .attr('x2', xScaleZoomed(xMidpoint))
+                        .attr('y2', yScaleZoomed(yDomain[1]))
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1)
+                        .attr('stroke-dasharray', '5,5'),
+                    update => update.transition().duration(transitionDuration)
+                        .attr('x1', xScaleZoomed(xMidpoint))
+                        .attr('y1', yScaleZoomed(yDomain[0]))
+                        .attr('x2', xScaleZoomed(xMidpoint))
+                        .attr('y2', yScaleZoomed(yDomain[1]))
+                );
+        } else {
+            axesGroup.selectAll('line.yAxis').remove();
+        }
+
+    }, [reducer, selections, mapData]);
 
     useEffect(() => {
 
