@@ -131,7 +131,7 @@ export default function World({
         select(svgRef.current).selectAll('text.map')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
-            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null);
+            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`);
         
         select(svgRef.current).selectAll('line.connectionLine')
             .attr('x1', d => xScaleZoomed(d.source.x))
@@ -142,12 +142,12 @@ export default function World({
         select(svgRef.current).selectAll('rect.selectedRect')
             .attr('x', d => xScaleZoomed(d.x) - rectXAdjustment)
             .attr('y', d => yScaleZoomed(d.y) - rectYAdjustment)
-            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null);
+            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`);
 
         select(svgRef.current).selectAll('text.selectedText')
             .attr('x', d => xScaleZoomed(d.x))
             .attr('y', d => yScaleZoomed(d.y))
-            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null);
+            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`);
         
         const zoomScale = transform.k;
         const zoomLevel = Math.floor((zoomScale - zoomScaleMin) / ((zoomScaleMax - zoomScaleMin) / 5));
@@ -239,7 +239,7 @@ export default function World({
                     .attr('y', d => yScaleZoomed(d.y))
                     .attr('data-smp', d => d.smp) // use for rect sizing
                     .attr('fill', 'coral')
-                    .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null) 
+                    .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`) 
                     .on('click', (event, d) => handleClickRef.current(event, d))
                     .on('dblclick', (event, d) => handleDoubleClickRef.current(event, d))
                     .call(enter => enter.transition().duration(transitionDuration * 2)
@@ -253,7 +253,7 @@ export default function World({
                 update => update.transition().duration(transitionDuration)
                     .attr('x', d => xScaleZoomed(d.x))
                     .attr('y', d => yScaleZoomed(d.y))
-                    .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null), 
+                    .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`), 
                 exit => exit.transition().duration(transitionDuration)
                     .style('opacity', 0)
                     .remove()
@@ -343,7 +343,7 @@ export default function World({
                             .attr('height', (d,i) => selectedTextSize[i].height + 10)
                             .attr('rx', 5)
                             .attr('fill', 'white')
-                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null)
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`)
                             .attr('stroke', 'coral')
                             .attr('stroke-width', rectStrokeWidth)
                             .style('opacity', 0)
@@ -352,7 +352,7 @@ export default function World({
                     update.transition().duration(transitionDuration)
                             .attr('x', (d,i) => xScaleZoomed(d.x) - rectXAdjustment)
                             .attr('y', (d,i) => yScaleZoomed(d.y) - rectYAdjustment)
-                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null)},
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`)},
                 exit => {
                     exit.transition().duration(transitionDuration).style('opacity', 0).remove()}
             );
@@ -368,7 +368,7 @@ export default function World({
                             .attr('y', d => yScaleZoomed(d.y))
                             .attr('class', 'selectedText')
                             .style('fill', 'black')
-                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null)
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`)
                             .style('opacity', 0)
                             .call(enter => enter.transition().duration(transitionDuration).style('opacity', 1))
                             .each(function(d) {
@@ -380,7 +380,7 @@ export default function World({
                 update => update.transition().duration(transitionDuration)
                             .attr('x', d => xScaleZoomed(d.x))
                             .attr('y', d => yScaleZoomed(d.y))
-                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : null),
+                            .attr('transform', d => reducerRef.current === 'project' && !(selectionsRef.current[2] && selectionsRef.current[3]) ? `rotate(-45, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})` : `rotate(0, ${xScaleZoomed(d.x)}, ${yScaleZoomed(d.y)})`),
                 exit => exit.transition().duration(transitionDuration).style('opacity', 0).remove()
             );
     }, [selectionsData]);
