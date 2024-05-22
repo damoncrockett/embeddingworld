@@ -38,7 +38,7 @@ export function polarToCartesian(r, theta) {
   return [x, y];
 }
 
-function generatePairwiseComparisons(length) {
+export function generatePairwiseComparisons(length) {
     const pairs = [];
     for (let i = 0; i < length - 1; i++) {
         for (let j = i + 1; j < length; j++) {

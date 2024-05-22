@@ -3,8 +3,10 @@ import { select } from 'd3-selection';
 
 const transitionDuration = 750;
 
-export default function PathString({ pathSmpsAndWeightChars, mapList }) {
+export default function PathString({ pathSmpsAndWeightChars, mapList, reducer }) {
   const ref = useRef();
+
+  console.log(pathSmpsAndWeightChars);
 
   const getLevelFromMapList = (item) => {
     const level = mapList.find((d) => d.smp === item);
@@ -58,5 +60,10 @@ export default function PathString({ pathSmpsAndWeightChars, mapList }) {
     }
   }, [pathSmpsAndWeightChars, mapList]);  
 
-  return <div id='pathStringContainer' ref={ref}></div>;
+  return ( 
+    <>
+      {pathSmpsAndWeightChars.smps.length > 0 ? <div id='pathStringContainer' style={{borderStyle: reducer === 'pca' ? 'dotted' : 'solid'}} ref={ref}></div> : null}
+    </>
+
+    );
 }

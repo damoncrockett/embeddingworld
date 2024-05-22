@@ -13,7 +13,9 @@ import {
     findShortestPath, 
     getPathWeights, 
     weightBinner,
-    totalCoordMovement
+    totalCoordMovement,
+    generatePairwiseComparisons,
+    cosineDistance
  } from '../../utils/geometry';
 
 import Meter from './Meter';
@@ -235,6 +237,17 @@ export default function App() {
                 setGraphData({lines: [], path: []});
                 coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
 
+                const nonNullSelections = selections.filter(item => item !== null);
+
+                if ( nonNullSelections.length > 1 ) {
+                    const selectionVecs = nonNullSelections.map(smp => mapList.find(item => item.smp === smp).vec);
+                    const allSelectionPairs = generatePairwiseComparisons(selectionVecs.length);
+                    const allSelectionDistances = allSelectionPairs.map(pair => `${nonNullSelections[pair[0]]}—${cosineDistance(selectionVecs[pair[0]], selectionVecs[pair[1]]).toFixed(3)}—${nonNullSelections[pair[1]]}`);
+                    const connectors = Array(allSelectionDistances.length - 1).fill(' ');
+
+                    setPathSmpsAndWeightChars({"smps": allSelectionDistances, "weights": connectors});
+                }
+
             } else if ( reducer === 'paths' ) {
 
                 graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
@@ -339,7 +352,7 @@ export default function App() {
                     setPathSmpsAndWeightChars({"smps": [], "weights": []});
                 }
 
-            } else {
+            } else if ( reducer !== 'pca' ) {
                 setGraphData({lines: [], path: []}); 
                 setPathSmpsAndWeightChars({"smps": [], "weights": []});
             }
@@ -446,7 +459,7 @@ export default function App() {
                         </div>
                     </div>
                 </div>
-                <PathString pathSmpsAndWeightChars={pathSmpsAndWeightChars} mapList={mapList} />
+                {(reducer === 'pca' || reducer === 'paths') && <PathString pathSmpsAndWeightChars={pathSmpsAndWeightChars} mapList={mapList} reducer={reducer} />}
                 <div id='info-group'>
                     <a href="https://github.com/damoncrockett/embeddingworld" target='_blank'>
                         <svg id='github-icon' viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
