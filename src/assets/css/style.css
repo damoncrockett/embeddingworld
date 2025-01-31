@@ -668,3 +668,63 @@ animation: fadeIn 1s ease-out;
     z-index: 2;
 }
 
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.custom-model-modal {
+  background: #222;
+  padding: 40px;
+  border-radius: 10px;
+  border: 1px solid white;
+  min-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.custom-model-modal input {
+  width: 80%;
+  padding: 12px;
+  margin-bottom: 25px;
+  background: #333;
+  border: 1px solid #444;
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.custom-model-modal input:focus {
+  outline: none;
+  border-color: coral;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: 1px solid #444;
+  background: #333;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 100px;
+  font-size: 14px;
+}
+
+.modal-buttons button:hover {
+  border-color: coral;
+  background: #444;
+}
+

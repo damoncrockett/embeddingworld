@@ -22,6 +22,7 @@ import { returnDomain } from '../../utils/data';
 import Selections, { selectionSlotStatus } from './Selections';
 import PathString from './PathString';
 import usePathsData from '../hooks/usePathsData';
+import ModelSelect from './ModelSelect';
 
 export default function App() {
 
@@ -35,7 +36,7 @@ export default function App() {
     const [pathSmpsAndWeightChars, setPathSmpsAndWeightChars] = useState({ smps: [], weights: [] });
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
-    const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
+    const [embeddingModel, setEmbeddingModel] = useState('Xenova/jina-embeddings-v2-small-en');
     const [reducer, setReducer] = useState('pca');
     const [ranks, setRanks] = useState(false);
     const [embedderChangeCounter, setEmbedderChangeCounter] = useState(0);
@@ -354,15 +355,29 @@ export default function App() {
                         </div>
                     </div>
                     <div id='model-group'>
-                        {(reducer === 'nearest' || reducer === 'project') && <button id='base-fitter' className={ranks ? 'on' : 'off'} onClick={() => setRanks(ranks => !ranks)}>RANKS</button>}
-                        {(reducer === 'pca' || reducer === 'paths') && <button id='base-fitter' className={basemapLocked ? 'on' : 'off'} onClick={handleBasemapLock}>FIT BASE</button>}
-                        <select id='model-menu' onChange={e => {setEmbeddingModel(e.target.value); setLoadingInset(true);}} value={embeddingModel}>
-                            {embeddingModels.map(model => (
-                                <option key={model} value={model}>
-                                    {model}
-                                </option>
-                            ))}
-                        </select>
+                        {(reducer === 'nearest' || reducer === 'project') && 
+                            <button 
+                                id='base-fitter' 
+                                className={ranks ? 'on' : 'off'} 
+                                onClick={() => setRanks(ranks => !ranks)}
+                            >
+                                RANKS
+                            </button>
+                        }
+                        {(reducer === 'pca' || reducer === 'paths') && 
+                            <button 
+                                id='base-fitter' 
+                                className={basemapLocked ? 'on' : 'off'} 
+                                onClick={handleBasemapLock}
+                            >
+                                FIT BASE
+                            </button>
+                        }
+                        <ModelSelect 
+                            embeddingModel={embeddingModel}
+                            setEmbeddingModel={setEmbeddingModel}
+                            setLoadingInset={setLoadingInset}
+                        />
                         <button 
                             id='webgpu-toggle' 
                             className={webGPU ? 'on' : 'off'} 

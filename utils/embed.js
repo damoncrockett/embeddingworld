@@ -2,13 +2,15 @@ import { pipeline } from '@xenova/transformers';
 import { set } from 'lodash';
 
 const embeddingModels = [
-    'nomic-ai/nomic-embed-text-v1',
+    'nomic-ai/nomic-embed-text-v1.5',
+    'nomic-ai/modernbert-embed-base',
+    'snowflake-arctic-embed-m-v2.0',
+    'Xenova/text-embedding-ada-002',
     'Xenova/all-MiniLM-L6-v2',
-    'Xenova/bert-base-uncased',
-    'Xenova/bge-m3',
+    'Xenova/bge-small-en-v1.5',
     'mixedbread-ai/mxbai-embed-large-v1',
-    'Xenova/jina-embeddings-v2-small-en'
-    
+    'Xenova/jina-embeddings-v2-small-en',
+    'Supabase/gte-small'
 ]
 
 async function initializeEmbedder(
