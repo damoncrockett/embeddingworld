@@ -16,9 +16,14 @@ async function initializeEmbedder(
     embedderRef, 
     setEmbedderChangeCounter,
     setLoading,
-    setLoadingInset) {
+    setLoadingInset,
+    webGPU
+) {
     try {
-        const newEmbedder = await pipeline('feature-extraction', embeddingModel);
+        const newEmbedder = await pipeline('feature-extraction', embeddingModel, {
+            device: webGPU ? 'webgpu' : null,
+            dtype: webGPU ? 'fp32' : 'q8'
+        });
         embedderRef.current = newEmbedder;
         setEmbedderChangeCounter(counter => counter + 1);
         setLoading(false);

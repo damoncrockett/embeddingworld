@@ -1,17 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { embeddingModels, initializeEmbedder, getEmbeddings } from '../../utils/embed';
 import { reduceEmbeddings } from '../../utils/reduce';
-import { basemaps, sampleRandomWords, iconPath } from '../../utils/text';
+import { basemaps, sampleRandomWords, gitIconPath } from '../../utils/text';
 import Radio from './Radio';
 import BasemapToggles from './BasemapToggles';
 import World from './World';
 import Loading from './Loading';
+import WebGPUIcon from '../assets/svg/webgpu-white.svg';
 
 import { 
     getMaxPairwiseDistance, 
     findBiggestOutlier, 
-    findShortestPath, 
-    getPathWeights, 
     weightBinner,
     totalCoordMovement,
     generatePairwiseComparisons,
@@ -22,6 +21,7 @@ import Meter from './Meter';
 import { returnDomain } from '../../utils/data';
 import Selections, { selectionSlotStatus } from './Selections';
 import PathString from './PathString';
+import usePathsData from '../hooks/usePathsData';
 
 export default function App() {
 
@@ -31,8 +31,8 @@ export default function App() {
     const [mapList, setMapList] = useState([]);
     const [mapData, setMapData] = useState(null);
     const [selectionsData, setSelectionsData] = useState(null);
-    const [graphData, setGraphData] = useState({lines: [], path: []});
-    const [pathSmpsAndWeightChars, setPathSmpsAndWeightChars] = useState({"smps": [], "weights": []});
+    const [graphData, setGraphData] = useState({ lines: [], path: [] });
+    const [pathSmpsAndWeightChars, setPathSmpsAndWeightChars] = useState({ smps: [], weights: [] });
     const [clickChange, setClickChange] = useState(null);
     const [basemapLocked, setBasemapLocked] = useState(false); 
     const [embeddingModel, setEmbeddingModel] = useState(embeddingModels[5]);
@@ -49,11 +49,25 @@ export default function App() {
     const [infoModal, setInfoModal] = useState(false);
     const [selectMode, setSelectMode] = useState(false);
     const [selections, setSelections] = useState([null, null, null, null]);
+    const [webGPU, setWebGPU] = useState(false);
 
     const inputRef = useRef(null);
     const embedderRef = useRef(null);
     const prevEmbeddingModel = useRef(embeddingModel);
     const prevMapData = useRef(null);
+
+    const { graphData: newGraphData, pathSmpsAndWeightChars: newPathSmps } = usePathsData({
+        reducer,
+        mapList,
+        basemapLocked,
+        selections,
+        ranks
+    });
+
+    useEffect(() => {
+        setGraphData(newGraphData);
+        setPathSmpsAndWeightChars(newPathSmps);
+    }, [newGraphData, newPathSmps]);
 
     const clearRemovedSelections = () => {
 
@@ -168,8 +182,10 @@ export default function App() {
             embedderRef, 
             setEmbedderChangeCounter,
             setLoading,
-            setLoadingInset);
-    }, [embeddingModel]);
+            setLoadingInset,
+            webGPU
+        );
+    }, [embeddingModel, webGPU]);
 
     useEffect(() => {
         const recomputeEmbeddings = async () => {
@@ -215,9 +231,8 @@ export default function App() {
         let coords;
         let mapListAndCoords;
                               
-        if (reducer === 'project' || reducer === 'nearest' ) {
+        if ( reducer !== 'paths' ) {
 
-            setGraphData({lines: [], path: []}); 
             coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
 
             mapListAndCoords = mapList.map((item, index) => ({
@@ -228,36 +243,14 @@ export default function App() {
 
             prevMapData.current = null;
             
-        } else if ( reducer === 'paths' || reducer === 'pca' ) {
+        } else if ( reducer === 'paths' ) {
 
-            let graphAndCoords;
+            const graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
 
-            if ( reducer === 'pca' ) {
-
-                setGraphData({lines: [], path: []});
-                coords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
-
-                const nonNullSelections = selections.filter(item => item !== null);
-
-                if ( nonNullSelections.length > 1 ) {
-                    const selectionVecs = nonNullSelections.map(smp => mapList.find(item => item.smp === smp).vec);
-                    const allSelectionPairs = generatePairwiseComparisons(selectionVecs.length);
-                    const allSelectionDistances = allSelectionPairs.map(pair => `${nonNullSelections[pair[0]]}—${cosineDistance(selectionVecs[pair[0]], selectionVecs[pair[1]]).toFixed(3)}—${nonNullSelections[pair[1]]}`);
-                    const connectors = Array(allSelectionDistances.length - 1).fill(' ');
-
-                    setPathSmpsAndWeightChars({"smps": allSelectionDistances, "weights": connectors});
-                }
-
-            } else if ( reducer === 'paths' ) {
-
-                graphAndCoords = reduceEmbeddings(mapList, basemapLocked, reducer, selections, ranks);
-
-                if (graphAndCoords.coords) {
-                    coords = graphAndCoords.coords; 
-                } else {
-                    coords = [[0, 0]];
-                }
-
+            if (graphAndCoords.coords) {
+                coords = graphAndCoords.coords; 
+            } else {
+                coords = [[0, 0]];
             }
 
             if ( prevMapData.current === null ) {
@@ -295,73 +288,10 @@ export default function App() {
 
             prevMapData.current = mapListAndCoords;
             
-            if ( reducer === 'paths' && graphAndCoords?.graph ) {
-                
-                const linesData = [];
-                const addedLines = new Set();
-
-                graphAndCoords.graph.forEach((value, key) => {
-                    const startPoint = { x: coords[key][0], y: coords[key][1], smp: mapList[key].smp };
-                    if (!startPoint) return;
-
-                    value.connections.forEach(conn => {
-                        const endPoint = { x: coords[conn.node][0], y: coords[conn.node][1], smp: mapList[conn.node].smp };
-                        if (!endPoint) return;
-
-                        const lineId = [startPoint.smp, endPoint.smp].sort().join('-'); // to avoid dupes
-
-                        if (!addedLines.has(lineId)) {
-                            linesData.push({
-                                source: startPoint,
-                                target: endPoint,
-                                weight: weightBinner(conn.weight)
-                            });
-
-                            addedLines.add(lineId);
-                        }
-                    });
-                });
-                
-                if ( selections[0] !== null && selections[1] !== null ) {
-                    
-                    const startNode = mapList.findIndex(item => item.smp === selections[0]);
-                    const endNode = mapList.findIndex(item => item.smp === selections[1]);
-                    const path = findShortestPath(graphAndCoords.graph, startNode, endNode);
-                    
-                    if (path) {
-                        
-                        const pathWeights = getPathWeights(graphAndCoords.graph, path);
-                        const weightCharacters = pathWeights.map(w => weightBinner(w, "character"));
-                        const smpPath = path.map(node => mapList[node].smp);
-                        
-                        setPathSmpsAndWeightChars({"smps": smpPath, "weights": weightCharacters});
-
-                        const pathSegments = [];
-                        for (let i = 0; i < smpPath.length - 1; i++) {
-                            pathSegments.push(`${smpPath[i]}-${smpPath[i + 1]}`);
-                            pathSegments.push(`${smpPath[i + 1]}-${smpPath[i]}`);
-                        }
-
-                        setGraphData({lines: linesData, path: pathSegments});
-                    } else {
-                        setGraphData({lines: linesData, path: []});
-                        setPathSmpsAndWeightChars({"smps": [], "weights": []});
-                    }
-                } else {
-                    setGraphData({lines: linesData, path: []});
-                    setPathSmpsAndWeightChars({"smps": [], "weights": []});
-                }
-
-            } else if ( reducer !== 'pca' ) {
-                setGraphData({lines: [], path: []}); 
-                setPathSmpsAndWeightChars({"smps": [], "weights": []});
-            }
         }
 
         setMapData(mapListAndCoords);
 
-        // used for selection highlights
-        // filter first for selections that have the `filled` class
         const filteredSelections = selections.filter((d, i) => selectionSlotStatus(d, i, reducer, selections) === 'filled');
         const selectedMapListAndCoords = mapListAndCoords.filter(d => filteredSelections.includes(d.smp));
         setSelectionsData(selectedMapListAndCoords);
@@ -433,6 +363,14 @@ export default function App() {
                                 </option>
                             ))}
                         </select>
+                        <button 
+                            id='webgpu-toggle' 
+                            className={webGPU ? 'on' : 'off'} 
+                            onClick={() => setWebGPU(!webGPU)}
+                            title="Toggle WebGPU acceleration"
+                        >
+                            <img src={WebGPUIcon} alt="WebGPU" />
+                        </button>
                     </div>
                     <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
                     <div id='layout-group'>
@@ -459,11 +397,17 @@ export default function App() {
                         </div>
                     </div>
                 </div>
-                {(reducer === 'pca' || reducer === 'paths') && <PathString pathSmpsAndWeightChars={pathSmpsAndWeightChars} mapList={mapList} reducer={reducer} />}
+                {reducer === 'paths' && (
+                    <PathString 
+                        pathSmpsAndWeightChars={pathSmpsAndWeightChars}
+                        mapList={mapList}
+                        reducer={reducer}
+                    />
+                )}
                 <div id='info-group'>
                     <a href="https://github.com/damoncrockett/embeddingworld" target='_blank'>
                         <svg id='github-icon' viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
-                            <path fillRule="evenodd" clipRule="evenodd" d={iconPath}></path>
+                            <path fillRule="evenodd" clipRule="evenodd" d={gitIconPath}></path>
                         </svg>
                     </a>
                     <div id='info-button' className='material-icons-outlined' onClick={() => setInfoModal(true)}>info</div>

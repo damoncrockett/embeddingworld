@@ -44,6 +44,10 @@ module.exports = {
         test: /\.txt$/,
         use: 'raw-loader',
       },
+      {
+        test: /\.svg$/,
+        type: 'asset/resource'
+      }
     ]
   },
   plugins: [

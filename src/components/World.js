@@ -51,7 +51,7 @@ export default function World({
     const zoomLevelRef = useRef();
 
     const zoomScaleMin = 0.25;
-    const zoomScaleMax = 5;
+    const zoomScaleMax = 7.5;
     
     const clickTimer = useRef(null);
     const handleClickRef = useRef();

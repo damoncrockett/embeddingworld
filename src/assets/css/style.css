@@ -278,10 +278,14 @@ textarea::placeholder {
     top: 2vh;
     right: 2vw;
     text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 #model-menu {
     width: 300px;
+    min-width: 200px;
 }
 
 select {
@@ -305,6 +309,41 @@ select {
 select:focus {
     outline: none;
 
+}
+
+#webgpu-toggle {
+    font-weight: 400;
+    padding: 10px;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: transparent;
+    color: grey;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#webgpu-toggle img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0.5);
+}
+
+#webgpu-toggle:hover {
+    border-color: white;
+}
+
+#webgpu-toggle:hover img {
+    filter: brightness(1);
+}
+
+#webgpu-toggle.on {
+    background-color: coral;
+}
+
+#webgpu-toggle.on img {
+    filter: brightness(1);
 }
 
 #loadingInsetContainer {
@@ -409,36 +448,50 @@ select:focus {
 }
 
 #pathStringContainer {
-    position: absolute;
-    bottom: 2vh;
-    left: 40vw;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap; 
     align-items: center;
-    border: 1px black;
-    box-shadow: 10px 10px 0 0 black;
+    padding: 10px 20px;
     border-radius: 10px;
-    padding: 10px; 
+    background: rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    width: fit-content;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+#pathStringContainer.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .segment {
-    
+    display: flex;
+    align-items: center;
+    min-width: 0;
 }
 
-.sep {
-    font-weight: 500;
+.pathString {
+    color: white;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.pathString.m {
     color: coral;
 }
 
-.m {
-    color: white;
-    font-weight: 500;
-}
-
-.b {
-    color: grey;
-    font-weight: 100;
+.sep {
+    color: coral;
+    margin: 0 8px;
+    opacity: 1;
+    flex-shrink: 0;
 }
 
 #spreadMeter {

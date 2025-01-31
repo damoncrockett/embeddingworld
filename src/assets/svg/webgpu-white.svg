@@ -1,0 +1,15 @@
+<svg id="Logo" xmlns="http://www.w3.org/2000/svg" width="768" height="768" viewBox="0 0 768 512">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="Triangle_1" data-name="Triangle 1" class="cls-1" d="m30.855 98.98 245.15 408.93 245.14-408.93h-490.29z"/>
+  <path id="Triangle_2" data-name="Triangle 2" class="cls-1" d="m528.76 103.11-118.78 198.13h237.56l-118.78-198.13z"/>
+  <path id="Triangle_3" data-name="Triangle 3" class="cls-1" d="m409.98 309.78 118.78 198.13 118.78-198.13h-237.56z"/>
+  <path id="Triangle_4" data-name="Triangle 4" class="cls-1" d="m599.53 204.38 55.596 92.738 55.754-92.738h-111.35z"/>
+  <path id="Triangle_5" data-name="Triangle 5" class="cls-1" d="m655.12 103.1-55.6 92.742h111.36l-55.756-92.742z"/>
+</svg>

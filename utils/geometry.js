@@ -221,6 +221,11 @@ export function findShortestPath(graph, startNode, endNode) {
       });
   }
 
+  // First check if we can reach the end node
+  if (distances.get(endNode) === Infinity) {
+    return null;
+  }
+
   const path = [];
   let current = endNode;
 
@@ -230,7 +235,11 @@ export function findShortestPath(graph, startNode, endNode) {
   }
 
   path.unshift(startNode);
-  if (path.length === 0 || path[0] !== startNode) return null; 
+  
+  // Double check path validity
+  if (path.length === 0 || path[0] !== startNode || path[path.length - 1] !== endNode) {
+    return null;
+  }
   
   return path; 
 }

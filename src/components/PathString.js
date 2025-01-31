@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { select } from 'd3-selection';
 
 const transitionDuration = 750;
@@ -6,64 +6,73 @@ const transitionDuration = 750;
 export default function PathString({ pathSmpsAndWeightChars, mapList, reducer }) {
   const ref = useRef();
 
-  console.log(pathSmpsAndWeightChars);
+  useEffect(() => {
+
+    const container = select(ref.current);
+    const segments = container.selectAll("div.segment")
+      .data(pathSmpsAndWeightChars.smps, (d, i) => `${d}-${i}`);
+  
+    // Handle exits
+    segments.exit()
+      .transition()
+      .duration(transitionDuration)
+      .style("opacity", 0)
+      .remove();
+
+    // Update existing segments
+    segments.each(function(d) {
+      const currentClass = getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b";
+      select(this)
+        .select("span.pathString")
+        .attr("class", currentClass);
+    });
+  
+    // Handle enters
+    const enteredSegments = segments.enter()
+      .append("div")
+      .attr("class", "segment")
+      .style("opacity", 0);
+
+    enteredSegments.append("span")
+      .attr("class", d => getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b")
+      .text(s => s.length > 20 ? s.substring(0, 20) + '...' : s);
+
+    enteredSegments.append("span")
+      .attr("class", "sep")
+      .text((d, i) => {
+        return i < pathSmpsAndWeightChars.smps.length - 1 
+          ? (pathSmpsAndWeightChars.weights[i] || '—')
+          : '';
+      });
+
+    // After content is added, wait a tick for layout
+    setTimeout(() => {
+      if (ref.current) {
+        select(ref.current)
+          .style('visibility', 'visible')
+          .transition()
+          .duration(transitionDuration)
+          .style('opacity', 1);
+      }
+    }, transitionDuration);
+
+    // Fade in new segments
+    enteredSegments.transition()
+      .duration(transitionDuration)
+      .style("opacity", 1);
+
+  }, [pathSmpsAndWeightChars, mapList]);  
 
   const getLevelFromMapList = (item) => {
     const level = mapList.find((d) => d.smp === item);
     return level ? level.lvl : 0;
   }
-  
-  useEffect(() => {
-    const container = select(ref.current);
-    const segments = container.selectAll("div.segment")
-      .data(pathSmpsAndWeightChars.smps, (d, i) => `${d}-${i}`);
-  
-    const exitSelection = segments.exit();
-    let exits = exitSelection.size(); 
-  
-    if (exits === 0) {
-      enterNewElements();
-    } else {
-      exitSelection.transition().duration(transitionDuration)
-        .style("opacity", 0)
-        .on("end", function() {
-          exits -= 1; 
-          if (exits === 0) {
-            enterNewElements();
-          }
-        })
-        .remove();
-    }
 
-    segments.each(function(d) {
-      const currentClass = getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b";
-      select(this).select("span.pathString")
-        .attr("class", currentClass)
-    });
-  
-    function enterNewElements() {
-      const enteredSegments = segments.enter()
-        .append("div")
-        .attr("class", "segment")
-        .style("opacity", 0);
-  
-      enteredSegments.append("span")
-        .attr("class", d => getLevelFromMapList(d) === "m" ? "pathString m" : "pathString b")
-        .text(s => s.length > 20 ? s.substring(0, 20) + '...' : s)
-  
-      enteredSegments.append("span")
-        .attr("class", "sep")
-        .text((d, i) => pathSmpsAndWeightChars.weights[i] ? pathSmpsAndWeightChars.weights[i] : "");
-  
-      enteredSegments.transition().duration(transitionDuration)
-        .style("opacity", 1);
-    }
-  }, [pathSmpsAndWeightChars, mapList]);  
-
-  return ( 
-    <>
-      {pathSmpsAndWeightChars.smps.length > 0 ? <div id='pathStringContainer' style={{borderStyle: reducer === 'pca' ? 'dotted' : 'solid'}} ref={ref}></div> : null}
-    </>
-
-    );
+  return (
+    <div 
+      id='pathStringContainer' 
+      className={reducer === 'paths' ? 'visible' : ''}
+      ref={ref}
+    />
+  );
 }
