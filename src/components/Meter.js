@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 export default function Meter({ initialValue, labelText, className }) {
   const frameRef = useRef();
   const [displayValue, setDisplayValue] = useState(initialValue);
   const startValueRef = useRef(initialValue);
   const [maxValue, setMaxValue] = useState(initialValue);
-  const [color, setColor] = useState('white');
+  const [color, setColor] = useState("white");
   const [fadeIn, setFadeIn] = useState(true); // For the fade-in effect
 
   useEffect(() => {
-    
     if (initialValue > maxValue) {
       setMaxValue(initialValue);
     }
 
-    const newColor = initialValue > startValueRef.current ? 'lightgreen' :
-                     initialValue < startValueRef.current ? 'tomato' : 'white';
+    const newColor =
+      initialValue > startValueRef.current
+        ? "lightgreen"
+        : initialValue < startValueRef.current
+          ? "tomato"
+          : "white";
     setColor(newColor);
 
     const start = performance.now();
@@ -24,7 +27,9 @@ export default function Meter({ initialValue, labelText, className }) {
     function animate(time) {
       const timeFraction = Math.min((time - start) / duration, 1);
       const easeOutTimeFraction = 1 - Math.pow(1 - timeFraction, 2);
-      const animatedValue = startValueRef.current + (initialValue - startValueRef.current) * easeOutTimeFraction;
+      const animatedValue =
+        startValueRef.current +
+        (initialValue - startValueRef.current) * easeOutTimeFraction;
 
       setDisplayValue(animatedValue);
 
@@ -32,7 +37,7 @@ export default function Meter({ initialValue, labelText, className }) {
         frameRef.current = requestAnimationFrame(animate);
       } else {
         startValueRef.current = initialValue; // Update at the end of the animation
-        setTimeout(() => setColor('white'), 500); // Begin transition back to white after a delay
+        setTimeout(() => setColor("white"), 500); // Begin transition back to white after a delay
       }
     }
 
@@ -54,16 +59,12 @@ export default function Meter({ initialValue, labelText, className }) {
   }, []);
 
   return (
-    <div className={`${className} ${fadeIn ? 'fade-in' : ''}`}>
+    <div className={`${className} ${fadeIn ? "fade-in" : ""}`}>
       <p style={{ color }}>
         {displayValue.toFixed(3)}
-        <span className='meter-max'>
-          {maxValue.toFixed(3)}
-        </span>
+        <span className="meter-max">{maxValue.toFixed(3)}</span>
       </p>
-      <div className='meter-label'>
-        {labelText.toUpperCase()}
-      </div>
+      <div className="meter-label">{labelText.toUpperCase()}</div>
     </div>
   );
 }

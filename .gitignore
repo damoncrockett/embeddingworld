@@ -15,3 +15,7 @@
 dist
 notebooks
 .editorconfig
+node_modules
+eslint.config.mjs
+babel.config.json
+.yarnrc.yml

@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { embeddingModels } from '../../utils/embed';
+import React, { useState } from "react";
+import { embeddingModels } from "../../utils/embed";
 
-export default function ModelSelect({ 
-  embeddingModel, 
-  setEmbeddingModel, 
-  setLoadingInset 
+export default function ModelSelect({
+  embeddingModel,
+  setEmbeddingModel,
+  setLoadingInset,
 }) {
   const [showCustomInput, setShowCustomInput] = useState(false);
-  const [customInput, setCustomInput] = useState('');
+  const [customInput, setCustomInput] = useState("");
   // Track custom models added during this session
   const [customModels, setCustomModels] = useState([]);
 
   const handleModelChange = (e) => {
     const value = e.target.value;
-    if (value === 'custom') {
+    if (value === "custom") {
       setShowCustomInput(true);
     } else {
       setEmbeddingModel(value);
@@ -26,13 +26,16 @@ export default function ModelSelect({
     const trimmedInput = customInput.trim();
     if (trimmedInput) {
       // Only add to custom models if it's not already in either list
-      if (!embeddingModels.includes(trimmedInput) && !customModels.includes(trimmedInput)) {
-        setCustomModels(prev => [...prev, trimmedInput]);
+      if (
+        !embeddingModels.includes(trimmedInput) &&
+        !customModels.includes(trimmedInput)
+      ) {
+        setCustomModels((prev) => [...prev, trimmedInput]);
       }
       setEmbeddingModel(trimmedInput);
       setLoadingInset(true);
       setShowCustomInput(false);
-      setCustomInput('');
+      setCustomInput("");
     }
   };
 
@@ -41,22 +44,22 @@ export default function ModelSelect({
 
   return (
     <>
-      <select 
-        id='model-menu' 
-        onChange={handleModelChange} 
-        value={allModels.includes(embeddingModel) ? embeddingModel : 'custom'}
+      <select
+        id="model-menu"
+        onChange={handleModelChange}
+        value={allModels.includes(embeddingModel) ? embeddingModel : "custom"}
       >
         <optgroup label="Built-in Models">
-          {embeddingModels.map(model => (
+          {embeddingModels.map((model) => (
             <option key={model} value={model}>
               {model}
             </option>
           ))}
         </optgroup>
-        
+
         {customModels.length > 0 && (
           <optgroup label="Custom Models">
-            {customModels.map(model => (
+            {customModels.map((model) => (
               <option key={model} value={model}>
                 {model}
               </option>
@@ -70,13 +73,19 @@ export default function ModelSelect({
       </select>
 
       {showCustomInput && (
-        <div className="modal-backdrop" onClick={() => setShowCustomInput(false)}>
-          <div className="custom-model-modal" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowCustomInput(false)}
+        >
+          <div
+            className="custom-model-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <form onSubmit={handleCustomSubmit}>
               <input
                 type="text"
                 value={customInput}
-                onChange={e => setCustomInput(e.target.value)}
+                onChange={(e) => setCustomInput(e.target.value)}
                 placeholder="Enter model path (e.g., organization/model-name)"
                 autoFocus
               />

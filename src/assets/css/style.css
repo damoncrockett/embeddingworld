@@ -484,7 +484,7 @@ select:focus {
 }
 
 .pathString.m {
-    color: coral;
+    font-weight: 700;
 }
 
 .sep {
@@ -682,12 +682,8 @@ animation: fadeIn 1s ease-out;
 }
 
 .custom-model-modal {
-  background: #222;
-  padding: 40px;
-  border-radius: 10px;
-  border: 1px solid white;
+  background: transparent;
   min-width: 500px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .custom-model-modal input {
@@ -726,5 +722,102 @@ animation: fadeIn 1s ease-out;
 .modal-buttons button:hover {
   border-color: coral;
   background: #444;
+}
+
+.custom-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  margin-right: 8px;
+  position: relative;
+}
+
+.custom-toggle .material-icons {
+  font-size: 20px;
+  color: white;
+}
+
+.spinner-container {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-toggle.loading .spinner {
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.custom-toggle.loading {
+  background: rgba(255, 127, 80, 0.2);
+}
+
+.custom-toggle .checkbox {
+  transition: all 0.2s ease;
+}
+
+.custom-toggle:hover .checkbox {
+  color: coral;
+}
+
+/* Base styles for the icon */
+.custom-toggle .material-icons {
+  font-size: 20px;
+  color: white;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Specific styles for the spinner when loading */
+.custom-toggle.loading .spinner {
+  animation: spin 1s infinite linear;
+  transform-origin: center;
+  display: inline-block;
+}
+
+/* Make sure the spinner is visible when loading */
+.custom-toggle.loading .material-icons.spinner {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Define the spin animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Optional: Add some hover effect */
+.custom-toggle:hover {
+  opacity: 0.8;
+}
+
+/* Update existing styles */
+.basemap-toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  transition: background-color 0.2s;
+}
+
+.basemap-toggle-label:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
