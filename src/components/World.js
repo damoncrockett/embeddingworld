@@ -31,6 +31,18 @@ let xDomain,
 
 const transitionDuration = 750;
 
+const createSafeSelector = (text) => {
+  // Convert string to UTF-8 bytes, then to base64
+  const utf8Bytes = encodeURIComponent(text).replace(
+    /%([0-9A-F]{2})/g,
+    function toSolidBytes(match, p1) {
+      return String.fromCharCode("0x" + p1);
+    },
+  );
+  const base64 = btoa(utf8Bytes).replace(/[+/=]/g, "_");
+  return `id-${base64}`;
+};
+
 export default function World({
   mapData,
   selectionsData,
@@ -331,7 +343,8 @@ export default function World({
             )
             .attr("x", (d) => xScaleZoomed(d.x))
             .attr("y", (d) => yScaleZoomed(d.y))
-            .attr("data-smp", (d) => d.smp) // use for rect sizing
+            .attr("id", (d) => createSafeSelector(d.smp))
+            .attr("data-smp", (d) => d.smp)
             .attr("fill", "coral")
             .attr("transform", (d) =>
               reducerRef.current === "project" &&
@@ -553,7 +566,7 @@ export default function World({
     const selectedTextSize = selectionsData
       .map((d) => {
         const textElement = mapPointsContainer
-          .select(`text[data-smp="${d.smp}"]`)
+          .select(`#${createSafeSelector(d.smp)}`)
           .node();
         if (!textElement) return null;
         const bbox = textElement.getBBox();
@@ -677,7 +690,7 @@ export default function World({
         const spreadRectData = maxPair
           .map((smp) => {
             const textElement = mapPointsContainer
-              .select(`text[data-smp="${smp}"]`)
+              .select(`#${createSafeSelector(smp)}`)
               .node();
             if (!textElement) return null;
             const bbox = textElement.getBBox();
@@ -729,7 +742,7 @@ export default function World({
 
         maxPair.forEach((smp) => {
           const originalTextElement = mapPointsContainer.select(
-            `text[data-smp="${smp}"]`,
+            `#${createSafeSelector(smp)}`,
           );
           if (!originalTextElement.empty()) {
             const bbox = originalTextElement.node().getBBox();
@@ -778,7 +791,7 @@ export default function World({
       // exactly as above, but for a single item only, and thus no line is drawn
       setTimeout(() => {
         const textElement = mapPointsContainer
-          .select(`text[data-smp="${maxZscoreSample}"]`)
+          .select(`#${createSafeSelector(maxZscoreSample)}`)
           .node();
         if (textElement) {
           const bbox = textElement.getBBox();
@@ -800,7 +813,7 @@ export default function World({
             .style("opacity", 1);
 
           const originalTextElement = mapPointsContainer.select(
-            `text[data-smp="${maxZscoreSample}"]`,
+            `#${createSafeSelector(maxZscoreSample)}`,
           );
           if (!originalTextElement.empty()) {
             const bbox = originalTextElement.node().getBBox();

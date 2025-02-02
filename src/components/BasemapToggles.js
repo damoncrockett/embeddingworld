@@ -1,29 +1,30 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 
-const CustomToggle = ({ name, onToggle }) => {
+const CustomToggle = forwardRef(({ name, onToggle }, ref) => {
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = () => {
     if (isLoading) return;
-
-    // Show spinner
     setIsLoading(true);
-
-    // Defer the heavy computation until after the spinner has rendered
     setTimeout(async () => {
       try {
-        // Perform your heavy asynchronous logic here
         await onToggle(name, !isChecked);
-
-        // Update the checked state after the work completes
         setIsChecked(!isChecked);
       } finally {
-        // Hide the spinner when done
         setIsLoading(false);
       }
     }, 0);
   };
+
+  useImperativeHandle(ref, () => ({
+    reset: () => setIsChecked(false),
+  }));
 
   return (
     <div
@@ -46,19 +47,37 @@ const CustomToggle = ({ name, onToggle }) => {
       )}
     </div>
   );
-};
+});
 
-const BasemapToggles = ({ basemaps, onToggle }) => {
+CustomToggle.displayName = "CustomToggle";
+
+const BasemapToggles = forwardRef(({ basemaps, onToggle }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
+  const toggleRefs = useRef({});
+
+  useImperativeHandle(ref, () => ({
+    resetAll: () => {
+      Object.values(toggleRefs.current).forEach((toggleRef) => {
+        toggleRef.current?.reset();
+      });
+    },
+  }));
 
   return (
     <div id="basemap-toggle-container" className={isOpen ? "open" : ""}>
-      {Object.keys(basemaps).map((basemapName) => (
-        <label key={basemapName} className="basemap-toggle-label">
-          <CustomToggle name={basemapName} onToggle={onToggle} />
-          {basemapName.toUpperCase()}
-        </label>
-      ))}
+      {Object.keys(basemaps).map((basemapName) => {
+        toggleRefs.current[basemapName] = useRef();
+        return (
+          <label key={basemapName} className="basemap-toggle-label">
+            <CustomToggle
+              ref={toggleRefs.current[basemapName]}
+              name={basemapName}
+              onToggle={onToggle}
+            />
+            {basemapName.toUpperCase()}
+          </label>
+        );
+      })}
       <div
         title="pre-made basemaps"
         className={`toggle-button material-icons ${isOpen ? "open" : ""}`}
@@ -68,6 +87,8 @@ const BasemapToggles = ({ basemaps, onToggle }) => {
       </div>
     </div>
   );
-};
+});
+
+BasemapToggles.displayName = "BasemapToggles";
 
 export default BasemapToggles;

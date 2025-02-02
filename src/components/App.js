@@ -59,6 +59,7 @@ export default function App() {
   const embedderRef = useRef(null);
   const prevEmbeddingModel = useRef(embeddingModel);
   const prevMapData = useRef(null);
+  const basemapTogglesRef = useRef();
 
   const clearRemovedSelections = () => {
     if (
@@ -101,7 +102,6 @@ export default function App() {
   const handleBasemapToggle = async (name, isChecked) => {
     let currentList = [...mapList];
     const itemsToAddOrRemove = basemaps[name];
-    console.log("itemsToAddOrRemove", itemsToAddOrRemove);
 
     if (isChecked) {
       const newItems = itemsToAddOrRemove.filter(
@@ -129,14 +129,8 @@ export default function App() {
     if (mapLevel === "map") {
       setMapList((prevList) => prevList.filter((item) => item.lvl === "b"));
     } else if (mapLevel === "base") {
+      basemapTogglesRef.current?.resetAll();
       setMapList((prevList) => prevList.filter((item) => item.lvl === "m"));
-
-      const basemapToggles = document.querySelectorAll(
-        ".basemap-toggle-checkbox",
-      );
-      basemapToggles.forEach((toggle) => {
-        toggle.checked = false;
-      });
     }
   };
 
@@ -561,7 +555,11 @@ export default function App() {
               <img src={WebGPUIcon} alt="WebGPU" />
             </button>
           </div>
-          <BasemapToggles basemaps={basemaps} onToggle={handleBasemapToggle} />
+          <BasemapToggles
+            ref={basemapTogglesRef}
+            basemaps={basemaps}
+            onToggle={handleBasemapToggle}
+          />
           <div id="layout-group">
             <Radio
               choice={reducer}
