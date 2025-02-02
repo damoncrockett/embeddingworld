@@ -101,6 +101,7 @@ export default function App() {
   const handleBasemapToggle = async (name, isChecked) => {
     let currentList = [...mapList];
     const itemsToAddOrRemove = basemaps[name];
+    console.log("itemsToAddOrRemove", itemsToAddOrRemove);
 
     if (isChecked) {
       const newItems = itemsToAddOrRemove.filter(
@@ -118,7 +119,7 @@ export default function App() {
       }
     } else {
       const filteredList = currentList.filter(
-        (item) => !itemsToAddOrRemove.includes(item.smp),
+        (item) => !itemsToAddOrRemove.includes(item.smp) || item.lvl === "m",
       );
       setMapList(filteredList);
     }
